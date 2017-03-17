@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Projeto Anna</string>
+    <string name="button_connect_first_text">Connect</string>
+    <string name="button_connect_second_text">Connect</string>
+    <string name="button_record_first_text">Record</string>
+    <string name="button_record_second_text">Record</string>
 </resources>

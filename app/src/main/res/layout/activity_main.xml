@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearLayout_main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="org.marceloleite.projetoanna.MainActivity">
+
+    <Button
+        android:id="@+id/button_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_connect_first_text" />
+
+    <Button
+        android:id="@+id/button_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_record_first_text" />
+
+    <EditText
+        android:id="@+id/editText_log"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:ems="10"
+        android:inputType="textMultiLine" />
+</LinearLayout>
