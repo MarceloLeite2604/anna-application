@@ -10,6 +10,8 @@ import org.marceloleite.projetoanna.bluetooth.Bluetooth;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String LOG_TAG = "projeto-anna";
+
     private Button buttonConnect;
 
     private Button buttonRecord;

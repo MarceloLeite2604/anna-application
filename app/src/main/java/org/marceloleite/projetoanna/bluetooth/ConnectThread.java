@@ -15,11 +15,11 @@ public class ConnectThread extends Thread {
 
     private static final String TAG = ConnectThread.class.getName();
 
-    private final ConnectInterface connectInterface;
+    private final ConnectDeviceInterface connectInterface;
     private final BluetoothSocket bluetoothSocket;
     private final BluetoothDevice bluetoothDevice;
 
-    public ConnectThread(ConnectInterface connectInterface) {
+    public ConnectThread(ConnectDeviceInterface connectInterface) {
         this.connectInterface = connectInterface;
 
         bluetoothDevice = connectInterface.getBluetoothDevice();
@@ -57,7 +57,7 @@ public class ConnectThread extends Thread {
 
         // The connection attempt succeeded. Perform work associated with
         // the connection in a separate thread.
-        connectInterface.returnBluetoothSocket(bluetoothSocket);
+        connectInterface.setBluetoothSocket(bluetoothSocket);
     }
 
     // Closes the client socket and causes the thread to finish.

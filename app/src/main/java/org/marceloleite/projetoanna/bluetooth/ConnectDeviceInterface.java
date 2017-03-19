@@ -7,9 +7,9 @@ import android.bluetooth.BluetoothSocket;
  * Created by marcelo on 18/03/17.
  */
 
-public interface ConnectInterface {
+public interface ConnectDeviceInterface {
 
     BluetoothDevice getBluetoothDevice();
 
-    void returnBluetoothSocket(BluetoothSocket bluetoothSocket);
+    void setBluetoothSocket(BluetoothSocket bluetoothSocket);
 }
