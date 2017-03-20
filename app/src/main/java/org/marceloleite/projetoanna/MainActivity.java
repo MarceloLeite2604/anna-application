@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         buttonConnect.setOnClickListener(new ButtonConnectOnClickListener(this));
 
         buttonRecord = (Button) findViewById(R.id.button_record);
+
+        buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
     }
 
     @Override
