@@ -11,10 +11,10 @@ import org.marceloleite.projetoanna.bluetooth.Bluetooth;
 
 public class ButtonConnectOnClickListener implements View.OnClickListener {
 
-    private Bluetooth bluetooth;
+    Bluetooth bluetooth;
 
-    public ButtonConnectOnClickListener(AppCompatActivity appCompatActivity) {
-        this.bluetooth = new Bluetooth(appCompatActivity);
+    public ButtonConnectOnClickListener(MainActivity mainActivity) {
+        this.bluetooth = mainActivity.getBluetooth();
     }
 
     @Override

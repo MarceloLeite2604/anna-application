@@ -8,4 +8,15 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="bluetooth_device_address">
+        <item name="android:text">00:00:00:00:00:00</item>
+        <item name="android:paddingLeft">@dimen/bluetooth_device_address_layout_padding</item>
+        <item name="android:textSize">@dimen/bluetooth_device_address_text_size</item>
+    </style>
+
+    <style name="bluetooth_device_name">
+        <item name="android:text">Device name</item>
+        <item name="android:textSize">@dimen/bluetooth_device_name_text_size</item>
+    </style>
+
 </resources>

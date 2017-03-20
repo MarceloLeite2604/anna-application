@@ -22,17 +22,11 @@ public class AlertDialogStartPairing extends AlertDialog implements DialogInterf
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        switch (which) {
-            case DialogInterface.BUTTON_POSITIVE:
-                bluetooth.StartDeviceDiscover();
-                break;
-            case DialogInterface.BUTTON_NEGATIVE:
-                /* TODO */
-                break;
-            default:
-                /* TODO */
-                break;
+
+        if (which == DialogInterface.BUTTON_POSITIVE) {
+            bluetooth.StartDeviceDiscover();
         }
+
         dismiss();
     }
 }

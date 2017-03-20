@@ -3,6 +3,7 @@ package org.marceloleite.projetoanna;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -16,27 +17,51 @@ public class MainActivity extends AppCompatActivity {
 
     private Button buttonRecord;
 
-    private EditText editTextLog;
+    private Bluetooth bluetooth = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        buttonConnect = (Button)findViewById(R.id.button_connect);
+        if (bluetooth == null) {
+            bluetooth = new Bluetooth(this);
+        }
+
+        buttonConnect = (Button) findViewById(R.id.button_connect);
 
         buttonConnect.setOnClickListener(new ButtonConnectOnClickListener(this));
 
-        buttonRecord = (Button)findViewById(R.id.button_connect);
-        editTextLog = (EditText)findViewById(R.id.editText_log);
+        buttonRecord = (Button) findViewById(R.id.button_record);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if ( requestCode == Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE ) {
-            // TODO: Conclude post bluetooth activation action.
+        if (requestCode == Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    Log.d(MainActivity.LOG_TAG, "onActivityResult, 42: Bluetooth activated.");
+                    bluetooth.ConnectToBluetoothServer();
+                    break;
+                default:
+                    Log.d(MainActivity.LOG_TAG, "onActivityResult, 47: Bluetooth not activated.");
+                    break;
+            }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    public Bluetooth getBluetooth() {
+        return bluetooth;
+    }
+
+    public void connectionStablished() {
+        buttonRecord.setEnabled(true);
+    }
+
+    public void disconnected() {
+        buttonRecord.setEnabled(false);
+    }
+
 }

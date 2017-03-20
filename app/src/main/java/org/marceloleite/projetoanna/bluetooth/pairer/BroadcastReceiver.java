@@ -29,7 +29,7 @@ public class BroadcastReceiver extends android.content.BroadcastReceiver {
             Log.d(MainActivity.LOG_TAG, "onReceive, 29: Finishing discovery.");
             pairer.discoverDevicesFinished();
         } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-            BluetoothDevice bluetoothDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Log.d(MainActivity.LOG_TAG, "onReceive, 33: Device \"" + bluetoothDevice.getName() + "\" found.");
             pairer.deviceFound(bluetoothDevice);
         } else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
