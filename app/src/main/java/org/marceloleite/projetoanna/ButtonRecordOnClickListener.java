@@ -3,8 +3,9 @@ package org.marceloleite.projetoanna;
 import android.util.Log;
 import android.view.View;
 
+import org.marceloleite.projetoanna.bluetooth.btpackage.TypeCode;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
@@ -24,7 +25,7 @@ public class ButtonRecordOnClickListener implements View.OnClickListener {
     public void onClick(View view) {
         try {
             OutputStream outputStream = mainActivity.getBluetooth().getBluetoothSocket().getOutputStream();
-            byte[] command = ByteBuffer.allocate(4).putInt(Commands.START_RECORD.getCode()).array();
+            byte[] command = ByteBuffer.allocate(4).putInt(TypeCode.START_RECORD.getCode()).array();
             outputStream.write(command);
         } catch (IOException e) {
             Log.e(MainActivity.LOG_TAG, "onClick, 29: Could not get bluetooth socket output stream.", e);
