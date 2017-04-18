@@ -1,5 +1,6 @@
 package org.marceloleite.projetoanna.bluetooth.btpackage.content;
 
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 
 /**
@@ -20,15 +21,16 @@ public class CommandResultContent extends Content {
         return resultCode;
     }
 
-    public void setResultCode(int resultCode) {
-        this.resultCode = resultCode;
-    }
-
-    public CommandResultContent(byte[] byteArray) {
-        if (byteArray.length != CONTENT_SIZE) {
-            throw new IllegalArgumentException("The byte array informed for constructor has " + byteArray.length + " bytes. The command result content has " + CONTENT_SIZE + " byte(s).");
+    public CommandResultContent(byte[] bytes) {
+        if (bytes.length != CONTENT_SIZE) {
+            throw new IllegalArgumentException("The byte array informed for constructor has " + bytes.length + " bytes. The command result content has " + CONTENT_SIZE + " byte(s).");
         }
 
-        this.resultCode = java.nio.ByteBuffer.wrap(byteArray).getInt();
+        this.resultCode = java.nio.ByteBuffer.wrap(bytes).getInt();
+    }
+
+    @Override
+    public byte[] convertToBytes() {
+        return ByteBuffer.allocate(CONTENT_SIZE).putInt(resultCode).array();
     }
 }

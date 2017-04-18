@@ -34,4 +34,14 @@ public enum TypeCode {
     public String getDescription() {
         return description;
     }
+
+    public static TypeCode getTypeCode(int code) {
+        for (TypeCode typeCode :
+                TypeCode.values()) {
+            if (typeCode.getCode() == code) {
+                return typeCode;
+            }
+        }
+        throw new IllegalArgumentException("Value \"" + Integer.toHexString(code) + "\" does not match any type code.");
+    }
 }

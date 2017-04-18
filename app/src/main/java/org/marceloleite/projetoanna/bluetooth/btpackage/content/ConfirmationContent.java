@@ -1,5 +1,7 @@
 package org.marceloleite.projetoanna.bluetooth.btpackage.content;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by Marcelo Leite on 17/04/2017.
  */
@@ -18,15 +20,16 @@ public class ConfirmationContent extends Content {
         return packageId;
     }
 
-    public void setPackageId(int packageId) {
-        this.packageId = packageId;
-    }
-
-    public ConfirmationContent(byte[] byteArray) {
-        if (byteArray.length != CONTENT_SIZE) {
-            throw new IllegalArgumentException("The byte array informed for constructor has " + byteArray.length + " bytes. The confirmation content has " + CONTENT_SIZE + " byte(s).");
+    public ConfirmationContent(byte[] bytes) {
+        if (bytes.length != CONTENT_SIZE) {
+            throw new IllegalArgumentException("The byte array informed for constructor has " + bytes.length + " bytes. The confirmation content has " + CONTENT_SIZE + " byte(s).");
         }
 
-        this.packageId = java.nio.ByteBuffer.wrap(byteArray).getInt();
+        this.packageId = java.nio.ByteBuffer.wrap(bytes).getInt();
+    }
+
+    @Override
+    public byte[] convertToBytes() {
+        return ByteBuffer.allocate(CONTENT_SIZE).putInt(packageId).array();
     }
 }

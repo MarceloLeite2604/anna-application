@@ -5,4 +5,6 @@ package org.marceloleite.projetoanna.bluetooth.btpackage.content;
  */
 
 public abstract class Content {
+
+    public abstract byte[] convertToBytes();
 }
