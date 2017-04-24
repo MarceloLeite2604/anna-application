@@ -8,15 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.marceloleite.projetoanna.MainActivity;
 import org.marceloleite.projetoanna.R;
+import org.marceloleite.projetoanna.audioRecorder.AudioRecorder;
+import org.marceloleite.projetoanna.bluetooth.pairer.AlertDialogStartPairing;
+import org.marceloleite.projetoanna.bluetooth.pairer.Pairer;
 import org.marceloleite.projetoanna.bluetooth.connector.AsyncTaskConnectToDevice;
 import org.marceloleite.projetoanna.bluetooth.connector.AsyncTaskConnectToDeviceParameters;
 import org.marceloleite.projetoanna.bluetooth.connector.AsyncTaskConnectToDeviceResponse;
-import org.marceloleite.projetoanna.bluetooth.pairer.AlertDialogStartPairing;
-import org.marceloleite.projetoanna.bluetooth.pairer.Pairer;
 
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +33,7 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
 
     private Pairer pairer;
 
-    private MainActivity mainActivity;
+    private AudioRecorder audioRecorder;
 
     private BluetoothAdapter bluetoothAdapter;
 
@@ -44,26 +44,38 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
     private AsyncTaskConnectToDevice asyncTaskConnectToDevice;
 
 
-    public Bluetooth(MainActivity mainActivity) {
-        this.mainActivity = mainActivity;
+    public Bluetooth(AudioRecorder audioRecorder) {
+        this.audioRecorder = audioRecorder;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
-    public void ConnectToBluetoothServer() {
+    public void enableBluetoothResult(int resultCode) {
+        switch (resultCode) {
+            case AppCompatActivity.RESULT_OK:
+                Log.d(MainActivity.LOG_TAG, "enableBluetoothResult, 55: Bluetooth activated.");
+                connectToBluetoothService();
+                break;
+            default:
+                Log.d(MainActivity.LOG_TAG, "enableBluetoothResult, 59: Bluetooth not activated.");
+                break;
+        }
+    }
+
+    public void connectToBluetoothService() {
         if (bluetoothAdapter == null) {
-            Log.e(MainActivity.LOG_TAG, "ConnectToBluetoothServer, 38: This device does not have a bluetooth connector.");
+            Log.e(MainActivity.LOG_TAG, "connectToBluetoothService, 38: This device does not have a bluetooth connector.");
             return;
         }
 
         if (!bluetoothAdapter.isEnabled()) {
-            Log.d(MainActivity.LOG_TAG, "ConnectToBluetoothServer, 48: Bluetooth adapter is not enabled.");
+            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 48: Bluetooth adapter is not enabled.");
             Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mainActivity.startActivityForResult(enableBluetoothIntent, Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE);
+            audioRecorder.getMainActivity().startActivityForResult(enableBluetoothIntent, Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE);
             return;
         }
 
         if (bluetoothDevice == null) {
-            Log.d(MainActivity.LOG_TAG, "ConnectToBluetoothServer, 55: No device to connect.");
+            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 55: No device to connect.");
             Set<BluetoothDevice> pairedBluetoothDevices = bluetoothAdapter.getBondedDevices();
 
             if (pairedBluetoothDevices.size() > 0) {
@@ -76,20 +88,13 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
         }
 
         if (asyncTaskConnectToDevice == null) {
-            Log.d(MainActivity.LOG_TAG, "ConnectToBluetoothServer, 77: Connecting to device " + bluetoothDevice.getAddress());
+            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 77: Connecting to device " + bluetoothDevice.getAddress());
             asyncTaskConnectToDevice = new AsyncTaskConnectToDevice(this, this);
             asyncTaskConnectToDevice.execute();
         } else {
-            Log.d(MainActivity.LOG_TAG, "ConnectToBluetoothServer, 86: Connection with device concluded.");
+            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 86: Connection with device concluded.");
             asyncTaskConnectToDevice = null;
-            if (bluetoothSocket == null) {
-                Toast.makeText(mainActivity, "Connection with \"" + bluetoothDevice.getName() + "\" failed.", Toast.LENGTH_SHORT).show();
-                mainActivity.disconnected();
-            } else {
-                Toast.makeText(mainActivity, "Connected with \"" + bluetoothDevice.getName() + "\".", Toast.LENGTH_SHORT).show();
-                mainActivity.connectionStablished();
-
-            }
+            audioRecorder.bluetoothConnectionProcessConcluded();
         }
     }
 
@@ -106,25 +111,25 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
     @Override
     public void setBluetoothSocket(BluetoothSocket bluetoothSocket) {
         this.bluetoothSocket = bluetoothSocket;
-        ConnectToBluetoothServer();
+        connectToBluetoothService();
     }
 
     @Override
     public AppCompatActivity getAppCompatActivity() {
-        return mainActivity;
+        return audioRecorder.getMainActivity();
     }
 
     @Override
     public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
         this.bluetoothDevice = bluetoothDevice;
         Log.d(MainActivity.LOG_TAG, "setBluetoothDevice, 93: Bluetooth device is " + bluetoothDevice.getAddress());
-        ConnectToBluetoothServer();
+        connectToBluetoothService();
     }
 
     @Override
     public void connectToDeviceProcessFinished(BluetoothSocket bluetoothSocket) {
         this.bluetoothSocket = bluetoothSocket;
-        ConnectToBluetoothServer();
+        connectToBluetoothService();
     }
 
     public static void fillBluetoothDeviceInformations(View view, BluetoothDevice bluetoothDevice) {

@@ -4,13 +4,12 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.IntentFilter;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.marceloleite.projetoanna.InformationView;
-import org.marceloleite.projetoanna.MainActivity;
 import org.marceloleite.projetoanna.bluetooth.Bluetooth;
+import org.marceloleite.projetoanna.ui.InformationView;
+import org.marceloleite.projetoanna.MainActivity;
 
 /**
  * Created by Marcelo Leite on 30/04/2016.

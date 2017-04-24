@@ -1,6 +1,5 @@
 package org.marceloleite.projetoanna.bluetooth.connector;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
 import android.util.Log;

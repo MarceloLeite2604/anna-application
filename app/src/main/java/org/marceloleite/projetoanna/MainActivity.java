@@ -5,9 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.EditText;
 
+import org.marceloleite.projetoanna.audioRecorder.AudioRecorder;
 import org.marceloleite.projetoanna.bluetooth.Bluetooth;
+import org.marceloleite.projetoanna.ui.ButtonConnectOnClickListener;
+import org.marceloleite.projetoanna.ui.ButtonRecordOnClickListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,53 +19,62 @@ public class MainActivity extends AppCompatActivity {
 
     private Button buttonRecord;
 
-    private Bluetooth bluetooth = null;
+    private AudioRecorder audioRecorder = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (bluetooth == null) {
-            bluetooth = new Bluetooth(this);
-        }
+        audioRecorder = new AudioRecorder(this);
 
         buttonConnect = (Button) findViewById(R.id.button_connect);
 
-        buttonConnect.setOnClickListener(new ButtonConnectOnClickListener(this));
+        buttonConnect.setOnClickListener(new ButtonConnectOnClickListener(this.audioRecorder));
 
         buttonRecord = (Button) findViewById(R.id.button_record);
 
-        buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
+        buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this.audioRecorder));
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE) {
-            switch (resultCode) {
-                case RESULT_OK:
-                    Log.d(MainActivity.LOG_TAG, "onActivityResult, 42: Bluetooth activated.");
-                    bluetooth.ConnectToBluetoothServer();
-                    break;
-                default:
-                    Log.d(MainActivity.LOG_TAG, "onActivityResult, 47: Bluetooth not activated.");
-                    break;
-            }
+            audioRecorder.enableBluetoothResult(resultCode);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public Bluetooth getBluetooth() {
-        return bluetooth;
+    public AudioRecorder getAudioRecorder() {
+        return audioRecorder;
     }
 
-    public void connectionStablished() {
-        buttonRecord.setEnabled(true);
+    public void updateInterface() {
+        updateButtonConnectInterface();
+        updateButtonRecordInterface();
     }
 
-    public void disconnected() {
-        buttonRecord.setEnabled(false);
+    private void updateButtonConnectInterface() {
+        if (audioRecorder.isConnected()) {
+            buttonConnect.setText(R.string.button_connect_second_text);
+        } else {
+            buttonConnect.setText(R.string.button_connect_first_text);
+        }
+        buttonConnect.setEnabled(true);
+    }
+
+    private void updateButtonRecordInterface() {
+        if (audioRecorder.isConnected()) {
+            if (audioRecorder.isRecording()) {
+                buttonRecord.setText(R.string.button_record_second_text);
+            } else {
+                buttonRecord.setText(R.string.button_record_first_text);
+            }
+            buttonRecord.setEnabled(true);
+        } else {
+            buttonRecord.setEnabled(false);
+        }
     }
 
 }
