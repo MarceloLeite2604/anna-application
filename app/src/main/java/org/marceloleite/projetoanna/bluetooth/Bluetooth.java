@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import org.marceloleite.projetoanna.MainActivity;
 import org.marceloleite.projetoanna.R;
-import org.marceloleite.projetoanna.audioRecorder.AudioRecorder;
+import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.bluetooth.pairer.AlertDialogStartPairing;
 import org.marceloleite.projetoanna.bluetooth.pairer.Pairer;
 import org.marceloleite.projetoanna.bluetooth.connector.AsyncTaskConnectToDevice;
@@ -26,6 +26,8 @@ import java.util.UUID;
  */
 
 public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDeviceParameters, AsyncTaskConnectToDeviceResponse {
+
+    private static final String LOG_TAG = Bluetooth.class.getSimpleName();
 
     public static final UUID BLUETOOTH_SERVICE_UUID = UUID.fromString("f5934b96-0110-11e6-8d22-5e5517507c66");
 
@@ -52,30 +54,30 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
     public void enableBluetoothResult(int resultCode) {
         switch (resultCode) {
             case AppCompatActivity.RESULT_OK:
-                Log.d(MainActivity.LOG_TAG, "enableBluetoothResult, 55: Bluetooth activated.");
+                Log.d(LOG_TAG, "enableBluetoothResult, 55: Bluetooth activated.");
                 connectToBluetoothService();
                 break;
             default:
-                Log.d(MainActivity.LOG_TAG, "enableBluetoothResult, 59: Bluetooth not activated.");
+                Log.d(LOG_TAG, "enableBluetoothResult, 59: Bluetooth not activated.");
                 break;
         }
     }
 
     public void connectToBluetoothService() {
         if (bluetoothAdapter == null) {
-            Log.e(MainActivity.LOG_TAG, "connectToBluetoothService, 38: This device does not have a bluetooth connector.");
+            Log.e(LOG_TAG, "connectToBluetoothService, 38: This device does not have a bluetooth connector.");
             return;
         }
 
         if (!bluetoothAdapter.isEnabled()) {
-            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 48: Bluetooth adapter is not enabled.");
+            Log.d(LOG_TAG, "connectToBluetoothService, 48: Bluetooth adapter is not enabled.");
             Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             audioRecorder.getMainActivity().startActivityForResult(enableBluetoothIntent, Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE);
             return;
         }
 
         if (bluetoothDevice == null) {
-            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 55: No device to connect.");
+            Log.d(LOG_TAG, "connectToBluetoothService, 55: No device to connect.");
             Set<BluetoothDevice> pairedBluetoothDevices = bluetoothAdapter.getBondedDevices();
 
             if (pairedBluetoothDevices.size() > 0) {
@@ -88,11 +90,11 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
         }
 
         if (asyncTaskConnectToDevice == null) {
-            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 77: Connecting to device " + bluetoothDevice.getAddress());
+            Log.d(LOG_TAG, "connectToBluetoothService, 77: Connecting to device " + bluetoothDevice.getAddress());
             asyncTaskConnectToDevice = new AsyncTaskConnectToDevice(this, this);
             asyncTaskConnectToDevice.execute();
         } else {
-            Log.d(MainActivity.LOG_TAG, "connectToBluetoothService, 86: Connection with device concluded.");
+            Log.d(LOG_TAG, "connectToBluetoothService, 86: Connection with device concluded.");
             asyncTaskConnectToDevice = null;
             audioRecorder.bluetoothConnectionProcessConcluded();
         }
@@ -122,7 +124,7 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
     @Override
     public void setBluetoothDevice(BluetoothDevice bluetoothDevice) {
         this.bluetoothDevice = bluetoothDevice;
-        Log.d(MainActivity.LOG_TAG, "setBluetoothDevice, 93: Bluetooth device is " + bluetoothDevice.getAddress());
+        Log.d(LOG_TAG, "setBluetoothDevice, 93: Bluetooth device is " + bluetoothDevice.getAddress());
         connectToBluetoothService();
     }
 

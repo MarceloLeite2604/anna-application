@@ -16,7 +16,7 @@ import org.marceloleite.projetoanna.MainActivity;
  */
 public class Pairer {
 
-    private static final String TAG = Pairer.class.toString();
+    private static final String LOG_TAG = Pairer.class.getSimpleName();
 
     private Bluetooth bluetooth;
 
@@ -87,7 +87,7 @@ public class Pairer {
     }
 
     public void pairingStarted() {
-        Log.i(TAG, "pairingStarted: Pairing started.");
+        Log.i(LOG_TAG, "pairingStarted: Pairing started.");
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(bluetooth.getAppCompatActivity());
         alertDialogBuilder.setTitle("Pairing");
@@ -99,7 +99,7 @@ public class Pairer {
     }
 
     public void pairingFinished(boolean devicePaired) {
-        Log.d(MainActivity.LOG_TAG, "pairingFinished, 109: Pairing finished.");
+        Log.d(LOG_TAG, "pairingFinished, 109: Pairing finished.");
 
         if (devicePaired) {
             alertDialogPairingDevice.dismiss();

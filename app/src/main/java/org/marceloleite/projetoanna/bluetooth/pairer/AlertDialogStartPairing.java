@@ -10,6 +10,8 @@ import org.marceloleite.projetoanna.bluetooth.Bluetooth;
  */
 public class AlertDialogStartPairing extends AlertDialog implements DialogInterface.OnClickListener {
 
+    private static final String LOG_TAG = AlertDialogStartPairing.class.getSimpleName();
+
     private Bluetooth bluetooth;
 
     public AlertDialogStartPairing(Bluetooth bluetooth) {

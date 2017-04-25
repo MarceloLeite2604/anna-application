@@ -15,6 +15,8 @@ import java.io.IOException;
 
 public class AsyncTaskConnectToDevice extends AsyncTask<Void, Integer, BluetoothSocket> {
 
+    private static final String LOG_TAG = AsyncTaskConnectToDevice.class.getSimpleName();
+
     private AlertDialogConnectingToDevice alertDialogConnectingToDevice;
 
     private AsyncTaskConnectToDeviceParameters parameters;
@@ -32,10 +34,10 @@ public class AsyncTaskConnectToDevice extends AsyncTask<Void, Integer, Bluetooth
         try {
             temporaryBluetoothSocket = parameters.getBluetoothDevice().createRfcommSocketToServiceRecord(Bluetooth.BLUETOOTH_SERVICE_UUID);
         } catch (IOException createSocketException) {
-            Log.e(MainActivity.LOG_TAG, "AsyncTaskConnectToDevice, 34: Could not create RFCOMM socket to service.", createSocketException);
+            Log.e(LOG_TAG, "AsyncTaskConnectToDevice, 34: Could not create RFCOMM socket to service.", createSocketException);
         }
         bluetoothSocket = temporaryBluetoothSocket;
-        Log.d(MainActivity.LOG_TAG, "AsyncTaskConnectToDevice, 39: " + bluetoothSocket.toString());
+        Log.d(LOG_TAG, "AsyncTaskConnectToDevice, 39: " + bluetoothSocket.toString());
     }
 
     @Override
@@ -57,13 +59,13 @@ public class AsyncTaskConnectToDevice extends AsyncTask<Void, Integer, Bluetooth
             // until it succeeds or throws an exception.
             bluetoothSocket.connect();
         } catch (IOException connectException) {
-            Log.e(MainActivity.LOG_TAG, "doInBackground, 42: Could not connect to device \"" + parameters.getBluetoothDevice().getAddress() + "\".", connectException);
+            Log.e(LOG_TAG, "doInBackground, 42: Could not connect to device \"" + parameters.getBluetoothDevice().getAddress() + "\".", connectException);
 
             // Unable to connect; close the socket and return.
             try {
                 bluetoothSocket.close();
             } catch (IOException closeException) {
-                Log.e(MainActivity.LOG_TAG, "doInBackground, 50: Could not close socket with device \"" + parameters.getBluetoothDevice().getAddress() + "\".");
+                Log.e(LOG_TAG, "doInBackground, 50: Could not close socket with device \"" + parameters.getBluetoothDevice().getAddress() + "\".");
             }
             bluetoothSocket = null;
         }

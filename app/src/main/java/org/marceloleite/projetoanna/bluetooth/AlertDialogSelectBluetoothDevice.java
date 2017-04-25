@@ -22,6 +22,8 @@ import java.util.ArrayList;
  */
 public class AlertDialogSelectBluetoothDevice extends AlertDialog implements AdapterView.OnItemClickListener {
 
+    private static final String LOG_TAG = AlertDialogSelectBluetoothDevice.class.getSimpleName();
+
     private SelectDeviceInterface selectDeviceInterface;
     private ArrayList<BluetoothDevice> bluetoothDeviceArrayList;
 
@@ -46,7 +48,7 @@ public class AlertDialogSelectBluetoothDevice extends AlertDialog implements Ada
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.d(MainActivity.LOG_TAG, "onItemClick, 51: Item selected.");
+        Log.d(LOG_TAG, "onItemClick, 51: Item selected.");
         hide();
         dismiss();
         selectDeviceInterface.setBluetoothDevice(bluetoothDeviceArrayList.get(i));

@@ -3,17 +3,16 @@ package org.marceloleite.projetoanna;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 
-import org.marceloleite.projetoanna.audioRecorder.AudioRecorder;
+import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.bluetooth.Bluetooth;
 import org.marceloleite.projetoanna.ui.ButtonConnectOnClickListener;
 import org.marceloleite.projetoanna.ui.ButtonRecordOnClickListener;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String LOG_TAG = "projeto-anna";
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private Button buttonConnect;
 

@@ -18,6 +18,8 @@ import org.marceloleite.projetoanna.bluetooth.Bluetooth;
 
 public class AlertDialogConnectingToDevice extends AlertDialog {
 
+    private static final String LOG_TAG = AlertDialogConnectingToDevice.class.getSimpleName();
+
     protected AlertDialogConnectingToDevice(AppCompatActivity appCompatActivity, BluetoothDevice bluetoothDevice) {
         super(appCompatActivity);
         setTitle("Connecting");
@@ -30,7 +32,7 @@ public class AlertDialogConnectingToDevice extends AlertDialog {
 
     @Override
     public void setOnCancelListener(@Nullable OnCancelListener listener) {
-        Log.d(MainActivity.LOG_TAG, "setOnCancelListener, 31: Cancelled.");
+        Log.d(LOG_TAG, "setOnCancelListener, 31: Cancelled.");
         super.setOnCancelListener(listener);
     }
 }

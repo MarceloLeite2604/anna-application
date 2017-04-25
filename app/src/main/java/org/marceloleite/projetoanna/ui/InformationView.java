@@ -13,6 +13,8 @@ import org.marceloleite.projetoanna.R;
  */
 public class InformationView extends LinearLayout {
 
+    private static final String LOG_TAG = InformationView.class.getSimpleName();
+
     private ProgressBar progressBar;
     private TextView textView;
 

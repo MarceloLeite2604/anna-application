@@ -24,6 +24,8 @@ import java.util.ArrayList;
  */
 public class AlertDialogSearchingDevices extends AlertDialog implements View.OnClickListener, DialogInterface.OnClickListener, AdapterView.OnItemClickListener {
 
+    private static final String LOG_TAG = AlertDialogSearchingDevices.class.getSimpleName();
+
     private Pairer pairer;
 
     private ArrayList<BluetoothDevice> bluetoothDeviceArrayList;
@@ -120,7 +122,7 @@ public class AlertDialogSearchingDevices extends AlertDialog implements View.OnC
                 pairer.discoverDevicesCancelled();
                 break;
             default:
-                Log.e(MainActivity.LOG_TAG, "onClick, 118: Unknown button.");
+                Log.e(LOG_TAG, "onClick, 118: Unknown button.");
                 break;
         }
         dismiss();

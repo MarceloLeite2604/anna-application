@@ -3,13 +3,15 @@ package org.marceloleite.projetoanna.ui;
 import android.view.View;
 import android.widget.Button;
 
-import org.marceloleite.projetoanna.audioRecorder.AudioRecorder;
+import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 
 /**
  * Created by Marcelo Leite on 20/03/2017.
  */
 
 public class ButtonRecordOnClickListener implements View.OnClickListener {
+
+    private static final String LOG_TAG = ButtonRecordOnClickListener.class.getSimpleName();
 
     private AudioRecorder audioRecorder;
 
