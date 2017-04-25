@@ -51,35 +51,30 @@ public class Communication {
         RetryAttempts retryAttempts = new RetryAttempts(MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS);
         boolean doneReading = false;
         DataPackage dataPackage = null;
+        byte[] bytes;
 
         while (!doneReading) {
 
             try {
-                ReadSocketContentResult readSocketContentResult = connection.readSocketContent();
-
-                switch (readSocketContentResult.getReturnValue()) {
-                    case ConnectionReturnCodes.SUCCESS:
-                        Log.d(MainActivity.LOG_TAG, "receivePackage, 65: Bytes received: " + readSocketContentResult.getBytes().length);
-                        dataPackage = new DataPackage(readSocketContentResult.getBytes());
-                        sendConfirmation(dataPackage);
-                        doneReading = true;
-                        break;
-                    case ConnectionReturnCodes.NO_CONTENT_TO_READ:
-                        Log.d(MainActivity.LOG_TAG, "receivePackage, 68: No content received.");
-                        switch (RetryAttempts.wait(retryAttempts)) {
-                            case RetryAttemptsReturnCodes.SUCCESS:
-                                break;
-                            case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
-                                doneReading = true;
-                                break;
-                            default:
-                                throw new CommunicationException("Unknown return code received from \"wait\" function.");
-                        }
-                        break;
-                    default:
-                        throw new CommunicationException("Unknown return code received from \"readSocketContent\" function.");
+                bytes = connection.readSocketContent();
+                if (bytes != null) {
+                    Log.d(MainActivity.LOG_TAG, "receivePackage, 65: Bytes received: " + bytes.length);
+                    dataPackage = new DataPackage(bytes);
+                    sendConfirmation(dataPackage);
+                    doneReading = true;
+                } else {
+                    switch (RetryAttempts.wait(retryAttempts)) {
+                        case RetryAttemptsReturnCodes.SUCCESS:
+                            break;
+                        case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
+                            doneReading = true;
+                            break;
+                        default:
+                            throw new CommunicationException("Unknown return code received from \"wait\" function.");
+                    }
                 }
             } catch (ConnectionException connectionException) {
+                Log.d(MainActivity.LOG_TAG, "receivePackage, 78: Exception thrown.");
                 throw new CommunicationException("Error while receiving a package.", connectionException);
             }
         }
@@ -120,38 +115,41 @@ public class Communication {
     }
 
     private boolean receiveConfirmation(DataPackage dataPackage) throws CommunicationException {
+        Log.d(MainActivity.LOG_TAG, "receiveConfirmation, 120: Receiving confirmation.");
+        byte[] bytes = null;
         boolean returnValue = false;
         boolean doneReceivingConfirmation = false;
         RetryAttempts retryAttempts = new RetryAttempts(MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS);
 
         try {
             while (!doneReceivingConfirmation) {
-                ReadSocketContentResult readSocketContentResult = connection.readSocketContent();
-                switch (readSocketContentResult.getReturnValue()) {
-                    case ConnectionReturnCodes.SUCCESS:
-                        DataPackage confirmationPackage = new DataPackage(readSocketContentResult.getBytes());
-                        if (confirmationPackage.getPackageType() == PackageType.CONFIRMATION) {
-                            ConfirmationContent confirmationContent = (ConfirmationContent) confirmationPackage.getContent();
-                            if (confirmationContent.getPackageId() == dataPackage.getId()) {
-                                doneReceivingConfirmation = true;
-                                returnValue = true;
-                            }
+                bytes = connection.readSocketContent();
+                if (bytes != null) {
+                    DataPackage receivedPackage = new DataPackage(bytes);
+                    if (receivedPackage.getPackageType() == PackageType.CONFIRMATION) {
+                        ConfirmationContent confirmationContent = (ConfirmationContent) receivedPackage.getContent();
+                        if (confirmationContent.getPackageId() == dataPackage.getId()) {
+                            Log.d(MainActivity.LOG_TAG, "receiveConfirmation, 134: Confirmation received.");
+                            doneReceivingConfirmation = true;
+                            returnValue = true;
+                        } else {
+                            Log.d(MainActivity.LOG_TAG, "receiveConfirmation, 137: Received a confirmation, but not for package id " + Integer.toHexString(dataPackage.getId()) + ".");
                         }
-                        break;
-                    case ConnectionReturnCodes.NO_CONTENT_TO_READ:
-                        break;
-                    default:
-                        throw new CommunicationException("Unknown return code received from \"readSocketContent\" function.");
-                }
-                switch (RetryAttempts.wait(retryAttempts)) {
-                    case RetryAttemptsReturnCodes.SUCCESS:
-                        break;
-                    case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
-                        doneReceivingConfirmation = true;
-                        returnValue = false;
-                        break;
-                    default:
-                        throw new CommunicationException("Unknown return code received from \"wait\" function.");
+                    } else {
+                        Log.d(MainActivity.LOG_TAG, "receiveConfirmation, 138: Received a \"" + receivedPackage.getPackageType() + "\" package");
+                    }
+                } else {
+                    switch (RetryAttempts.wait(retryAttempts)) {
+                        case RetryAttemptsReturnCodes.SUCCESS:
+                            break;
+                        case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
+                            Log.d(MainActivity.LOG_TAG, "receiveConfirmation, 148: Maximum retries reached.");
+                            doneReceivingConfirmation = true;
+                            returnValue = false;
+                            break;
+                        default:
+                            throw new CommunicationException("Unknown return code received from \"wait\" function.");
+                    }
                 }
             }
 

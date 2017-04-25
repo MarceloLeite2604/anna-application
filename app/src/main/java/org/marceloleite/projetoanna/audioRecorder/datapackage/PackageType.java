@@ -93,7 +93,7 @@ public enum PackageType {
     /**
      * Returns the package title.
      *
-     * @return THe package title.
+     * @return The package title.
      */
     public String getTitle() {
         return title;
@@ -113,5 +113,10 @@ public enum PackageType {
             }
         }
         throw new IllegalArgumentException("Value \"" + Integer.toHexString(code) + "\" does not match any type code.");
+    }
+
+    @Override
+    public String toString() {
+        return title;
     }
 }

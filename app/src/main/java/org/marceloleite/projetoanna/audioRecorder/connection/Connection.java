@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.MainActivity;
+import org.marceloleite.projetoanna.audioRecorder.utils.GenericReturnCodes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,21 +29,16 @@ public class Connection {
         return bluetoothSocket;
     }
 
-    public ReadSocketContentResult readSocketContent() throws ConnectionException {
-        Log.d(MainActivity.LOG_TAG, "readSocketContent, 32: Reading socket content.");
-        ReadSocketContentResult readSocketContentResult = null;
+    public byte[] readSocketContent() throws ConnectionException {
+        byte[] bytes = null;
         if (isBluetoothConnected()) {
             try {
                 int totalBytesAvailable = bluetoothSocket.getInputStream().available();
-                Log.d(MainActivity.LOG_TAG, "readSocketContent, 38: Total bytes available: " + totalBytesAvailable);
                 if (totalBytesAvailable > 0) {
-                    byte[] readedBytes = new byte[totalBytesAvailable];
-                    bluetoothSocket.getInputStream().read(readedBytes);
-                    readSocketContentResult = new ReadSocketContentResult(ConnectionReturnCodes.SUCCESS, readedBytes);
-                } else {
-                    readSocketContentResult = new ReadSocketContentResult(ConnectionReturnCodes.NO_CONTENT_TO_READ, null);
+                    bytes = new byte[totalBytesAvailable];
+                    int totalRead = bluetoothSocket.getInputStream().read(bytes);
+                    Log.d(MainActivity.LOG_TAG, "readSocketContent, 41: Total of bytes read: " + totalRead);
                 }
-
             } catch (IOException ioException) {
                 String exceptionMessage = "Error reading socket content.";
                 throw new ConnectionException(exceptionMessage, ioException);
@@ -50,7 +46,7 @@ public class Connection {
         } else {
             throw CONNECTION_IS_CLOSED_EXCEPTION;
         }
-        return readSocketContentResult;
+        return bytes;
     }
 
     public void writeContentOnSocket(byte[] bytes) throws ConnectionException {

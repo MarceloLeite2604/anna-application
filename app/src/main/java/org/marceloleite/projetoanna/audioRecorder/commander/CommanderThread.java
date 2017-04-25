@@ -1,45 +1,43 @@
 package org.marceloleite.projetoanna.audioRecorder.commander;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.Handler;
+import android.content.Context;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.MainActivity;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.CommandTask;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.executor.CommandExecutorHandler;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.executor.CommandExecutorInterface;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.result.CommandResultHandler;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.result.CommandResultType;
 import org.marceloleite.projetoanna.audioRecorder.operator.Operator;
 import org.marceloleite.projetoanna.audioRecorder.operator.OperatorException;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.Command;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.CommandResult;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.CommandType;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
  */
 
-public class CommanderThread extends Thread {
+public class CommanderThread extends Thread implements CommandExecutorInterface {
 
     private Operator operator;
 
-    private Handler commandRequestHandler;
+    private CommandExecutorHandler commandExecutorHandler;
 
-    private Commander commander;
+    private CommandResultHandler commandResultHandler;
 
-    private volatile CommandType commandTypeToExecute;
+    private boolean finishExecution;
 
-
-    public volatile boolean finishExecution;
-
-    public CommanderThread(Commander commander, BluetoothSocket bluetoothSocket) {
-        this.commander = commander;
-        this.operator = new Operator(this.commander.getAudioRecorder().getMainActivity(), bluetoothSocket);
-        this.commandRequestHandler = null;
+    public CommanderThread(CommandResultHandler commandResultHandler, Context context, BluetoothSocket bluetoothSocket) {
+        this.commandResultHandler = commandResultHandler;
+        this.operator = new Operator(context, bluetoothSocket);
         this.finishExecution = false;
     }
 
-    public Handler getCommandRequestHandler() {
-        return commandRequestHandler;
+    public CommandExecutorHandler getCommandExecutorHandler() {
+        return commandExecutorHandler;
     }
 
     @Override
@@ -47,81 +45,76 @@ public class CommanderThread extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Looper.prepare();
 
-        this.commandRequestHandler = new Handler() {
-            @Override
-            public void handleMessage(Message message) {
-                Command command = (Command) message.obj;
-                scheduleCommandToExecute(command.getCommandType());
-            }
-        };
+        this.commandExecutorHandler = new CommandExecutorHandler(this);
 
-        while (!finishExecution) {
-            try {
-                if (!checkCommandToExecute()) {
-                    operator.receivePackage();
-                }
-            } catch (OperatorException operatorException) {
-                /* TODO: What should be done? */
-            }
-        }
+        sendCheckPackageMessage();
 
         Looper.loop();
     }
 
-    private void scheduleCommandToExecute(CommandType commandType) {
-        this.commandTypeToExecute = commandType;
+    @Override
+    public void executeCommand(CommandTask commandTask) {
+        Log.d(MainActivity.LOG_TAG, "checkCommandToExecute, 70: Executing command \"" + commandTask.getCommandType() + "\".");
+        Integer returnValue = null;
+        Throwable throwable = null;
+
+        switch (commandTask.getCommandType()) {
+            case START_AUDIO_RECORD:
+                try {
+                    returnValue = operator.startRecord();
+                } catch (OperatorException operatorException) {
+                    throwable = operatorException;
+                }
+                break;
+            case STOP_AUDIO_RECORD:
+                try {
+                    returnValue = operator.stopRecord();
+                } catch (OperatorException operatorException) {
+                    throwable = operatorException;
+                }
+                break;
+            case DISCONNECT:
+                Log.w(MainActivity.LOG_TAG, "executeCommand, 79: \"" + commandTask.getCommandType() + "\"Not implemented yet.");
+                throwable = new Throwable("CommandTask \"" + commandTask.getCommandType() + "\" is not implemented yet.");
+                break;
+            case FINISH_EXECUTION:
+                this.finishExecution = true;
+                break;
+            default:
+                Log.e(MainActivity.LOG_TAG, "executeInterfaceCommand, 37: Unknown commandTask \"" + commandTask.getCommandType() + "\".");
+                break;
+        }
+
+        if (returnValue != null) {
+            commandTask.setCommandResultType(CommandResultType.VALUE_RETURNED);
+            commandTask.setReturnValue(returnValue);
+        } else {
+            commandTask.setCommandResultType(CommandResultType.EXCEPTION_THROWN);
+            commandTask.setThrowable(throwable);
+        }
+
+
+        Message commandResultMessage = commandResultHandler.obtainMessage();
+        commandResultMessage.what = CommandResultHandler.RECEIVE_COMMAND_RESULT;
+        commandResultMessage.obj = commandTask;
+        Log.d(MainActivity.LOG_TAG, "executeCommand, 105: Sending the result of command " + commandTask.getCommandType());
+        commandResultHandler.sendMessage(commandResultMessage);
     }
 
-    private boolean checkCommandToExecute() {
-        if (commandTypeToExecute != null) {
-
-            Log.d(MainActivity.LOG_TAG, "checkCommandToExecute, 70: Executing command \"" + commandTypeToExecute.getTitle() + "\".");
-            Integer returnValue = null;
-            Throwable throwable = null;
-            Command command = new Command(commandTypeToExecute);
-            commandTypeToExecute = null;
-
-            switch (command.getCommandType()) {
-                case START_AUDIO_RECORD:
-                    try {
-                        returnValue = operator.startRecord();
-                    } catch (OperatorException operatorException) {
-                        throwable = operatorException;
-                    }
-                    break;
-                case STOP_AUDIO_RECORD:
-                    try {
-                        returnValue = operator.stopRecord();
-                    } catch (OperatorException operatorException) {
-                        throwable = operatorException;
-                    }
-                    break;
-                case DISCONNECT:
-                    Log.w(MainActivity.LOG_TAG, "executeInterfaceCommand, 68: Not implemented yet.");
-                    throwable = new Throwable("Command \"" + command.getCommandType().getTitle() + "\" is not implemented yet.");
-                    break;
-                case FINISH_EXECUTION:
-                    this.finishExecution = true;
-                    break;
-                default:
-                    Log.e(MainActivity.LOG_TAG, "executeInterfaceCommand, 37: Unknown command \"" + command.getCommandType().getTitle() + "\".");
-                    break;
-            }
-
-            if (returnValue != null) {
-                command.setCommandResult(CommandResult.VALUE_RETURNED);
-                command.setReturnValue(returnValue);
-            } else {
-                command.setCommandResult(CommandResult.EXCEPTION_THROWN);
-                command.setThrowable(throwable);
-            }
-
-            Message commandResultMessage = Message.obtain();
-            commandResultMessage.obj = command;
-            commander.getCommandResultHandler().dispatchMessage(commandResultMessage);
-
-            return true;
+    @Override
+    public void checkPackage() {
+        try {
+            operator.receivePackage();
+        } catch (OperatorException operatorException) {
+                /* TODO: What should be done? */
         }
-        return false;
+
+        sendCheckPackageMessage();
+    }
+
+    private void sendCheckPackageMessage() {
+        Message checkPackageMessage = this.commandExecutorHandler.obtainMessage();
+        checkPackageMessage.what = CommandExecutorHandler.CHECK_PACKAGE;
+        this.commandExecutorHandler.sendMessage(checkPackageMessage);
     }
 }

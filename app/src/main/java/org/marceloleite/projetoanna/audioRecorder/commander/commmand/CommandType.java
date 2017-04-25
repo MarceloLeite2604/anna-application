@@ -1,4 +1,4 @@
-package org.marceloleite.projetoanna.audioRecorder.operator.command;
+package org.marceloleite.projetoanna.audioRecorder.commander.commmand;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
@@ -17,6 +17,11 @@ public enum CommandType {
     }
 
     public String getTitle() {
+        return title;
+    }
+
+    @Override
+    public String toString() {
         return title;
     }
 }

@@ -62,7 +62,7 @@ public class FileReceiver {
                     this.fileSize = fileHeaderContent.getFileSize();
                     createFile(fileHeaderContent.getFileName());
                 } else {
-                    throw new FileReceiverException("The package received is not a file header. Package type: \"" + dataPackage.getPackageType().getTitle() + "\".");
+                    throw new FileReceiverException("The package received is not a file header. Package type: \"" + dataPackage.getPackageType() + "\".");
                 }
             } else {
                 throw new FileReceiverException("No package received.");
@@ -119,7 +119,7 @@ public class FileReceiver {
                             doneReceiveFileContent = true;
                         }
                     } else {
-                        throw new FileReceiverException("The package received is not a file content. Package type: \"" + dataPackage.getPackageType().getTitle() + "\".");
+                        throw new FileReceiverException("The package received is not a file content. Package type: \"" + dataPackage.getPackageType() + "\".");
                     }
                 } else {
                     throw new FileReceiverException("No package received.");
@@ -135,7 +135,7 @@ public class FileReceiver {
             DataPackage dataPackage = communication.receivePackage();
             if (dataPackage != null) {
                 if (dataPackage.getPackageType() != PackageType.FILE_TRAILER) {
-                    throw new FileReceiverException("The package received is not a file trailer. Package type: \"" + dataPackage.getPackageType().getTitle() + "\".");
+                    throw new FileReceiverException("The package received is not a file trailer. Package type: \"" + dataPackage.getPackageType() + "\".");
                 }
             } else {
                 throw new FileReceiverException("No package received.");

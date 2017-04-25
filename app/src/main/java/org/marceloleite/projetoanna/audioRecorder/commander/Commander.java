@@ -2,22 +2,24 @@ package org.marceloleite.projetoanna.audioRecorder.commander;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.MainActivity;
 import org.marceloleite.projetoanna.audioRecorder.AudioRecorder;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.Command;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.CommandType;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.CommandTask;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.CommandType;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.executor.CommandExecutorHandler;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.result.CommandResultHandler;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.result.CommandResultInterface;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
  */
 
-public class Commander {
+public class Commander implements CommandResultInterface {
 
-    private Handler commandResultHandler;
+    private CommandResultHandler commandResultHandler;
 
     private AudioRecorder audioRecorder;
 
@@ -25,14 +27,9 @@ public class Commander {
 
     public Commander(AudioRecorder audioRecorder, BluetoothSocket bluetoothSocket) {
         this.audioRecorder = audioRecorder;
-        this.commandResultHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message message) {
-                checkCommandResult((Command) message.obj);
-            }
-        };
+        this.commandResultHandler = new CommandResultHandler(this);
 
-        this.commanderThread = new CommanderThread(this, bluetoothSocket);
+        this.commanderThread = new CommanderThread(commandResultHandler, audioRecorder.getMainActivity(), bluetoothSocket);
         this.commanderThread.start();
     }
 
@@ -40,23 +37,24 @@ public class Commander {
         return audioRecorder;
     }
 
-    public void checkCommandResult(Command command) {
-        this.audioRecorder.checkCommandResult(command);
-    }
-
     public Handler getCommandResultHandler() {
         return commandResultHandler;
     }
 
     public void executeCommand(CommandType commandType) {
-        Command command = new Command(commandType);
+        Log.d(MainActivity.LOG_TAG, "executeCommand, 46: " + commandType);
+        CommandTask commandTask = new CommandTask(commandType);
 
-        Message commandRequestMessage = new Message();
-        commandRequestMessage.obj = command;
+        CommandExecutorHandler commandExecutorHandler = commanderThread.getCommandExecutorHandler();
+        Message commandExecutorMessage = commandExecutorHandler.obtainMessage();
+        commandExecutorMessage.what = CommandExecutorHandler.EXECUTE_COMMAND;
+        commandExecutorMessage.obj = commandTask;
+        Log.d(MainActivity.LOG_TAG, "executeCommand, 51: Sending message to execute command \"" + commandType + "\".");
+        commanderThread.getCommandExecutorHandler().sendMessage(commandExecutorMessage);
+    }
 
-        Handler commandRequestHandler = commanderThread.getCommandRequestHandler();
-        Log.d(MainActivity.LOG_TAG, "executeCommand, 59: Requesting to execute command \"" + commandType.getTitle() + "\".");
-        commandRequestHandler.dispatchMessage(commandRequestMessage);
-        Log.d(MainActivity.LOG_TAG, "executeCommand, 64: Concluded \"executeCommand\".");
+    @Override
+    public void receiveCommandResult(CommandTask commandTask) {
+        this.audioRecorder.checkCommandResult(commandTask);
     }
 }

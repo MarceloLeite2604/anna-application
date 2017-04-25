@@ -1,22 +1,24 @@
-package org.marceloleite.projetoanna.audioRecorder.operator.command;
+package org.marceloleite.projetoanna.audioRecorder.commander.commmand;
+
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.result.CommandResultType;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
  */
 
-public class Command {
+public class CommandTask {
 
     private CommandType commandType;
-    private CommandResult commandResult;
+    private CommandResultType commandResultType;
     private Throwable throwable;
     private int returnValue;
 
-    public Command(CommandType commandType) {
+    public CommandTask(CommandType commandType) {
         this.commandType = commandType;
     }
 
-    public void setCommandResult(CommandResult commandResult) {
-        this.commandResult = commandResult;
+    public void setCommandResultType(CommandResultType commandResultType) {
+        this.commandResultType = commandResultType;
     }
 
     public void setThrowable(Throwable throwable) {
@@ -31,8 +33,8 @@ public class Command {
         return commandType;
     }
 
-    public CommandResult getCommandResult() {
-        return commandResult;
+    public CommandResultType getCommandResultType() {
+        return commandResultType;
     }
 
     public Throwable getThrowable() {

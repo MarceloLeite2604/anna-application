@@ -79,7 +79,7 @@ public class Operator {
             case FILE_TRAILER:
             case START_RECORD:
             case STOP_RECORD:
-                throw new OperatorException("Received a \"" + dataPackage.getPackageType().getTitle() + "\" package type, which should not be received.");
+                throw new OperatorException("Received a \"" + dataPackage.getPackageType() + "\" package type, which should not be received.");
             case DISCONNECT:
                 try {
                     communication.disconnect();
@@ -91,7 +91,7 @@ public class Operator {
                 /* TODO: Report error to user. */
                 break;
             default:
-                throw new OperatorException("Unknown package type \"" + dataPackage.getPackageType().getTitle() + "\".");
+                throw new OperatorException("Unknown package type \"" + dataPackage.getPackageType() + "\".");
         }
     }
 
@@ -102,31 +102,31 @@ public class Operator {
     public int stopRecord() throws OperatorException {
         int returnValue;
         returnValue = sendStartStopRecord(PackageType.STOP_RECORD);
-        if (returnValue == GenericReturnCodes.SUCCESS) {
+        /*if (returnValue == GenericReturnCodes.SUCCESS) {
             requestLatestAudioFile();
-        }
+        }*/
 
         return returnValue;
     }
 
     private int sendStartStopRecord(PackageType packageType) throws OperatorException {
-        Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 117: Sending command \"" + packageType.getTitle() + "\".");
+        Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 117: Sending command \"" + packageType + "\".");
         DataPackage dataPackage = new DataPackage(packageType, null);
         int returnValue;
 
         try {
             communication.sendPackage(dataPackage);
         } catch (CommunicationException communicationException) {
-            throw new OperatorException("Error while sending \"" + packageType.getTitle() + "\" package.", communicationException);
+            throw new OperatorException("Error while sending \"" + packageType + "\" package.", communicationException);
         }
 
         DataPackage receivedDataPackage;
         try {
-            Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 128: Waiting for command \"" + packageType.getTitle() + "\" result.");
+            Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 128: Waiting for command \"" + packageType + "\" result.");
             receivedDataPackage = communication.receivePackage();
-            Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 127: Received result from command \"" + packageType.getTitle() + "\".");
 
             if (receivedDataPackage != null) {
+                Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 129: Received a package.");
                 switch (receivedDataPackage.getPackageType()) {
                     case COMMAND_RESULT:
                         CommandResultContent commandResultContent = (CommandResultContent) receivedDataPackage.getContent();
@@ -136,18 +136,20 @@ public class Operator {
                                 returnValue = commandResultContent.getResultCode();
                                 break;
                             default:
-                                throw new OperatorException("Unknown return value received from device after send \"" + packageType.getTitle() + "\" package.");
+                                throw new OperatorException("Unknown return value received from device after send \"" + packageType + "\" package.");
                         }
                         break;
                     default:
-                        throw new OperatorException("Received a \"" + receivedDataPackage.getPackageType().getTitle() + "\" package, when expecting a \"" + PackageType.COMMAND_RESULT.getTitle() + "\" package.");
+                        Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 143: The package received is not a \"" + PackageType.COMMAND_RESULT + "\" package.");
+                        throw new OperatorException("Received a \"" + receivedDataPackage.getPackageType() + "\" package, when expecting a \"" + PackageType.COMMAND_RESULT + "\" package.");
                 }
             } else {
+                Log.d(MainActivity.LOG_TAG, "sendStartStopRecord, 145: Didn't received the \"" + packageType + "\" command result.");
                 throw new OperatorException("No package received.");
             }
 
         } catch (CommunicationException communicationException) {
-            throw new OperatorException("Error while receiving result after send \"" + packageType.getTitle() + "\" package.", communicationException);
+            throw new OperatorException("Error while receiving result after send \"" + packageType + "\" package.", communicationException);
         }
 
         return returnValue;

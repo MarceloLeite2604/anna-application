@@ -1,19 +1,15 @@
 package org.marceloleite.projetoanna.audioRecorder;
 
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
 import org.marceloleite.projetoanna.MainActivity;
 import org.marceloleite.projetoanna.audioRecorder.commander.Commander;
-import org.marceloleite.projetoanna.audioRecorder.commander.CommanderException;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.Command;
-import org.marceloleite.projetoanna.audioRecorder.operator.command.CommandType;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.CommandTask;
+import org.marceloleite.projetoanna.audioRecorder.commander.commmand.CommandType;
 import org.marceloleite.projetoanna.audioRecorder.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.bluetooth.Bluetooth;
-import org.marceloleite.projetoanna.bluetooth.BluetoothException;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
@@ -86,92 +82,103 @@ public class AudioRecorder {
             Toast.makeText(mainActivity, "Connected with \"" + bluetooth.getBluetoothDevice().getName() + "\".", Toast.LENGTH_SHORT).show();
         } else {
             if (bluetooth.getBluetoothDevice() != null) {
-                showConnectionError();
+                String toastMessage;
+                if (bluetooth.getBluetoothDevice() != null) {
+                    toastMessage = "Could not connect to \"" + bluetooth.getBluetoothDevice().getName() + "\".";
+
+                } else {
+                    toastMessage = "Could not connect wiht audio record device.";
+                }
+                Toast.makeText(mainActivity, toastMessage, Toast.LENGTH_LONG).show();
             }
         }
         mainActivity.updateInterface();
     }
 
-    public void checkCommandResult(Command command) {
-        if (command != null) {
-            switch (command.getCommandType()) {
+    public void checkCommandResult(CommandTask commandTask) {
+        if (commandTask != null) {
+            switch (commandTask.getCommandType()) {
                 case START_AUDIO_RECORD:
-                    checkStartAudioRecordCommandResult(command);
+                    checkStartAudioRecordCommandResult(commandTask);
                     break;
                 case STOP_AUDIO_RECORD:
-                    checkStopAudioRecordCommandResult(command);
+                    checkStopAudioRecordCommandResult(commandTask);
                     break;
                 case DISCONNECT:
-                    checkDisconnectCommandResult(command);
+                    checkDisconnectCommandResult(commandTask);
                     break;
                 case FINISH_EXECUTION:
-                    checkFinishExecutionCommandResult(command);
+                    checkFinishExecutionCommandResult(commandTask);
                     break;
                 default:
-                    Log.e(MainActivity.LOG_TAG, "checkCommandResult, 39: Unknown command \"" + command.getCommandType().getTitle() + "\".");
+                    Log.e(MainActivity.LOG_TAG, "checkCommandResult, 39: Unknown commandTask \"" + commandTask.getCommandType() + "\".");
                     break;
             }
         }
     }
 
-    private void checkStartAudioRecordCommandResult(Command command) {
-        switch (command.getCommandResult()) {
+    private void checkStartAudioRecordCommandResult(CommandTask commandTask) {
+        switch (commandTask.getCommandResultType()) {
             case VALUE_RETURNED:
-                switch (command.getReturnValue()) {
+                switch (commandTask.getReturnValue()) {
                     case GenericReturnCodes.SUCCESS:
                         Toast.makeText(mainActivity, "Audio record started.", Toast.LENGTH_SHORT).show();
+                        recording = true;
+                        break;
                     case GenericReturnCodes.GENERIC_ERROR:
                         Toast.makeText(mainActivity, "Could not start audio record.", Toast.LENGTH_SHORT).show();
+                        recording = false;
+                        break;
                     default:
-                        Log.e(MainActivity.LOG_TAG, "startAudioRecordCommandResult, 111: Unknown return value received from \"start record\" command: " + command.getReturnValue() + ".");
+                        Log.e(MainActivity.LOG_TAG, "startAudioRecordCommandResult, 111: Unknown return value received from \"start record\" commandTask: " + commandTask.getReturnValue() + ".");
+                        break;
                 }
                 break;
             case EXCEPTION_THROWN:
-                Throwable throwable = command.getThrowable();
-                Log.e(MainActivity.LOG_TAG, "startAudioRecordCommandResult, 116: Start audio command returned an exception.");
+                Throwable throwable = commandTask.getThrowable();
+                Log.e(MainActivity.LOG_TAG, "startAudioRecordCommandResult, 116: Start audio commandTask returned an exception.");
                 throwable.printStackTrace();
                 Toast.makeText(mainActivity, "Could not start audio record.", Toast.LENGTH_SHORT).show();
+                recording = false;
+                break;
         }
         mainActivity.updateInterface();
     }
 
-    private void checkStopAudioRecordCommandResult(Command command) {
-        switch (command.getCommandResult()) {
+    private void checkStopAudioRecordCommandResult(CommandTask commandTask) {
+        switch (commandTask.getCommandResultType()) {
             case VALUE_RETURNED:
-                switch (command.getReturnValue()) {
+                switch (commandTask.getReturnValue()) {
                     case GenericReturnCodes.SUCCESS:
                         Toast.makeText(mainActivity, "Audio record finished.", Toast.LENGTH_SHORT).show();
+                        recording = false;
+                        break;
                     case GenericReturnCodes.GENERIC_ERROR:
                         Toast.makeText(mainActivity, "Could not stop audio record.", Toast.LENGTH_SHORT).show();
+                        recording = true;
+                        break;
                     default:
-                        Log.e(MainActivity.LOG_TAG, "checkStopAudioRecordCommandResult, 76:  Unknown return value received from \"stop record\" command: " + command.getReturnValue() + ".");
+                        Log.e(MainActivity.LOG_TAG, "checkStopAudioRecordCommandResult, 76:  Unknown return value received from \"stop record\" commandTask: " + commandTask.getReturnValue() + ".");
+                        break;
                 }
                 break;
             case EXCEPTION_THROWN:
-                Throwable throwable = command.getThrowable();
-                Log.e(MainActivity.LOG_TAG, "checkStopAudioRecordCommandResult, 86:  Stop audio command returned an exception.");
+                Throwable throwable = commandTask.getThrowable();
+                Log.e(MainActivity.LOG_TAG, "checkStopAudioRecordCommandResult, 86:  Stop audio commandTask returned an exception.");
                 throwable.printStackTrace();
                 Toast.makeText(mainActivity, "Could not stop audio record.", Toast.LENGTH_SHORT).show();
+                recording = true;
+                break;
         }
         mainActivity.updateInterface();
     }
 
-    private void checkDisconnectCommandResult(Command command) {
-        Log.e(MainActivity.LOG_TAG, "checkDisconnectCommandResult, 169: \"" + command.getCommandType().getTitle() + "\" not implemented yet.");
+    private void checkDisconnectCommandResult(CommandTask commandTask) {
+        Log.e(MainActivity.LOG_TAG, "checkDisconnectCommandResult, 169: \"" + commandTask.getCommandType() + "\" not implemented yet.");
     }
 
-    private void checkFinishExecutionCommandResult(Command command) {
-        Log.e(MainActivity.LOG_TAG, "checkDisconnectCommandResult, 173: \"" + command.getCommandType().getTitle() + "\" not implemented yet.");
+    private void checkFinishExecutionCommandResult(CommandTask commandTask) {
+        Log.e(MainActivity.LOG_TAG, "checkDisconnectCommandResult, 173: \"" + commandTask.getCommandType() + "\" not implemented yet.");
     }
 
-    private void showConnectionError() {
-        String toastMessage;
-        if (bluetooth.getBluetoothDevice() != null) {
-            toastMessage = "Could not connect to \"" + bluetooth.getBluetoothDevice().getName() + "\".";
-
-        } else {
-            toastMessage = "Could not connect wiht audio record device.";
-        }
-        Toast.makeText(mainActivity, toastMessage, Toast.LENGTH_LONG).show();
-    }
 }
