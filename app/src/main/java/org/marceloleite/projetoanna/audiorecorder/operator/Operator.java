@@ -2,174 +2,93 @@ package org.marceloleite.projetoanna.audiorecorder.operator;
 
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
-import org.marceloleite.projetoanna.MainActivity;
-import org.marceloleite.projetoanna.audiorecorder.datapackage.DataPackage;
-import org.marceloleite.projetoanna.audiorecorder.datapackage.PackageType;
-import org.marceloleite.projetoanna.audiorecorder.datapackage.content.CommandResultContent;
-import org.marceloleite.projetoanna.audiorecorder.communication.Communication;
-import org.marceloleite.projetoanna.audiorecorder.operator.filereceiver.FileReceiver;
-import org.marceloleite.projetoanna.audiorecorder.operator.filereceiver.FileReceiverException;
-import org.marceloleite.projetoanna.bluetooth.pairer.CommunicationException;
-import org.marceloleite.projetoanna.audiorecorder.utils.GenericReturnCodes;
-import org.marceloleite.projetoanna.audiorecorder.utils.retryattempts.RetryAttempts;
-import org.marceloleite.projetoanna.audiorecorder.utils.retryattempts.RetryAttemptsReturnCodes;
+import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.Command;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.OperatorThreadParameters;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.OperationExecutorHandler;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultHandler;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultInterface;
 
 /**
- * Created by Marcelo Leite on 18/04/2017.
+ * Created by Marcelo Leite on 24/04/2017.
  */
 
-public class Operator {
+public class Operator implements OperationResultInterface, OperatorThreadParameters {
 
     private static final String LOG_TAG = Operator.class.getSimpleName();
 
-    /**
-     * Maximum retry attempts to receive a package.
-     */
-    private static final int MAXIMUM_RECEIVE_PACKAGE_RETRIES = 30;
+    private OperationResultHandler operationResultHandler;
 
-    private Context context;
+    private AudioRecorder audioRecorder;
 
-    private Communication communication;
+    private OperatorThread operatorThread;
 
-    private RetryAttempts retryAttempts;
+    private Bluetooth bluetooth;
 
-    public Operator(Context context, BluetoothSocket bluetoothSocket) {
-        this.context = context;
-        this.communication = new Communication(bluetoothSocket);
-        this.retryAttempts = new RetryAttempts(MAXIMUM_RECEIVE_PACKAGE_RETRIES);
+    public Operator(AudioRecorder audioRecorder, Bluetooth bluetooth) {
+        this.audioRecorder = audioRecorder;
+        this.operationResultHandler = new OperationResultHandler(this);
+        this.bluetooth = bluetooth;
     }
 
-    public void receivePackage() throws OperatorException {
-        DataPackage dataPackage;
-        try {
-            dataPackage = communication.receivePackage();
-            if (dataPackage != null) {
-                checkPackageReceived(dataPackage);
-            }
-        } catch (CommunicationException communicationException) {
-            throw new OperatorException("Error while receiving a package.", communicationException);
+    public void startExecution() {
+        if (operatorThread == null) {
+            this.operatorThread = new OperatorThread(operationResultHandler, this);
         }
 
-        switch (RetryAttempts.wait(retryAttempts)) {
-            case RetryAttemptsReturnCodes.SUCCESS:
-                break;
-            case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
-                try {
-                    communication.disconnect();
-                } catch (CommunicationException communicationException) {
-                    throw new OperatorException("Error while requesting to disconnect from equipment.", communicationException);
-                }
-                break;
+        if (!operatorThread.isAlive()) {
+            operatorThread.start();
         }
     }
 
-    private void checkPackageReceived(DataPackage dataPackage) throws OperatorException {
-        switch (dataPackage.getPackageType()) {
-            case CHECK_CONNECTION:
-                Log.d(LOG_TAG, "checkPackageReceived, 73: Checking connection.");
-                retryAttempts = new RetryAttempts(MAXIMUM_RECEIVE_PACKAGE_RETRIES);
-                break;
-            case COMMAND_RESULT:
-            case CONFIRMATION:
-            case REQUEST_AUDIO_FILE:
-            case FILE_CHUNK:
-            case FILE_HEADER:
-            case FILE_TRAILER:
-            case START_RECORD:
-            case STOP_RECORD:
-                throw new OperatorException("Received a \"" + dataPackage.getPackageType() + "\" package type, which should not be received.");
-            case DISCONNECT:
-                try {
-                    communication.disconnect();
-                } catch (CommunicationException communicationException) {
-                    throw new OperatorException("Error while requesting to disconnect from equipment.", communicationException);
-                }
-                break;
-            case ERROR:
-                /* TODO: Report error to user. */
-                break;
-            default:
-                throw new OperatorException("Unknown package type \"" + dataPackage.getPackageType() + "\".");
-        }
+    public void executeCommand(Command command) {
+        Log.d(LOG_TAG, "executeOperation, 46: " + command);
+        Operation operation = new Operation(command);
+
+        OperationExecutorHandler operationExecutorHandler = operatorThread.getOperationExecutorHandler();
+        Message commandExecutorMessage = operationExecutorHandler.obtainMessage();
+        commandExecutorMessage.what = OperationExecutorHandler.CHECK_COMMAND_TO_EXECUTE;
+        commandExecutorMessage.obj = operation;
+        Log.d(LOG_TAG, "executeOperation, 51: Sending message to execute command \"" + command + "\".");
+        operatorThread.getOperationExecutorHandler().sendMessage(commandExecutorMessage);
     }
 
-    public int startRecord() throws OperatorException {
-        return sendStartStopRecord(PackageType.START_RECORD);
+    public void finishOperatorThreadExecution() {
+        Log.d(LOG_TAG, "finishOperatorThreadExecution, 63: Finishing operator thread execution.");
+        OperationExecutorHandler operationExecutorHandler = operatorThread.getOperationExecutorHandler();
+        Message commandExecutorMessage = operationExecutorHandler.obtainMessage();
+        commandExecutorMessage.what = OperationExecutorHandler.FINISH_EXECUTION;
+        operatorThread.getOperationExecutorHandler().sendMessage(commandExecutorMessage);
     }
 
-    public int stopRecord() throws OperatorException {
-        int returnValue;
-        returnValue = sendStartStopRecord(PackageType.STOP_RECORD);
-        if (returnValue == GenericReturnCodes.SUCCESS) {
-            requestLatestAudioFile();
-        }
-
-        return returnValue;
+    public void finishExecution() {
+        finishOperatorThreadExecution();
     }
 
-    private int sendStartStopRecord(PackageType packageType) throws OperatorException {
-        Log.d(LOG_TAG, "sendStartStopRecord, 117: Sending command \"" + packageType + "\".");
-        DataPackage dataPackage = new DataPackage(packageType, null);
-        int returnValue;
-
-        try {
-            communication.sendPackage(dataPackage);
-        } catch (CommunicationException communicationException) {
-            throw new OperatorException("Error while sending \"" + packageType + "\" package.", communicationException);
-        }
-
-        DataPackage receivedDataPackage;
-        try {
-            Log.d(LOG_TAG, "sendStartStopRecord, 128: Waiting for command \"" + packageType + "\" result.");
-            receivedDataPackage = communication.receivePackage();
-
-            if (receivedDataPackage != null) {
-                Log.d(LOG_TAG, "sendStartStopRecord, 129: Received a package.");
-                switch (receivedDataPackage.getPackageType()) {
-                    case COMMAND_RESULT:
-                        CommandResultContent commandResultContent = (CommandResultContent) receivedDataPackage.getContent();
-                        switch (commandResultContent.getResultCode()) {
-                            case GenericReturnCodes.SUCCESS:
-                            case GenericReturnCodes.GENERIC_ERROR:
-                                returnValue = commandResultContent.getResultCode();
-                                break;
-                            default:
-                                throw new OperatorException("Unknown return value received from device after send \"" + packageType + "\" package.");
-                        }
-                        break;
-                    default:
-                        Log.d(LOG_TAG, "sendStartStopRecord, 143: The package received is not a \"" + PackageType.COMMAND_RESULT + "\" package.");
-                        throw new OperatorException("Received a \"" + receivedDataPackage.getPackageType() + "\" package, when expecting a \"" + PackageType.COMMAND_RESULT + "\" package.");
-                }
-            } else {
-                Log.d(LOG_TAG, "sendStartStopRecord, 145: Didn't received the \"" + packageType + "\" command result.");
-                throw new OperatorException("No package received.");
-            }
-
-        } catch (CommunicationException communicationException) {
-            throw new OperatorException("Error while receiving result after send \"" + packageType + "\" package.", communicationException);
-        }
-
-        return returnValue;
+    @Override
+    public void receiveOperationResult(Operation operation) {
+        this.audioRecorder.checkOperationResult(operation);
     }
 
-    private void requestLatestAudioFile() throws OperatorException {
-        Log.d(LOG_TAG, "requestLatestAudioFile, 159: Requesting audio file.");
+    @Override
+    public void connectionLost() {
+        operatorThread.finishExecution();
+        audioRecorder.connectionLost();
+    }
 
-        DataPackage requestAudioFilePackage = new DataPackage(PackageType.REQUEST_AUDIO_FILE, null);
-        try {
-            communication.sendPackage(requestAudioFilePackage);
-        } catch (CommunicationException communicationException) {
-            throw new OperatorException("Error while requesting latest audio file.", communicationException);
-        }
+    @Override
+    public Context getContext() {
+        return audioRecorder.getAudioRecordActivityInterface().getActivity();
+    }
 
-        FileReceiver fileReceiver = new FileReceiver(context, communication);
-        try {
-            fileReceiver.receiveFile();
-        } catch (FileReceiverException fileReceiverException) {
-            throw new OperatorException("Error while receiving latest audio file.", fileReceiverException);
-        }
+    @Override
+    public BluetoothSocket getBluetoothSocket() {
+        return bluetooth.getBluetoothSocket();
     }
 }

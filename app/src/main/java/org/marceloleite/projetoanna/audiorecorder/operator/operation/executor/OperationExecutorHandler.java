@@ -1,0 +1,44 @@
+package org.marceloleite.projetoanna.audiorecorder.operator.operation.executor;
+
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
+
+/**
+ * Created by Marcelo Leite on 24/04/2017.
+ */
+
+public class OperationExecutorHandler extends Handler {
+
+    private static final String LOG_TAG = OperationExecutorHandler.class.getSimpleName();
+
+    public static final int CHECK_COMMAND_TO_EXECUTE = 0x391f;
+
+    public static final int FINISH_EXECUTION = 0x9403;
+
+    private OperationExecutorInterface operationExecutorInterface;
+
+    public OperationExecutorHandler(OperationExecutorInterface operationExecutorInterface) {
+        super();
+        this.operationExecutorInterface = operationExecutorInterface;
+    }
+
+    @Override
+    public void handleMessage(Message message) {
+        switch (message.what) {
+            case CHECK_COMMAND_TO_EXECUTE:
+                Operation operation = (Operation) message.obj;
+                operationExecutorInterface.executeOperation(operation);
+                break;
+            case FINISH_EXECUTION:
+                operationExecutorInterface.finishExecution();
+                break;
+            default:
+                Log.d(LOG_TAG, "handleMessage, 33: Handling message to another handler.");
+                super.handleMessage(message);
+                break;
+        }
+    }
+}

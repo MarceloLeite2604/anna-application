@@ -4,6 +4,8 @@ import android.view.View;
 import android.widget.Button;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
+import org.marceloleite.projetoanna.camera.CameraController;
+import org.marceloleite.projetoanna.camera.CameraPreview;
 
 /**
  * Created by Marcelo Leite on 20/03/2017.
@@ -11,11 +13,12 @@ import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 
 public class ButtonRecordOnClickListener implements View.OnClickListener {
 
-    private static final String LOG_TAG = ButtonRecordOnClickListener.class.getSimpleName();
-
     private AudioRecorder audioRecorder;
 
-    public ButtonRecordOnClickListener(AudioRecorder audioRecorder) {
+    private CameraController cameraController;
+
+    public ButtonRecordOnClickListener(AudioRecorder audioRecorder, CameraController cameraController) {
+        this.cameraController = cameraController;
         this.audioRecorder = audioRecorder;
     }
 
@@ -23,9 +26,11 @@ public class ButtonRecordOnClickListener implements View.OnClickListener {
     public void onClick(View view) {
         Button button = (Button) view;
         if (audioRecorder.isRecording()) {
+            cameraController.stopRecording();
             audioRecorder.stopRecord();
         } else {
             audioRecorder.startAudioRecord();
+            cameraController.startRecording();
         }
         button.setEnabled(false);
     }
