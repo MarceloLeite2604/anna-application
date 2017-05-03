@@ -1,0 +1,116 @@
+package org.marceloleite.projetoanna.utils.file;
+
+import android.content.Context;
+import android.os.Environment;
+import android.util.Log;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * Created by Marcelo Leite on 03/05/2017.
+ */
+
+public class FileUtils {
+
+    private static final NullPointerException CONTEXT_NOT_DEFINED_EXCEPTION = new NullPointerException("Context for file creation is not specified. Use \"setContext\" method to define it.");
+
+    private static final String LOG_TAG = FileUtils.class.getSimpleName();
+
+    private static Context context = null;
+
+    public static void setContext(Context context) {
+        FileUtils.context = context;
+    }
+
+    public static File createTemporaryFile(FileType fileType) {
+
+        if (context == null) {
+            throw CONTEXT_NOT_DEFINED_EXCEPTION;
+        }
+
+        File cacheDirectory = context.getCacheDir();
+
+        if (!cacheDirectory.exists()) {
+            if (!cacheDirectory.mkdirs()) {
+                Log.d(LOG_TAG, "createTemporaryFile, 26: Failed to create directory \"" + cacheDirectory.getPath() + "\".");
+                return null;
+            }
+        }
+
+        String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+
+
+        File temporaryFile = new File(cacheDirectory.getPath() + File.separator + formattedDate + fileType.getFileExtension());
+
+        try {
+            temporaryFile.createNewFile();
+        } catch (IOException ioException) {
+            Log.d(LOG_TAG, "createTemporaryFile, 45: Error while creating new temporary file \"" + temporaryFile.getAbsolutePath() + "\".");
+            ioException.printStackTrace();
+        }
+
+        return temporaryFile;
+    }
+
+    public static File createFile(FileType fileType) throws IOException {
+
+        if (context == null) {
+            throw CONTEXT_NOT_DEFINED_EXCEPTION;
+        }
+
+        if (!isExternalStorageWritable()) {
+            throw new IOException("External storage is not available.");
+        }
+
+        String rootDirectory = null;
+        switch (fileType) {
+            case TEMPORARY_FILE:
+                throw new IOException("Temprary files should be created on using \"createTemporaryFile\" method.");
+            case AUDIO_FILE:
+                rootDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath();
+                break;
+            case VIDEO_FILE:
+            case MOVIE_FILE:
+                rootDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getAbsolutePath();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown file type " + fileType);
+        }
+
+        File outputDirectory = new File(rootDirectory + File.separator + context.getPackageName());
+
+        if (!outputDirectory.exists()) {
+            if (!outputDirectory.mkdirs()) {
+                throw new IOException("Could not create directory \"" + outputDirectory.getAbsolutePath() + "\".");
+            }
+            Log.d(LOG_TAG, "createFile, 85: Directory \"" + outputDirectory.getAbsolutePath() + "\" created.");
+        }
+
+        String fileName = createFileName(fileType);
+
+        File file = new File(outputDirectory, fileName);
+
+        file.createNewFile();
+
+        return file;
+    }
+
+
+    private static boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static String createFileName(FileType fileType) {
+        String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = formattedDate + "." + fileType.getFileExtension();
+        return fileName;
+    }
+
+}

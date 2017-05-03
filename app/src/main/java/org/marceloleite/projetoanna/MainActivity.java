@@ -3,15 +3,16 @@ package org.marceloleite.projetoanna;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ViewGroup;
+import android.util.Log;
+import android.util.Size;
+import android.view.TextureView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecordActivityInterface;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
-import org.marceloleite.projetoanna.camera.CameraController;
-import org.marceloleite.projetoanna.camera.CameraPreview;
+import org.marceloleite.projetoanna.utils.file.FileUtils;
+import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 import org.marceloleite.projetoanna.ui.ButtonConnectOnClickListener;
 import org.marceloleite.projetoanna.ui.ButtonRecordOnClickListener;
 
@@ -26,11 +27,6 @@ public class MainActivity extends AppCompatActivity implements AudioRecordActivi
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
-     * Controls the bluetooth activation, pairing and connection.
-     */
-    private Bluetooth bluetooth;
-
-    /**
      * The button to connect and disconnect from audio recorder.
      */
     private Button buttonConnect;
@@ -40,21 +36,26 @@ public class MainActivity extends AppCompatActivity implements AudioRecordActivi
      */
     private Button buttonRecord;
 
+    private TextureView textureView;
+
     /**
      * The audio recorder controller.
      */
-    private AudioRecorder audioRecorder = null;
+    private AudioRecorder audioRecorder;
 
-    private CameraController cameraController;
-
-    private CameraPreview cameraPreview;
+    private VideoRecorder videoRecorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FileUtils.setContext(this);
 
         audioRecorder = new AudioRecorder(this);
+
+        textureView = (TextureView) findViewById(R.id.texture_view_camera_preview);
+
+        videoRecorder = new VideoRecorder(this, textureView);
 
         buttonConnect = (Button) findViewById(R.id.button_connect);
 
@@ -62,18 +63,16 @@ public class MainActivity extends AppCompatActivity implements AudioRecordActivi
 
         buttonRecord = (Button) findViewById(R.id.button_record);
 
-        cameraController = new CameraController();
+        buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(audioRecorder, videoRecorder));
 
-        // Create our Preview view and set it as the content of our activity.
-        cameraPreview = new CameraPreview(this, cameraController.getCamera());
+        updateInterface();
 
-        cameraController.setCameraPreview(cameraPreview);
+        /* String videoFileAbsolutePath = "/storage/sdcard0/Movies/VID_20170502_162010.mp4";
+        String audioFileAbsolutePath = "/storage/sdcard0/Music/audio_20170502_172056.mp3";
 
-        LinearLayout linearLayoutCameraPreview = (LinearLayout) findViewById(R.id.linear_layout_camera_preview);
-        ViewGroup.LayoutParams layoutParams = linearLayoutCameraPreview.getLayoutParams();
-        linearLayoutCameraPreview.addView(cameraPreview, layoutParams);
-
-        buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(audioRecorder, cameraController));
+        MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(videoFileAbsolutePath, audioFileAbsolutePath);
+        MixerAsyncTask mixerAsyncTask = new MixerAsyncTask();
+        mixerAsyncTask.execute(mixerAsyncTaskParameters); */
 
     }
 
@@ -121,8 +120,10 @@ public class MainActivity extends AppCompatActivity implements AudioRecordActivi
      * Updates the record button interface.
      */
     private void updateButtonRecordInterface() {
-        if (audioRecorder.isConnected()) {
-            if (audioRecorder.isRecording()) {
+        /*if (audioRecorder.isConnected()) {*/
+        if (true) {
+            /* if (audioRecorder.isRecording()) { */
+            if (videoRecorder.isRecording()) {
                 buttonRecord.setText(R.string.button_record_second_text);
             } else {
                 buttonRecord.setText(R.string.button_record_first_text);
@@ -131,5 +132,22 @@ public class MainActivity extends AppCompatActivity implements AudioRecordActivi
         } else {
             buttonRecord.setEnabled(false);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(LOG_TAG, "onResume, 154: OnResume");
+        if (textureView != null) {
+            Size textureViewSize = new Size(textureView.getWidth(), textureView.getHeight());
+            videoRecorder.resume(textureViewSize);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d(LOG_TAG, "onPause, 160: OnPause");
+        videoRecorder.pause();
+        super.onPause();
     }
 }

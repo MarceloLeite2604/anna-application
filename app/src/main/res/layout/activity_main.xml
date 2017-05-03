@@ -8,13 +8,12 @@
     android:orientation="vertical"
     tools:mainActivity="org.marceloleite.projetoanna.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/linear_layout_camera_preview"
+    <TextureView
+        android:id="@+id/texture_view_camera_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.2"
-        android:orientation="vertical">
-        </LinearLayout>
+        android:layout_weight="0.2">
+        </TextureView>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -10,6 +10,8 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.PackageT
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.FileChunkContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.FileHeaderContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.CommunicationException;
+import org.marceloleite.projetoanna.utils.file.FileType;
+import org.marceloleite.projetoanna.utils.file.FileUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -80,7 +82,7 @@ public class FileReceiver {
     }
 
     private void createFile(String fileName) throws FileReceiverException {
-        Log.d(LOG_TAG, "createFile, 80: Creating file \"" + fileName + "\".");
+        /* Log.d(LOG_TAG, "createFile, 80: Creating file \"" + fileName + "\".");
         int suffixDividerIndex = fileName.lastIndexOf(".");
         String preffix = fileName.substring(0, suffixDividerIndex);
         String suffix = fileName.substring(suffixDividerIndex + 1, fileName.length());
@@ -93,6 +95,11 @@ public class FileReceiver {
         } else {
             Log.d(LOG_TAG, "createFile, 94: The external storage is not available to write file.");
             throw new FileReceiverException("The external storage is not available to write file.");
+        }*/
+        try {
+            this.file = FileUtils.createFile(FileType.AUDIO_FILE);
+        } catch (IOException ioException) {
+            Log.d(LOG_TAG, "createFile, 102: Error creating audio file.", ioException);
         }
     }
 
