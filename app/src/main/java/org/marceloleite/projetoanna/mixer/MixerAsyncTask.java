@@ -1,7 +1,8 @@
 package org.marceloleite.projetoanna.mixer;
 
 import android.os.AsyncTask;
-import android.util.Log;
+
+import org.marceloleite.projetoanna.MainActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,20 +15,33 @@ public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, Integer,
 
     private static final String LOG_TAG = MixerAsyncTask.class.getSimpleName();
 
+    private MainActivity mainActivity;
+
+    public MixerAsyncTask(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+    }
+
     @Override
     protected File doInBackground(MixerAsyncTaskParameters... mixerAsyncTaskParametersArray) {
 
+        File mixedFile = null;
         for (int counter = 0; counter < mixerAsyncTaskParametersArray.length; counter++) {
             MixerAsyncTaskParameters mixerAsyncTaskParameters = mixerAsyncTaskParametersArray[counter];
-            Log.d(LOG_TAG, "doInBackground, 22: Mixing file \"" + mixerAsyncTaskParameters.getVideoFileAbsolutePath() + "\".");
-            Mixer mixer = new Mixer(mixerAsyncTaskParameters.getVideoFileAbsolutePath(), mixerAsyncTaskParameters.getAudioFileAbsolutePath());
+            File movieFile = mixerAsyncTaskParameters.getMovieFile();
+            File audioFile = mixerAsyncTaskParameters.getAudioFile();
             try {
-                mixer.test();
+                mixedFile = Mixer.mixAudioAndVideo(audioFile, movieFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        return null;
+        return mixedFile;
+    }
+
+    @Override
+    protected void onPostExecute(File file) {
+        mainActivity.mixConcluded(file);
+        super.onPostExecute(file);
     }
 }

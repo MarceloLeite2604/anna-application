@@ -9,7 +9,8 @@ public class Operation {
     private Command command;
     private ResultType resultType;
     private Throwable throwable;
-    private int returnValue;
+    private Object returnObject;
+    private Class returnObjectClass;
 
     public Operation(Command command) {
         this.command = command;
@@ -23,8 +24,12 @@ public class Operation {
         this.throwable = throwable;
     }
 
-    public void setReturnValue(int returnValue) {
-        this.returnValue = returnValue;
+    public void setReturnObject(Object returnObject) {
+        this.returnObject = returnObject;
+    }
+
+    public void setReturnObjectClass(Class returnObjectClass) {
+        this.returnObjectClass = returnObjectClass;
     }
 
     public Command getCommand() {
@@ -39,7 +44,11 @@ public class Operation {
         return throwable;
     }
 
-    public int getReturnValue() {
-        return returnValue;
+    public Object getReturnObject() {
+        return returnObject;
+    }
+
+    public Class getReturnObjectClass() {
+        return returnObjectClass;
     }
 }

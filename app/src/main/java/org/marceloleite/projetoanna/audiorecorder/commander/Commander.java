@@ -13,6 +13,8 @@ import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileRec
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiverException;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 
+import java.io.File;
+
 /**
  * Created by Marcelo Leite on 18/04/2017.
  */
@@ -21,12 +23,9 @@ public class Commander {
 
     private static final String LOG_TAG = Commander.class.getSimpleName();
 
-    private Context context;
-
     private SenderReceiver senderReceiver;
 
-    public Commander(Context context, BluetoothSocket bluetoothSocket) {
-        this.context = context;
+    public Commander(BluetoothSocket bluetoothSocket) {
         this.senderReceiver = new SenderReceiver(bluetoothSocket);
     }
 
@@ -37,10 +36,6 @@ public class Commander {
     public int stopRecord() throws CommanderException {
         int returnValue;
         returnValue = sendPackageAndWaitForResult(PackageType.STOP_RECORD);
-        if (returnValue == GenericReturnCodes.SUCCESS) {
-            requestLatestAudioFile();
-        }
-
         return returnValue;
     }
 
@@ -101,8 +96,8 @@ public class Commander {
         return returnValue;
     }
 
-    private void requestLatestAudioFile() throws CommanderException {
-        Log.d(LOG_TAG, "requestLatestAudioFile, 159: Requesting audio file.");
+    public File requestLatestAudioFile() throws CommanderException {
+        Log.d(LOG_TAG, "requestLatestAudioFile, 159: Requesting latest audio file.");
 
         DataPackage requestAudioFilePackage = new DataPackage(PackageType.REQUEST_AUDIO_FILE, null);
         try {
@@ -111,12 +106,15 @@ public class Commander {
             throw new CommanderException("Error while requesting latest audio file.", communicationException);
         }
 
-        FileReceiver fileReceiver = new FileReceiver(context, senderReceiver);
+        FileReceiver fileReceiver = new FileReceiver(senderReceiver);
         try {
             fileReceiver.receiveFile();
         } catch (FileReceiverException fileReceiverException) {
             throw new CommanderException("Error while receiving latest audio file.", fileReceiverException);
         }
+
+
+        return fileReceiver.getFile();
     }
 
     public boolean checkConnection() {

@@ -107,7 +107,7 @@ public class VideoRecorder {
 
     // private Surface surface;
 
-    private File outputFile;
+    private File videoFile;
 
     private boolean recording;
 
@@ -136,6 +136,10 @@ public class VideoRecorder {
             this.cameraCaptureSession = cameraCaptureSession;
             updatePreview();
         }
+    }
+
+    public File getVideoFile() {
+        return videoFile;
     }
 
     public void openCamera(Size previewSize) {
@@ -423,7 +427,7 @@ public class VideoRecorder {
         mediaRecorder.stop();
         mediaRecorder.reset();
         createCameraPreview();
-        Toast.makeText(appCompatActivity, "Video saved on " + outputFile.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
+        Toast.makeText(appCompatActivity, "Video saved on " + videoFile.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
     }
 
     protected void createCameraPreview() {
@@ -449,13 +453,13 @@ public class VideoRecorder {
 
     private void setUpMediaRecorder() throws IOException {
 
-        outputFile = FileUtils.createFile(FileType.MOVIE_FILE);
+        videoFile = FileUtils.createFile(FileType.MOVIE_FILE);
         int orientationHint = setMediaRecorderOrientation();
 
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mediaRecorder.setOutputFile(outputFile.getAbsolutePath());
+        mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setVideoEncodingBitRate(ENCODING_BIT_RATE);
         mediaRecorder.setVideoFrameRate(FRAME_RATE);
         mediaRecorder.setVideoSize(videoSize.getWidth(), videoSize.getHeight());

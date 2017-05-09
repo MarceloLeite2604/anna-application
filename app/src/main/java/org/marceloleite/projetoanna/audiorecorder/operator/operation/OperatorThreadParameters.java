@@ -9,7 +9,5 @@ import android.content.Context;
 
 public interface OperatorThreadParameters {
 
-    Context getContext();
-
     BluetoothSocket getBluetoothSocket();
 }

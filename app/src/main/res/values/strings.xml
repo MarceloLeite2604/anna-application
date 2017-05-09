@@ -2,6 +2,6 @@
     <string name="app_name">Projeto Anna</string>
     <string name="button_connect_first_text">Connect</string>
     <string name="button_connect_second_text">Disconnect</string>
-    <string name="button_record_first_text">Start audio Record</string>
-    <string name="button_record_second_text">Stop Audio Record</string>
+    <string name="button_record_first_text">Start Record</string>
+    <string name="button_record_second_text">Stop Record</string>
 </resources>

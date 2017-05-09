@@ -1,25 +1,27 @@
 package org.marceloleite.projetoanna.mixer;
 
+import java.io.File;
+
 /**
  * Created by Marcelo Leite on 03/05/2017.
  */
 
 public class MixerAsyncTaskParameters {
 
-    private String audioFileAbsolutePath;
-    private String videoFileAbsolutePath;
+    private File audioFile;
+    private File movieFile;
 
 
-    public MixerAsyncTaskParameters(String videoFileAbsolutePath, String audioFileAbsolutePath) {
-        this.audioFileAbsolutePath = audioFileAbsolutePath;
-        this.videoFileAbsolutePath = videoFileAbsolutePath;
+    public MixerAsyncTaskParameters(File audioFile, File movieFile) {
+        this.audioFile = audioFile;
+        this.movieFile = movieFile;
     }
 
-    public String getAudioFileAbsolutePath() {
-        return audioFileAbsolutePath;
+    public File getAudioFile() {
+        return audioFile;
     }
 
-    public String getVideoFileAbsolutePath() {
-        return videoFileAbsolutePath;
+    public File getMovieFile() {
+        return movieFile;
     }
 }

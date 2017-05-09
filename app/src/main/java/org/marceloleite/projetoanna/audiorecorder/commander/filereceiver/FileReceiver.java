@@ -1,7 +1,5 @@
 package org.marceloleite.projetoanna.audiorecorder.commander.filereceiver;
 
-import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.senderreceiver.SenderReceiver;
@@ -27,26 +25,20 @@ public class FileReceiver {
 
     private static final String LOG_TAG = FileReceiver.class.getSimpleName();
 
-    private Context context;
-
     private SenderReceiver senderReceiver;
 
     private File file;
+
     private int fileSize;
 
-    public FileReceiver(Context context, SenderReceiver senderReceiver) {
-        this.context = context;
+    public FileReceiver(SenderReceiver senderReceiver) {
         this.senderReceiver = senderReceiver;
         this.file = null;
         this.fileSize = 0;
     }
 
-    public String getFileName() {
-        String fileName = null;
-        if (file != null) {
-            fileName = file.getName();
-        }
-        return fileName;
+    public File getFile() {
+        return file;
     }
 
     public void receiveFile() throws FileReceiverException {
@@ -97,7 +89,7 @@ public class FileReceiver {
             throw new FileReceiverException("The external storage is not available to write file.");
         }*/
         try {
-            this.file = FileUtils.createFile(FileType.AUDIO_FILE);
+            this.file = FileUtils.createFile(FileType.AUDIO_MP3_FILE);
         } catch (IOException ioException) {
             Log.d(LOG_TAG, "createFile, 102: Error creating audio file.", ioException);
         }

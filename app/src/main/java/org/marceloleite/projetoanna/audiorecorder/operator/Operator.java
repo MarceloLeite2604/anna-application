@@ -83,11 +83,6 @@ public class Operator implements OperationResultInterface, OperatorThreadParamet
     }
 
     @Override
-    public Context getContext() {
-        return audioRecorder.getAudioRecordActivityInterface().getActivity();
-    }
-
-    @Override
     public BluetoothSocket getBluetoothSocket() {
         return bluetooth.getBluetoothSocket();
     }

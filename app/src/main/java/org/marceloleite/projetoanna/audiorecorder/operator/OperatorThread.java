@@ -16,6 +16,8 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.ResultType;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttemptsReturnCodes;
 
+import java.io.File;
+
 /**
  * Created by Marcelo Leite on 24/04/2017.
  */
@@ -53,7 +55,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Looper.prepare();
 
-        this.commander = new Commander(operatorThreadParameters.getContext(), operatorThreadParameters.getBluetoothSocket());
+        this.commander = new Commander(operatorThreadParameters.getBluetoothSocket());
         this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
         this.operationExecutorHandler = new OperationExecutorHandler(this);
 
@@ -65,6 +67,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
     @Override
     public void executeOperation(Operation operation) {
         Integer returnValue = null;
+        File latestAudioFile = null;
         Throwable throwable = null;
 
         if (operation != null) {
@@ -80,6 +83,13 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
                 case STOP_AUDIO_RECORD:
                     try {
                         returnValue = commander.stopRecord();
+                    } catch (CommanderException commanderException) {
+                        throwable = commanderException;
+                    }
+                    break;
+                case REQUEST_LATEST_AUDIO_FILE:
+                    try {
+                        latestAudioFile = commander.requestLatestAudioFile();
                     } catch (CommanderException commanderException) {
                         throwable = commanderException;
                     }
@@ -100,12 +110,20 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
             }
 
             if (returnValue != null) {
-                operation.setResultType(ResultType.VALUE_RETURNED);
-                operation.setReturnValue(returnValue);
+                operation.setResultType(ResultType.OBJECT_RETURNED);
+                operation.setReturnObjectClass(Integer.class);
+                operation.setReturnObject(returnValue);
                 this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
             } else {
-                operation.setResultType(ResultType.EXCEPTION_THROWN);
-                operation.setThrowable(throwable);
+                if (latestAudioFile != null) {
+                    operation.setResultType(ResultType.OBJECT_RETURNED);
+                    operation.setReturnObjectClass(File.class);
+                    operation.setReturnObject(latestAudioFile);
+                    this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
+                } else {
+                    operation.setResultType(ResultType.EXCEPTION_THROWN);
+                    operation.setThrowable(throwable);
+                }
             }
 
             Message commandResultMessage = operationResultHandler.obtainMessage();
@@ -114,7 +132,9 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
             Log.d(LOG_TAG, "executeOperation, 105: Sending the result of command " + operation.getCommand());
             operationResultHandler.sendMessage(commandResultMessage);
 
-        } else {
+        } else
+
+        {
             switch (RetryAttempts.wait(this.noOperationRetryAttempts)) {
                 case RetryAttemptsReturnCodes.SUCCESS:
                     Log.d(LOG_TAG, "executeOperation, 115: Check command, attempt " + this.noOperationRetryAttempts.getTotalAttempts() + " of " + this.noOperationRetryAttempts.getMaximumAttempts() + ".");
@@ -127,12 +147,15 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
                         Log.d(LOG_TAG, "executeOperation, 118: Lost connection with audio recorder.");
                         Message commandResultMessage = operationResultHandler.obtainMessage();
                         commandResultMessage.what = OperationResultHandler.CONNECTION_LOST;
+                        commandResultMessage.obj = operation;
+                        operationResultHandler.sendMessage(commandResultMessage);
                     }
                     break;
             }
         }
 
         sendCheckOperationMessage();
+
     }
 
     @Override

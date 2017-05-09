@@ -5,7 +5,7 @@ package org.marceloleite.projetoanna.audiorecorder.operator.operation;
  */
 
 public enum ResultType {
-    VALUE_RETURNED("VALUE_RETURNED"),
+    OBJECT_RETURNED("OBJECT_RETURNED"),
     EXCEPTION_THROWN("EXCEPTION_THROWN");
 
     String title;

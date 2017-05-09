@@ -10,6 +10,9 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
 
+import java.io.File;
+import java.io.InvalidObjectException;
+
 /**
  * Controls the audio recorder device.
  */
@@ -40,6 +43,8 @@ public class AudioRecorder implements BluetoothInterface {
      */
     private boolean recording;
 
+    private File latestAudioFile;
+
     /**
      * Instantiates the Audio Recorder class.
      *
@@ -64,6 +69,10 @@ public class AudioRecorder implements BluetoothInterface {
         return recording;
     }
 
+    public File getLatestAudioFile() {
+        return latestAudioFile;
+    }
+
     public void connect() {
         bluetooth.connect();
     }
@@ -81,6 +90,12 @@ public class AudioRecorder implements BluetoothInterface {
     public void stopRecord() {
         if (operator != null) {
             operator.executeCommand(Command.STOP_AUDIO_RECORD);
+        }
+    }
+
+    public void requestLatestAudioFile() {
+        if (operator != null) {
+            operator.executeCommand(Command.REQUEST_LATEST_AUDIO_FILE);
         }
     }
 
@@ -112,6 +127,7 @@ public class AudioRecorder implements BluetoothInterface {
 
     public void checkOperationResult(Operation operation) {
         if (operation != null) {
+
             switch (operation.getCommand()) {
                 case START_AUDIO_RECORD:
                     checkStartAudioRecordCommandResult(operation);
@@ -121,6 +137,9 @@ public class AudioRecorder implements BluetoothInterface {
                     break;
                 case DISCONNECT:
                     checkDisconnectCommandResult(operation);
+                    break;
+                case REQUEST_LATEST_AUDIO_FILE:
+                    checkRequestLatestAudioFileResult(operation);
                     break;
                 case FINISH_EXECUTION:
                     checkFinishExecutionCommandResult(operation);
@@ -134,19 +153,25 @@ public class AudioRecorder implements BluetoothInterface {
 
     private void checkStartAudioRecordCommandResult(Operation operation) {
         switch (operation.getResultType()) {
-            case VALUE_RETURNED:
-                switch (operation.getReturnValue()) {
-                    case GenericReturnCodes.SUCCESS:
-                        Toast.makeText(audioRecordActivityInterface.getActivity(), "Audio record started.", Toast.LENGTH_SHORT).show();
-                        recording = true;
-                        break;
-                    case GenericReturnCodes.GENERIC_ERROR:
-                        Toast.makeText(audioRecordActivityInterface.getActivity(), "Could not start audio record.", Toast.LENGTH_SHORT).show();
-                        recording = false;
-                        break;
-                    default:
-                        Log.e(LOG_TAG, "startAudioRecordCommandResult, 111: Unknown return value received from \"start record\" operation: " + operation.getReturnValue() + ".");
-                        break;
+            case OBJECT_RETURNED:
+                Class returnObjectClass = operation.getReturnObjectClass();
+                if (returnObjectClass == Integer.class) {
+                    Integer returnObject = (Integer) operation.getReturnObject();
+                    switch (returnObject) {
+                        case GenericReturnCodes.SUCCESS:
+                            Toast.makeText(audioRecordActivityInterface.getActivity(), "Audio record started.", Toast.LENGTH_SHORT).show();
+                            recording = true;
+                            break;
+                        case GenericReturnCodes.GENERIC_ERROR:
+                            Toast.makeText(audioRecordActivityInterface.getActivity(), "Could not start audio record.", Toast.LENGTH_SHORT).show();
+                            recording = false;
+                            break;
+                        default:
+                            Log.e(LOG_TAG, "startAudioRecordCommandResult, 111: Unknown return value received from \"start record\" operation: " + operation.getReturnObject() + ".");
+                            break;
+                    }
+                } else {
+                    Log.e(LOG_TAG, "checkStartAudioRecordCommandResult, 164: Unknown object \"" + returnObjectClass.getName() + "\" return from operation \"" + operation.getCommand() + "\".");
                 }
                 break;
             case EXCEPTION_THROWN:
@@ -162,19 +187,25 @@ public class AudioRecorder implements BluetoothInterface {
 
     private void checkStopAudioRecordCommandResult(Operation operation) {
         switch (operation.getResultType()) {
-            case VALUE_RETURNED:
-                switch (operation.getReturnValue()) {
-                    case GenericReturnCodes.SUCCESS:
-                        Toast.makeText(audioRecordActivityInterface.getActivity(), "Audio record finished.", Toast.LENGTH_SHORT).show();
-                        recording = false;
-                        break;
-                    case GenericReturnCodes.GENERIC_ERROR:
-                        Toast.makeText(audioRecordActivityInterface.getActivity(), "Could not stop audio record.", Toast.LENGTH_SHORT).show();
-                        recording = true;
-                        break;
-                    default:
-                        Log.e(LOG_TAG, "checkStopAudioRecordCommandResult, 76:  Unknown return value received from \"stop record\" operation: " + operation.getReturnValue() + ".");
-                        break;
+            case OBJECT_RETURNED:
+                Class returnObjectClass = operation.getReturnObjectClass();
+                if (returnObjectClass == Integer.class) {
+                    Integer returnObject = (Integer) operation.getReturnObject();
+                    switch (returnObject) {
+                        case GenericReturnCodes.SUCCESS:
+                            Toast.makeText(audioRecordActivityInterface.getActivity(), "Audio record finished.", Toast.LENGTH_SHORT).show();
+                            recording = false;
+                            break;
+                        case GenericReturnCodes.GENERIC_ERROR:
+                            Toast.makeText(audioRecordActivityInterface.getActivity(), "Could not stop audio record.", Toast.LENGTH_SHORT).show();
+                            recording = true;
+                            break;
+                        default:
+                            Log.e(LOG_TAG, "checkStopAudioRecordCommandResult, 76:  Unknown return value received from \"stop record\" operation: " + operation.getReturnObject() + ".");
+                            break;
+                    }
+                } else {
+                    Log.e(LOG_TAG, "checkStopAudioRecordCommandResult, 198: Unknown object \"" + returnObjectClass.getName() + "\" return from operation \"" + operation.getCommand() + "\".");
                 }
                 break;
             case EXCEPTION_THROWN:
@@ -190,17 +221,23 @@ public class AudioRecorder implements BluetoothInterface {
 
     private void checkDisconnectCommandResult(Operation operation) {
         switch (operation.getResultType()) {
-            case VALUE_RETURNED:
-                switch (operation.getReturnValue()) {
-                    case GenericReturnCodes.SUCCESS:
-                        Toast.makeText(audioRecordActivityInterface.getActivity(), "Disconnected from " + bluetooth.getBluetoothDevice().getName() + ".", Toast.LENGTH_SHORT).show();
-                        break;
-                    case GenericReturnCodes.GENERIC_ERROR:
-                        Toast.makeText(audioRecordActivityInterface.getActivity(), "Error while disconnecting from " + bluetooth.getBluetoothDevice().getName() + ".", Toast.LENGTH_SHORT).show();
-                        break;
-                    default:
-                        Log.e(LOG_TAG, "checkDisconnectCommandResult, 204: Unknown return value received from \"disconnect\" operation: " + operation.getReturnValue() + ".");
-                        break;
+            case OBJECT_RETURNED:
+                Class returnObjectClass = operation.getReturnObjectClass();
+                if (returnObjectClass == Integer.class) {
+                    Integer returnObject = (Integer) operation.getReturnObject();
+                    switch (returnObject) {
+                        case GenericReturnCodes.SUCCESS:
+                            Toast.makeText(audioRecordActivityInterface.getActivity(), "Disconnected from " + bluetooth.getBluetoothDevice().getName() + ".", Toast.LENGTH_SHORT).show();
+                            break;
+                        case GenericReturnCodes.GENERIC_ERROR:
+                            Toast.makeText(audioRecordActivityInterface.getActivity(), "Error while disconnecting from " + bluetooth.getBluetoothDevice().getName() + ".", Toast.LENGTH_SHORT).show();
+                            break;
+                        default:
+                            Log.e(LOG_TAG, "checkDisconnectCommandResult, 204: Unknown return value received from \"disconnect\" operation: " + operation.getReturnObject() + ".");
+                            break;
+                    }
+                } else {
+                    Log.e(LOG_TAG, "checkDisconnectCommandResult, 219: Unknown object \"" + returnObjectClass.getName() + "\" return from operation \"" + operation.getCommand() + "\".");
                 }
                 break;
             case EXCEPTION_THROWN:
@@ -216,11 +253,35 @@ public class AudioRecorder implements BluetoothInterface {
         audioRecordActivityInterface.updateInterface();
     }
 
+    private void checkRequestLatestAudioFileResult(Operation operation) {
+        Log.d(LOG_TAG, "checkRequestLatestAudioFileResult, 257: Received latest audio file.");
+        switch (operation.getResultType()) {
+            case OBJECT_RETURNED:
+                Class returnObjectClass = operation.getReturnObjectClass();
+                Log.d(LOG_TAG, "checkRequestLatestAudioFileResult, 260: Class returned: " + returnObjectClass.getName());
+                if (returnObjectClass == File.class) {
+                    latestAudioFile = (File) operation.getReturnObject();
+                    Log.d(LOG_TAG, "checkRequestLatestAudioFileResult, 264: Latest audio file: " + latestAudioFile);
+                } else {
+                    Log.e(LOG_TAG, "checkDisconnectCommandResult, 219: Unknown object \"" + returnObjectClass.getName() + "\" return from operation \"" + operation.getCommand() + "\".");
+                }
+                break;
+            case EXCEPTION_THROWN:
+                Throwable throwable = operation.getThrowable();
+                Log.e(LOG_TAG, "checkDisconnectCommandResult, 210: Disconnect command returned an exception.");
+                throwable.printStackTrace();
+                Toast.makeText(audioRecordActivityInterface.getActivity(), "Error while disconnecting from " + bluetooth.getBluetoothDevice().getName() + ".", Toast.LENGTH_SHORT).show();
+                break;
+        }
+
+        audioRecordActivityInterface.receiveLatestAudioFileConcluded();
+    }
+
     private void checkFinishExecutionCommandResult(Operation operation) {
         Log.e(LOG_TAG, "checkDisconnectCommandResult, 173: \"" + operation.getCommand() + "\" not implemented yet.");
     }
 
     public void connectionLost() {
-
+        Log.d(LOG_TAG, "connectionLost, 284: Lost connection with audio recorder.");
     }
 }

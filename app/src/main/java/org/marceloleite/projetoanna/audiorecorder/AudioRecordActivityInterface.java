@@ -12,5 +12,5 @@ public interface AudioRecordActivityInterface {
 
     void updateInterface();
 
-
+    void receiveLatestAudioFileConcluded();
 }

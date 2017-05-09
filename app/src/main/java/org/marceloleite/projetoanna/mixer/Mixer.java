@@ -1,18 +1,19 @@
 package org.marceloleite.projetoanna.mixer;
 
 import android.media.MediaCodec;
-import android.media.MediaCodecList;
+import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.util.Log;
-import android.view.Surface;
 
+import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
+import org.marceloleite.projetoanna.mixer.media.codec.MediaCodecWrapper;
+import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -20,181 +21,124 @@ import java.nio.ByteBuffer;
  * Created by Marcelo Leite on 03/05/2017.
  */
 
-public class Mixer {
+public abstract class Mixer {
 
-    private static final int BUFFER_SIZE = 1024 * 1024;
+    private static final int VIDEO_COPY_BUFFER_SIZE = 1024 * 1024;
 
     private static final String LOG_TAG = Mixer.class.getSimpleName();
 
-    private String movieFileAbsolutePath;
-
-    private String audioFileAbsolutePath;
-
-    private File temporaryVideoFile;
-
-    private File videoOutputFile;
-
-    public Mixer(String movieFileAbsolutePath, String audioFileAbsolutePath) {
-        this.movieFileAbsolutePath = movieFileAbsolutePath;
-        this.audioFileAbsolutePath = audioFileAbsolutePath;
+    public static File mixAudioAndVideo(File audioFile, File videoFile) throws IOException {
+        File rawAudioFile = convertMp3ToRaw(audioFile);
+        File mixedVideoFile = createMixedMp4File(rawAudioFile, videoFile);
+        return mixedVideoFile;
     }
 
-    public void test() throws IOException {
-        extractVideoFromMovie();
-        mixAudioAndVideo();
+    private static File convertMp3ToRaw(File mp3File) throws IOException {
+        Log.d(LOG_TAG, "convertMp3ToRaw, 40: Converting mp3 file to raw audio.");
+
+        /* Creates and configures the mp3 file media extractor. */
+        MediaExtractorWrapper mp3FileMediaExtractorWrapper = new MediaExtractorWrapper(mp3File, MediaFormat.MIMETYPE_AUDIO_MPEG);
+
+        /* Creates the new raw audio file. */
+        File rawAudioFile = FileUtils.createFile(FileType.AUDIO_RAW_FILE);
+
+        /* Creates and configures the mp3 media decoder. */
+        MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile);
+
+        /* Waits the decodification to conclude. */
+        Log.d(LOG_TAG, "convertMp3ToRaw, 56: Decoding mp3 file.");
+        mp3MediaDecoderWrapper.startAndWaitCodec();
+        Log.d(LOG_TAG, "convertMp3ToRaw, 262: Decodification complete.");
+
+        return rawAudioFile;
     }
 
-    public void extractVideoFromMovie() throws IOException {
-        MediaExtractor mediaExtractor = new MediaExtractor();
+    private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile) throws IOException {
+        MediaCodecWrapper mediaCodecWrapper;
 
-        try {
-            mediaExtractor.setDataSource(movieFileAbsolutePath);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-
-        int videoFileTracks = mediaExtractor.getTrackCount();
-        Log.d(LOG_TAG, "test, 37: Total of tracks on this file: " + videoFileTracks);
-
-        for (int counter = 0; counter < videoFileTracks; counter++) {
-            MediaFormat mediaFormat = mediaExtractor.getTrackFormat(counter);
-            String mime = mediaFormat.getString(MediaFormat.KEY_MIME);
-            Log.d(LOG_TAG, "test, 45: Mime of track " + counter + ": " + mime);
-            if (MediaFormat.MIMETYPE_VIDEO_AVC.equals(mime)) {
-                mediaExtractor.selectTrack(counter);
-                break;
-            }
-        }
-        ByteBuffer inputBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-
-        temporaryVideoFile = FileUtils.createFile(FileType.VIDEO_FILE);
-        FileOutputStream fileOutputStream = new FileOutputStream(temporaryVideoFile);
-
-        boolean trackExtractionConcluded = false;
-        int bytesRead;
-        int sampleTrackIndex = -1;
-        int totalOfBytes = 0;
-
-        while (!trackExtractionConcluded) {
-            bytesRead = mediaExtractor.readSampleData(inputBuffer, 0);
-            if (bytesRead > 0) {
-                sampleTrackIndex = mediaExtractor.getSampleTrackIndex();
-                fileOutputStream.write(inputBuffer.array());
-                Log.d(LOG_TAG, "test, 57: Extracted " + bytesRead + " byte(s) from track index " + sampleTrackIndex + ".");
-                totalOfBytes += bytesRead;
-                mediaExtractor.advance();
-            } else {
-                trackExtractionConcluded = true;
-            }
-        }
-        Log.d(LOG_TAG, "test, 63: " + totalOfBytes + " byte(s) written of file \"" + temporaryVideoFile.getAbsolutePath() + "\".");
-        fileOutputStream.close();
-
-        mediaExtractor.release();
+        MediaFormat mp3MediaFormat = mediaExtractorWrapper.getSelectedMediaTrackInfos().getMediaFormat();
+        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper.getMediaExtractor(), rawAudioFile);
+        return mediaCodecWrapper;
     }
 
-    public void mixAudioAndVideo() throws IOException {
+    private static File createMixedMp4File(File rawAudioFile, File videoFile) throws IOException {
 
-        videoOutputFile = FileUtils.createFile(FileType.VIDEO_FILE);
+        /* Creates and configures the media extractor for video file. */
+        MediaExtractorWrapper videoFileMediaExtractorWrapper = new MediaExtractorWrapper(videoFile, MediaFormat.MIMETYPE_VIDEO_AVC);
 
-        MediaMuxer mediaMuxer = new MediaMuxer(videoOutputFile.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+        /* Creates the mixed video file. */
+        File mixedVideoFile = FileUtils.createFile(FileType.MOVIE_FILE);
 
-        MediaExtractor audioMediaExtractor = new MediaExtractor();
-        audioMediaExtractor.setDataSource(audioFileAbsolutePath);
+        /* Creates the media muxer to mix audio and video. */
+        MediaMuxerWrapper mediaMuxerWrapper = new MediaMuxerWrapper(mixedVideoFile);
 
-        MediaExtractor movieMediaExtractor = new MediaExtractor();
-        movieMediaExtractor.setDataSource(movieFileAbsolutePath);
+        /* Creates the video track on media muxer. */
+        mediaMuxerWrapper.addMediaMuxerVideoTrack(videoFileMediaExtractorWrapper);
 
-        GetMediaFormatFromFileResult getAudioMediaFormatFromFileResult;
-        getAudioMediaFormatFromFileResult = getMediaFormatFromFile(audioMediaExtractor, MediaFormat.MIMETYPE_AUDIO_MPEG);
-        MediaFormat audioMediaFormat = getAudioMediaFormatFromFileResult.mediaFormat;
-        audioMediaExtractor.selectTrack(getAudioMediaFormatFromFileResult.trackIndex);
+        /* Creates the AAC audio encoder */
+        MediaCodecWrapper aacMediaEncoderWrapper = createAacMediaEncoder(rawAudioFile, mediaMuxerWrapper);
 
-        GetMediaFormatFromFileResult getVideoMediaFormatFromFileResult = getMediaFormatFromFile(movieMediaExtractor, MediaFormat.MIMETYPE_VIDEO_AVC);
-        MediaFormat videoMediaFormat = getVideoMediaFormatFromFileResult.mediaFormat;
-        movieMediaExtractor.selectTrack(getVideoMediaFormatFromFileResult.trackIndex);
+        Log.d(LOG_TAG, "createMixedMp4File, 138: Encoding raw audio to AAC format.");
+        aacMediaEncoderWrapper.startAndWaitCodec();
 
-        int videoTrackIndex = mediaMuxer.addTrack(videoMediaFormat);
-        int audioTrackIndex = mediaMuxer.addTrack(audioMediaFormat);
+        /*
+        Once the media encoder has finished its work, this function's mediaMuxer has to be
+        updated so we can conclude the video copy.
+         */
+        // mediaMuxer = ((MediaEncoderCallback) aacMediaEncoderWrapper.getCallback()).getMediaMuxer();
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+        Log.d(LOG_TAG, "createMixedMp4File, 118: Encoding complete.");
 
-        MediaCodec.BufferInfo videoBufferInfo = new MediaCodec.BufferInfo();
-        MediaCodec.BufferInfo audioBufferInfo = new MediaCodec.BufferInfo();
+        Log.d(LOG_TAG, "createMixedMp4File, 106: Copying video to mix file.");
+        copyVideoToMixedFile(videoFileMediaExtractorWrapper, mediaMuxerWrapper);
+        Log.d(LOG_TAG, "createMixedMp4File, 106: Video copying complete.");
 
-        movieMediaExtractor.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+        /* Stops the media muxer. */
+        mediaMuxerWrapper.stopMediaMuxer();
 
-        boolean finished = false;
-        int frameCount = 0;
-        int offset = 100; /* TODO: Why not 0? */
+        return mixedVideoFile;
+    }
 
-        mediaMuxer.start();
-        while (!finished) {
+    private static MediaCodecWrapper createAacMediaEncoder(File inputFile, MediaMuxerWrapper mediaMuxerWrapper) throws IOException {
+        MediaFormat aacMediaFormat = createAacMediaFormat();
+        MediaCodecWrapper mediaCodecWrapper = new MediaCodecWrapper(aacMediaFormat, inputFile, mediaMuxerWrapper);
 
-            videoBufferInfo.offset = offset;
-            videoBufferInfo.size = movieMediaExtractor.readSampleData(byteBuffer, offset);
+        return mediaCodecWrapper;
+    }
 
-            if (videoBufferInfo.size < 0) {
+    private static MediaFormat createAacMediaFormat() {
+        MediaFormat aacMediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AudioUtils.SAMPLE_RATE, 2);
+        aacMediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+        aacMediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, AudioUtils.AAC_ENCODING_BIT_RATE);
+        aacMediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, AudioUtils.AAC_ENCODING_MAX_INPUT_SIZE);
+        return aacMediaFormat;
+    }
+
+    private static void copyVideoToMixedFile(MediaExtractorWrapper videoFileMediaExtractorWrapper, MediaMuxerWrapper mediaMuxerWrapper) {
+
+        boolean videoExtractionConcluded = false;
+        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(VIDEO_COPY_BUFFER_SIZE);
+        bufferInfo.offset = AudioUtils.BUFFER_OFFSET;
+
+        MediaExtractor videoFileMediaExtractor = videoFileMediaExtractorWrapper.getMediaExtractor();
+        MediaMuxer mediaMuxer = mediaMuxerWrapper.getMediaMuxer();
+
+        while (!videoExtractionConcluded) {
+            bufferInfo.size = videoFileMediaExtractor.readSampleData(byteBuffer, AudioUtils.BUFFER_OFFSET);
+
+            if (bufferInfo.size < 0) {
                 Log.d(LOG_TAG, "mixAudioAndVideo, 146: End of video copy.");
-                finished = true;
-                videoBufferInfo.size = 0;
+                Log.d(LOG_TAG, "createMixedMp4File, 162: Last presentation time: " + bufferInfo.presentationTimeUs);
+                videoExtractionConcluded = true;
+                bufferInfo.size = 0;
             } else {
-                videoBufferInfo.presentationTimeUs = movieMediaExtractor.getSampleTime();
-                videoBufferInfo.flags = movieMediaExtractor.getSampleFlags();
-                mediaMuxer.writeSampleData(videoTrackIndex, byteBuffer, videoBufferInfo);
-                movieMediaExtractor.advance();
-                frameCount++;
-                Log.d(LOG_TAG, "mixAudioAndVideo, 156: Frame (" + frameCount + ") Video PresentationTimeUs:" + videoBufferInfo.presentationTimeUs + " Flags:" + videoBufferInfo.flags + " Size(KB) " + videoBufferInfo.size / 1024);
+                bufferInfo.presentationTimeUs = videoFileMediaExtractor.getSampleTime();
+                bufferInfo.flags = videoFileMediaExtractor.getSampleFlags();
+
+                mediaMuxer.writeSampleData(mediaMuxerWrapper.getVideoTrackIndex(), byteBuffer, bufferInfo);
+                videoFileMediaExtractor.advance();
             }
         }
-
-        audioMediaExtractor.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
-
-        finished = false;
-        frameCount = 0;
-        offset = 0;
-        while (!finished) {
-            audioBufferInfo.offset = offset;
-            audioBufferInfo.size = audioMediaExtractor.readSampleData(byteBuffer, offset);
-
-            if (audioBufferInfo.size < 0) {
-                Log.d(LOG_TAG, "mixAudioAndVideo, 163: End of audio copy.");
-                finished = true;
-                audioBufferInfo.size = 0;
-            } else {
-                audioBufferInfo.presentationTimeUs = audioMediaExtractor.getSampleTime();
-                audioBufferInfo.flags = audioMediaExtractor.getSampleFlags();
-                mediaMuxer.writeSampleData(audioTrackIndex, byteBuffer, audioBufferInfo);
-                audioMediaExtractor.advance();
-                frameCount++;
-
-                Log.d(LOG_TAG, "mixAudioAndVideo, 175: Frame (" + frameCount + ") Audio PresentationTimeUs:" + audioBufferInfo.presentationTimeUs + " Flags:" + audioBufferInfo.flags + " Size(KB) " + audioBufferInfo.size / 1024);
-            }
-        }
-
-
-        mediaMuxer.stop();
-        mediaMuxer.release();
-    }
-
-    private GetMediaFormatFromFileResult getMediaFormatFromFile(MediaExtractor mediaExtractor, String mimeType) throws IOException {
-        GetMediaFormatFromFileResult getMediaFormatFromFileResult = new GetMediaFormatFromFileResult();
-
-        int totalAudioTracks = mediaExtractor.getTrackCount();
-
-        for (int counter = 0; counter < totalAudioTracks; counter++) {
-            MediaFormat trackMediaFormat = mediaExtractor.getTrackFormat(counter);
-            String mime = trackMediaFormat.getString(MediaFormat.KEY_MIME);
-            if (mimeType.equals(mime)) {
-                getMediaFormatFromFileResult.trackIndex = counter;
-                getMediaFormatFromFileResult.mediaFormat = trackMediaFormat;
-            }
-        }
-        return getMediaFormatFromFileResult;
-    }
-
-    private class GetMediaFormatFromFileResult {
-        public MediaFormat mediaFormat;
-        public int trackIndex;
     }
 }
