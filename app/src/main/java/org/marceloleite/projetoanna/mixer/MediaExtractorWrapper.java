@@ -2,6 +2,7 @@ package org.marceloleite.projetoanna.mixer;
 
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.MediaTrackInfos;
@@ -21,15 +22,16 @@ public class MediaExtractorWrapper {
 
     private File mediaFile;
 
-    private String mediaMimetype;
+    private long mediaDuration;
+
+    // private String mediaMimetype;
 
     private MediaTrackInfos selectedMediaTrackInfos;
 
     public MediaExtractorWrapper(File mediaFile, String mediaMimetype) throws IOException {
-        Log.d(LOG_TAG, "MediaExtractorWrapper, 29: Media file: " + mediaFile.getAbsolutePath());
-        Log.d(LOG_TAG, "MediaExtractorWrapper, 30: Mimetype: " + mediaMimetype);
         this.mediaFile = mediaFile;
-        this.mediaMimetype = mediaMimetype;
+        //this.mediaMimetype = mediaMimetype;
+        this.mediaDuration = calculateMediaDuration(mediaFile);
         this.mediaExtractor = createMediaExtractor(mediaFile);
         this.selectedMediaTrackInfos = selectMediaTrack(mediaMimetype);
     }
@@ -44,6 +46,21 @@ public class MediaExtractorWrapper {
 
     public File getMediaFile() {
         return mediaFile;
+    }
+
+    public long getMediaDuration() {
+        return mediaDuration;
+    }
+
+    private long calculateMediaDuration(File mediaFile) {
+        int duration = 0;
+        MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
+        metaRetriever.setDataSource(mediaFile.getAbsolutePath());
+        String stringDuration = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        if (stringDuration != null) {
+            duration = Integer.parseInt(stringDuration);
+        }
+        return duration;
     }
 
     private MediaExtractor createMediaExtractor(File mediaFile) throws IOException {

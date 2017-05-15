@@ -1,8 +1,6 @@
 package org.marceloleite.projetoanna.audiorecorder.operator;
 
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
@@ -14,6 +12,7 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.OperatorThr
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.OperationExecutorHandler;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultHandler;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultInterface;
+import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.

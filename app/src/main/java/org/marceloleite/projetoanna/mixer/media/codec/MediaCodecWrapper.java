@@ -4,14 +4,14 @@ import android.media.MediaCodec;
 import android.media.MediaCodecList;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
-import android.media.MediaMuxer;
-import android.util.Log;
 
+import org.marceloleite.projetoanna.mixer.MediaExtractorWrapper;
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaCodecCallback;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaDecoderCallback;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaEncoderCallback;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
+import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +28,10 @@ public class MediaCodecWrapper {
 
     private MediaCodecCallback callback;
 
-    public MediaCodecWrapper(MediaFormat mediaFormat, MediaExtractor mediaExtractor, File outputFile) throws IOException {
+    public MediaCodecWrapper(MediaFormat mediaFormat, MediaExtractorWrapper mediaExtractorWrapper, File outputFile, long startAudioDelay, long stopAudioDelay) throws IOException {
         createMediaDecoder(mediaFormat);
-        createMediaDecoderCallback(mediaExtractor, outputFile);
+        long audioDuration = (mediaExtractorWrapper.getMediaDuration() * 1000l) - stopAudioDelay;
+        createMediaDecoderCallback(mediaExtractorWrapper.getMediaExtractor(), outputFile, startAudioDelay, audioDuration);
         configureMediaCodec(mediaFormat, 0);
     }
 
@@ -66,7 +67,6 @@ public class MediaCodecWrapper {
     }
 
     private void createMediaEncoder(MediaFormat mediaFormat) throws IOException {
-        Log.d(LOG_TAG, "createMediaEncoder, 63: Media format: " + mediaFormat);
         MediaCodecList mediaCodecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
         MediaFormat mediaFormatForEncoder;
 
@@ -86,8 +86,8 @@ public class MediaCodecWrapper {
 
     }
 
-    private void createMediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile) throws IOException {
-        callback = new MediaDecoderCallback(mediaExtractor, outputFile);
+    private void createMediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile, long startDelay, long audioDuration) throws IOException {
+        callback = new MediaDecoderCallback(mediaExtractor, outputFile, startDelay, audioDuration);
         mediaCodec.setCallback(callback);
     }
 

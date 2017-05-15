@@ -1,7 +1,6 @@
 package org.marceloleite.projetoanna.audiorecorder.commander;
 
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.DataPackage;
@@ -12,6 +11,7 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.senderreceiver.Sende
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiver;
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiverException;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
+import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 
@@ -25,8 +25,12 @@ public class Commander {
 
     private SenderReceiver senderReceiver;
 
-    public Commander(BluetoothSocket bluetoothSocket) {
-        this.senderReceiver = new SenderReceiver(bluetoothSocket);
+    public Commander(BluetoothSocket bluetoothSocket) throws CommanderException {
+        try {
+            this.senderReceiver = new SenderReceiver(bluetoothSocket);
+        } catch (CommunicationException communicationException) {
+            throw new CommanderException("Error while creating Commander object.", communicationException);
+        }
     }
 
     public int startRecord() throws CommanderException {
@@ -118,7 +122,7 @@ public class Commander {
     }
 
     public boolean checkConnection() {
-        Log.d(LOG_TAG, "checkConnection, 175: Checking connection with audio recorder.");
+        // Log.d(LOG_TAG, "checkConnection, 175: Checking connection with audio recorder.");
         boolean result;
 
         DataPackage checkConnectionDataPackage = new DataPackage(PackageType.CHECK_CONNECTION, null);

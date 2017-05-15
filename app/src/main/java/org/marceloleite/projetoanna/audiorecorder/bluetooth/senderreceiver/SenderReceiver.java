@@ -10,10 +10,11 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.PackageT
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.ConfirmationContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.Content;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.CommunicationException;
+import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttemptsReturnCodes;
 
-import java.nio.ByteBuffer;
+import java.io.IOException;
 
 /**
  * Controls the communication between the application and the recorder.
@@ -39,8 +40,12 @@ public class SenderReceiver {
      *
      * @param bluetoothSocket The bluetooth socket which stablishes a readerWriter between the application and the recorder.
      */
-    public SenderReceiver(BluetoothSocket bluetoothSocket) {
-        this.readerWriter = new ReaderWriter(bluetoothSocket);
+    public SenderReceiver(BluetoothSocket bluetoothSocket) throws CommunicationException {
+        try {
+            this.readerWriter = new ReaderWriter(bluetoothSocket);
+        } catch (IOException ioException) {
+            throw new CommunicationException("Error while creating SenderReceiver object.", ioException);
+        }
         this.remainingBytes = null;
     }
 
@@ -62,7 +67,6 @@ public class SenderReceiver {
             try {
                 bytes = readFromSocket();
                 if (bytes != null) {
-                    Log.d(LOG_TAG, "receivePackage, 65: Bytes received: " + bytes.length);
                     dataPackage = new DataPackage(bytes);
                     sendConfirmation(dataPackage);
                     doneReading = true;
@@ -86,7 +90,7 @@ public class SenderReceiver {
     }
 
     private boolean sendConfirmation(DataPackage dataPackage) throws CommunicationException {
-        Log.d(LOG_TAG, "sendConfirmation, 94: Sending confirmation for package \"" + Integer.toHexString(dataPackage.getId()) + "\".");
+        // Log.d(LOG_TAG, "sendConfirmation, 94: Sending confirmation for package \"" + Integer.toHexString(dataPackage.getId()) + "\".");
         boolean returnValue;
         Content confirmationContent = new ConfirmationContent(dataPackage.getId());
         DataPackage dataPackageConfirmation = new DataPackage(PackageType.CONFIRMATION, confirmationContent);
@@ -102,13 +106,19 @@ public class SenderReceiver {
     }
 
     public boolean sendPackage(DataPackage dataPackage) throws CommunicationException {
-        Log.d(LOG_TAG, "sendPackage, 101: Sending \"" + dataPackage.getPackageType() + "\" package.");
+        // Log.d(LOG_TAG, "sendPackage, 101: Sending \"" + dataPackage.getPackageType() + "\" package.");
+
+        Chronometer newCommunicationChronometer = new Chronometer();
+
         boolean returnValue;
         try {
             readerWriter.writeContentOnSocket(dataPackage.convertToBytes());
 
+            newCommunicationChronometer.start();
+
             if (receiveConfirmation(dataPackage)) {
                 returnValue = true;
+                newCommunicationChronometer.stop();
             } else {
                 returnValue = false;
             }
@@ -120,7 +130,7 @@ public class SenderReceiver {
     }
 
     private boolean receiveConfirmation(DataPackage dataPackage) throws CommunicationException {
-        Log.d(LOG_TAG, "receiveConfirmation, 120: Receiving confirmation.");
+        // Log.d(LOG_TAG, "receiveConfirmation, 120: Receiving confirmation.");
         byte[] bytes;
         boolean returnValue = false;
         boolean doneReceivingConfirmation = false;
@@ -134,7 +144,6 @@ public class SenderReceiver {
                     if (receivedPackage.getPackageType() == PackageType.CONFIRMATION) {
                         ConfirmationContent confirmationContent = (ConfirmationContent) receivedPackage.getContent();
                         if (confirmationContent.getPackageId() == dataPackage.getId()) {
-                            Log.d(LOG_TAG, "receiveConfirmation, 134: Confirmation received.");
                             doneReceivingConfirmation = true;
                             returnValue = true;
                         } else {
@@ -175,9 +184,9 @@ public class SenderReceiver {
     private byte[] readFromSocket() throws ReaderWriterException {
         byte[] contentRead;
         contentRead = readerWriter.readSocketContent();
-        if (contentRead != null) {
+        /*if (contentRead != null) {
             Log.d(LOG_TAG, "readFromSocket, 179: Read " + contentRead.length + " byte(s) from socket.");
-        }
+        }*/
         contentRead = concatenateRemainingBytes(contentRead);
         contentRead = removeRemainingBytes(contentRead);
         return contentRead;
@@ -192,7 +201,7 @@ public class SenderReceiver {
                 int remainingBytesLength = (bytes.length - (packageTrailerPosition + DataPackage.PACKAGE_TRAILER_BYTE_ARRAY_SIZE));
                 int resultBytesLength = bytes.length - remainingBytesLength;
                 if (remainingBytesLength > 0) {
-                    Log.d(LOG_TAG, "removeRemainingBytes, 195: " + remainingBytesLength + " byte(s) removed.");
+                    /*Log.d(LOG_TAG, "removeRemainingBytes, 195: " + remainingBytesLength + " byte(s) removed.");*/
                     remainingBytes = new byte[remainingBytesLength];
                     System.arraycopy(bytes, packageTrailerPosition + DataPackage.PACKAGE_TRAILER_BYTE_ARRAY_SIZE, remainingBytes, 0, remainingBytesLength);
                     resultBytes = new byte[resultBytesLength];
@@ -217,7 +226,7 @@ public class SenderReceiver {
         byte[] resultBytes = null;
 
         if (remainingBytes != null) {
-            Log.d(LOG_TAG, "concatenateRemainingBytes, 202: Concatenating " + remainingBytes.length + " byte(s).");
+            /*Log.d(LOG_TAG, "concatenateRemainingBytes, 202: Concatenating " + remainingBytes.length + " byte(s).");*/
             resultBytesLength += remainingBytes.length;
         }
 

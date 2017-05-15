@@ -25,6 +25,7 @@ import android.view.TextureView;
 import android.widget.Toast;
 
 import org.marceloleite.projetoanna.utils.CompareSizesByArea;
+import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.SizeRatio;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
@@ -81,7 +82,8 @@ public class VideoRecorder {
 
     private static final int FRAME_RATE = 30;
 
-    private AppCompatActivity appCompatActivity;
+    // private AppCompatActivity appCompatActivity;
+    private VideoRecorderActivityInterface videoRecorderActivityInterface;
 
     private TextureView textureView;
 
@@ -112,9 +114,17 @@ public class VideoRecorder {
     private boolean recording;
 
 
-    public VideoRecorder(AppCompatActivity appCompatActivity, TextureView textureView) {
+    /*public VideoRecorder(AppCompatActivity appCompatActivity, TextureView textureView) {
         this.textureView = textureView;
         this.appCompatActivity = appCompatActivity;
+        this.recording = false;
+        this.stateCallback = new CameraDeviceStateCallback(this);
+        this.textureListener = new CameraSurfaceTextureListener(this);
+    }*/
+
+    public VideoRecorder(VideoRecorderActivityInterface videoRecorderActivityInterface, TextureView textureView) {
+        this.textureView = textureView;
+        this.videoRecorderActivityInterface = videoRecorderActivityInterface;
         this.recording = false;
         this.stateCallback = new CameraDeviceStateCallback(this);
         this.textureListener = new CameraSurfaceTextureListener(this);
@@ -171,7 +181,8 @@ public class VideoRecorder {
             } else {
                 analysedCameraId = cameraIds[counter];
                 cameraCharacteristics = cameraManager.getCameraCharacteristics(analysedCameraId);
-                if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK) {
+                //if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK) {
+                if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
                     selectedCameraId = analysedCameraId;
                     cameraSelected = true;
                 } else {
@@ -207,7 +218,7 @@ public class VideoRecorder {
     }
 
     private CameraManager getCameraManager() {
-        return (CameraManager) appCompatActivity.getSystemService(Context.CAMERA_SERVICE);
+        return (CameraManager) videoRecorderActivityInterface.getAppCompatActivity().getSystemService(Context.CAMERA_SERVICE);
     }
 
     private Size chooseSize(Size[] size) {
@@ -278,6 +289,7 @@ public class VideoRecorder {
 
     private void openSelectedCamera(String selectedCameraId) throws CameraAccessException {
         CameraManager cameraManager = getCameraManager();
+        AppCompatActivity appCompatActivity = videoRecorderActivityInterface.getAppCompatActivity();
         if (ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(appCompatActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_CAMERA_PERMISSION);
             return;
@@ -411,14 +423,14 @@ public class VideoRecorder {
 
     public void startMediaRecorder() {
         Log.d(LOG_TAG, "startMediaRecorder, 407: ");
-        appCompatActivity.runOnUiThread(new Runnable() {
+        videoRecorderActivityInterface.getAppCompatActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 recording = true;
                 mediaRecorder.start();
+                videoRecorderActivityInterface.startVideoRecordingResult(GenericReturnCodes.SUCCESS);
             }
         });
-        Toast.makeText(appCompatActivity, "Record started.", Toast.LENGTH_SHORT).show();
     }
 
     public void stopRecord() {
@@ -427,7 +439,7 @@ public class VideoRecorder {
         mediaRecorder.stop();
         mediaRecorder.reset();
         createCameraPreview();
-        Toast.makeText(appCompatActivity, "Video saved on " + videoFile.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
+        videoRecorderActivityInterface.stopVideoRecordingResult(GenericReturnCodes.SUCCESS);
     }
 
     protected void createCameraPreview() {
@@ -472,7 +484,7 @@ public class VideoRecorder {
     private int setMediaRecorderOrientation() {
         int orientationHint = 0;
 
-        int rotation = appCompatActivity.getWindowManager().getDefaultDisplay().getRotation();
+        int rotation = videoRecorderActivityInterface.getAppCompatActivity().getWindowManager().getDefaultDisplay().getRotation();
         int sensorOrientation = getSensorOrientation();
         switch (sensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:

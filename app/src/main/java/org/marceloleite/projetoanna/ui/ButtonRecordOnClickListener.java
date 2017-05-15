@@ -27,13 +27,9 @@ public class ButtonRecordOnClickListener implements View.OnClickListener {
         AudioRecorder audioRecorder = mainActivity.getAudioRecorder();
         VideoRecorder videoRecorder = mainActivity.getVideoRecorder();
         if (audioRecorder.isRecording() && videoRecorder.isRecording()) {
-            videoRecorder.stopRecord();
-            audioRecorder.stopRecord();
-            audioRecorder.requestLatestAudioFile();
-
+            mainActivity.stopRecording();
         } else {
-            audioRecorder.startAudioRecord();
-            videoRecorder.startRecord();
+            mainActivity.startRecording();
         }
         button.setEnabled(false);
     }

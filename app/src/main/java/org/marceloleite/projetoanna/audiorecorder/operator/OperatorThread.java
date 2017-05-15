@@ -13,6 +13,7 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.Op
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.OperationExecutorInterface;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultHandler;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.ResultType;
+import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttemptsReturnCodes;
 
@@ -55,13 +56,18 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Looper.prepare();
 
-        this.commander = new Commander(operatorThreadParameters.getBluetoothSocket());
-        this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
-        this.operationExecutorHandler = new OperationExecutorHandler(this);
+        try {
+            this.commander = new Commander(operatorThreadParameters.getBluetoothSocket());
+            this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
+            this.operationExecutorHandler = new OperationExecutorHandler(this);
 
-        sendCheckOperationMessage();
+            sendCheckOperationMessage();
 
-        Looper.loop();
+            Looper.loop();
+        } catch (CommanderException commanderException) {
+            Log.e(LOG_TAG, "run, 66: Error while executing operator thread.");
+            commanderException.printStackTrace();
+        }
     }
 
     @Override
@@ -137,11 +143,11 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
         {
             switch (RetryAttempts.wait(this.noOperationRetryAttempts)) {
                 case RetryAttemptsReturnCodes.SUCCESS:
-                    Log.d(LOG_TAG, "executeOperation, 115: Check command, attempt " + this.noOperationRetryAttempts.getTotalAttempts() + " of " + this.noOperationRetryAttempts.getMaximumAttempts() + ".");
+                    //Log.d(LOG_TAG, "executeOperation, 115: Check command, attempt " + this.noOperationRetryAttempts.getTotalAttempts() + " of " + this.noOperationRetryAttempts.getMaximumAttempts() + ".");
                     break;
                 case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
                     if (commander.checkConnection()) {
-                        Log.d(LOG_TAG, "executeOperation, 115: ReaderWriter checked: Audio recorder is connected.");
+                        //Log.d(LOG_TAG, "executeOperation, 115: ReaderWriter checked: Audio recorder is connected.");
                         this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
                     } else {
                         Log.d(LOG_TAG, "executeOperation, 118: Lost connection with audio recorder.");

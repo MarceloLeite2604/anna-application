@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
+import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,10 +28,16 @@ public class MediaDecoderCallback extends MediaCodecCallback {
 
     private volatile boolean finishedDecoding;
 
-    public MediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile) throws IOException {
+    private long bytesIgnoredFromDelay;
+
+    private long bytesToDecode;
+
+    public MediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile, long audioDelay, long audioDuration) throws IOException {
         this.mediaExtractor = mediaExtractor;
         this.fileOutputStream = new FileOutputStream(outputFile);
         this.finishedDecoding = false;
+        this.bytesIgnoredFromDelay = AudioUtils.calculateBytesOnAudioTime(audioDelay);
+        this.bytesToDecode = AudioUtils.calculateBytesOnAudioTime(audioDuration);
     }
 
     @Override
@@ -77,17 +84,41 @@ public class MediaDecoderCallback extends MediaCodecCallback {
 
     private void writeOutputStream(FileOutputStream fileOutputStream, ByteBuffer byteBuffer) {
 
-        int bufferSize = byteBuffer.limit();
-        byte[] buffer = new byte[bufferSize];
+        int bytesToRead = 0;
+        int byteBufferSize = byteBuffer.limit();
+        int bytesIgnored = 0;
 
-        byteBuffer.get(buffer);
+        if (bytesIgnoredFromDelay <= byteBufferSize) {
 
-        try {
-            fileOutputStream.write(buffer);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "writeOutputStream, 88: Error while writing data on output file.");
-            e.printStackTrace();
-            this.finishedDecoding = true;
+            bytesIgnored = (int) bytesIgnoredFromDelay;
+
+            byte[] buffer = new byte[byteBufferSize];
+
+            if (bytesIgnored > 0) {
+                byteBuffer.get(buffer, 0, bytesIgnored);
+            }
+
+            bytesToRead = (int) (byteBufferSize - bytesIgnoredFromDelay);
+
+            if (bytesToDecode <= bytesToRead) {
+                bytesToRead = (int) bytesToDecode;
+            }
+            byteBuffer.get(buffer, 0, bytesToRead);
+
+            try {
+                fileOutputStream.write(buffer, 0, bytesToRead);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "writeOutputStream, 88: Error while writing data on output file.");
+                e.printStackTrace();
+                this.finishedDecoding = true;
+            }
+
+            bytesIgnoredFromDelay -= bytesIgnored;
+            bytesToDecode -= bytesToRead;
+        } else {
+            bytesIgnored = byteBufferSize;
+            bytesIgnoredFromDelay -= bytesIgnored;
+            bytesToDecode -= byteBufferSize;
         }
     }
 

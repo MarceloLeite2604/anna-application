@@ -27,13 +27,13 @@ public abstract class Mixer {
 
     private static final String LOG_TAG = Mixer.class.getSimpleName();
 
-    public static File mixAudioAndVideo(File audioFile, File videoFile) throws IOException {
-        File rawAudioFile = convertMp3ToRaw(audioFile);
+    public static File mixAudioAndVideo(File audioFile, File videoFile, long startAudioDelay, long stopAudioDelay) throws IOException {
+        File rawAudioFile = convertMp3ToRaw(audioFile, startAudioDelay, stopAudioDelay);
         File mixedVideoFile = createMixedMp4File(rawAudioFile, videoFile);
         return mixedVideoFile;
     }
 
-    private static File convertMp3ToRaw(File mp3File) throws IOException {
+    private static File convertMp3ToRaw(File mp3File, long startAudioDelay, long stopAudioDelay) throws IOException {
         Log.d(LOG_TAG, "convertMp3ToRaw, 40: Converting mp3 file to raw audio.");
 
         /* Creates and configures the mp3 file media extractor. */
@@ -43,7 +43,7 @@ public abstract class Mixer {
         File rawAudioFile = FileUtils.createFile(FileType.AUDIO_RAW_FILE);
 
         /* Creates and configures the mp3 media decoder. */
-        MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile);
+        MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile, startAudioDelay, stopAudioDelay);
 
         /* Waits the decodification to conclude. */
         Log.d(LOG_TAG, "convertMp3ToRaw, 56: Decoding mp3 file.");
@@ -53,11 +53,12 @@ public abstract class Mixer {
         return rawAudioFile;
     }
 
-    private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile) throws IOException {
+    private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile, long startAudioDelay, long stopAudioDelay) throws IOException {
+        Log.d(LOG_TAG, "createMp3MediaDecoder, 119: Creating mp3 media decoder.");
         MediaCodecWrapper mediaCodecWrapper;
 
         MediaFormat mp3MediaFormat = mediaExtractorWrapper.getSelectedMediaTrackInfos().getMediaFormat();
-        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper.getMediaExtractor(), rawAudioFile);
+        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper, rawAudioFile, startAudioDelay, stopAudioDelay);
         return mediaCodecWrapper;
     }
 
@@ -129,13 +130,11 @@ public abstract class Mixer {
 
             if (bufferInfo.size < 0) {
                 Log.d(LOG_TAG, "mixAudioAndVideo, 146: End of video copy.");
-                Log.d(LOG_TAG, "createMixedMp4File, 162: Last presentation time: " + bufferInfo.presentationTimeUs);
                 videoExtractionConcluded = true;
                 bufferInfo.size = 0;
             } else {
                 bufferInfo.presentationTimeUs = videoFileMediaExtractor.getSampleTime();
                 bufferInfo.flags = videoFileMediaExtractor.getSampleFlags();
-
                 mediaMuxer.writeSampleData(mediaMuxerWrapper.getVideoTrackIndex(), byteBuffer, bufferInfo);
                 videoFileMediaExtractor.advance();
             }

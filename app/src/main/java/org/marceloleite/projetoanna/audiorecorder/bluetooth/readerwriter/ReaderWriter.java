@@ -7,6 +7,8 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.DataPack
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -21,9 +23,15 @@ public class ReaderWriter {
 
     private BluetoothSocket bluetoothSocket;
 
-    public ReaderWriter(BluetoothSocket bluetoothSocket) {
+    private InputStream bluetoothSocketInputStream;
+
+    private OutputStream bluetoothSocketOuptutStream;
+
+    public ReaderWriter(BluetoothSocket bluetoothSocket) throws IOException {
 
         this.bluetoothSocket = bluetoothSocket;
+        this.bluetoothSocketInputStream = bluetoothSocket.getInputStream();
+        this.bluetoothSocketOuptutStream = bluetoothSocket.getOutputStream();
     }
 
     public byte[] readSocketContent() throws ReaderWriterException {
@@ -33,9 +41,9 @@ public class ReaderWriter {
         if (isBluetoothConnected()) {
             while (!doneReading) {
                 try {
-                    int totalBytesAvailable = bluetoothSocket.getInputStream().available();
+                    int totalBytesAvailable = bluetoothSocketInputStream.available();
                     if (totalBytesAvailable > 0) {
-                        Log.d(LOG_TAG, "readSocketContent, 37: Total of bytes available on socket: " + totalBytesAvailable);
+                        /*Log.d(LOG_TAG, "readSocketContent, 37: Total of bytes available on socket: " + totalBytesAvailable);*/
                         if (bytes == null) {
                             bytes = new byte[totalBytesAvailable];
                         } else {
@@ -43,13 +51,13 @@ public class ReaderWriter {
                             bytes = new byte[totalBytesAvailable];
                         }
 
-                        int totalRead = bluetoothSocket.getInputStream().read(bytes);
-                        Log.d(LOG_TAG, "readSocketContent, 47: Total of bytes read from socket: " + totalRead);
+                        int totalRead = bluetoothSocketInputStream.read(bytes);
+                        /*Log.d(LOG_TAG, "readSocketContent, 47: Total of bytes read from socket: " + totalRead);*/
 
                         if (previousBytes != null) {
                             bytes = ByteBuffer.allocate(previousBytes.length + bytes.length).put(previousBytes).put(bytes).array();
                         }
-                        Log.d(LOG_TAG, "readSocketContent, 52: Total of bytes on buffer: " + bytes.length);
+                        /*Log.d(LOG_TAG, "readSocketContent, 52: Total of bytes on buffer: " + bytes.length);*/
 
                     } else {
                         doneReading = true;
@@ -62,9 +70,9 @@ public class ReaderWriter {
         } else {
             throw CONNECTION_IS_CLOSED_EXCEPTION;
         }
-        if (bytes != null) {
+        /*if (bytes != null) {
             Log.d(LOG_TAG, "readSocketContent, 67: Total os bytes on buffer: " + bytes.length);
-        }
+        }*/
         return bytes;
     }
 
@@ -72,9 +80,9 @@ public class ReaderWriter {
 
         if (isBluetoothConnected()) {
             try {
-                Log.d(LOG_TAG, "writeContentOnSocket, 70: Writing " + bytes.length + " byte(s) on socket.");
-                bluetoothSocket.getOutputStream().write(bytes);
-                bluetoothSocket.getOutputStream().flush();
+                /*Log.d(LOG_TAG, "writeContentOnSocket, 70: Writing " + bytes.length + " byte(s) on socket.");*/
+                bluetoothSocketOuptutStream.write(bytes);
+                bluetoothSocketOuptutStream.flush();
             } catch (IOException ioException) {
                 String exceptionMessage = "Error writing content on socket.";
                 throw new ReaderWriterException(exceptionMessage, ioException);

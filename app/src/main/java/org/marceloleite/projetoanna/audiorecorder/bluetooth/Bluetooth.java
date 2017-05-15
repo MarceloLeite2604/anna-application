@@ -66,7 +66,7 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
                 break;
             default:
                 Log.d(LOG_TAG, "enableBluetoothResult, 59: Bluetooth not activated.");
-                audioRecorder.getAudioRecordActivityInterface().updateInterface();
+                audioRecorder.getAudioRecorderActivityInterface().updateInterface();
                 break;
         }
     }
@@ -156,7 +156,7 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
             Log.d(LOG_TAG, "activateBluetoothAdapter, 124: Bluetooth adapter is already active.");
         } else {
             Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            audioRecorder.getAudioRecordActivityInterface().getActivity().startActivityForResult(enableBluetoothIntent, Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE);
+            audioRecorder.getAudioRecorderActivityInterface().getActivity().startActivityForResult(enableBluetoothIntent, Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE);
         }
     }
 
@@ -178,7 +178,7 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
 
     @Override
     public AppCompatActivity getAppCompatActivity() {
-        return audioRecorder.getAudioRecordActivityInterface().getActivity();
+        return audioRecorder.getAudioRecorderActivityInterface().getActivity();
     }
 
     @Override
@@ -190,7 +190,7 @@ public class Bluetooth implements SelectDeviceInterface, AsyncTaskConnectToDevic
             connectToDevice();
         } else {
             Log.d(LOG_TAG, "setBluetoothDevice, 191: User didn't select any device.");
-            audioRecorder.getAudioRecordActivityInterface().updateInterface();
+            audioRecorder.getAudioRecorderActivityInterface().updateInterface();
         }
     }
 
