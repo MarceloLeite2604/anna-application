@@ -12,6 +12,7 @@ import android.widget.Toast;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderActivityInterface;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.BluetoothConnectReturnCodes;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTask;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTaskParameters;
 import org.marceloleite.projetoanna.ui.ButtonConnectOnClickListener;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
-     * The button to connect and disconnect from audio recorder.
+     * The button to connectWithAudioRecorder and disconnect from audio recorder.
      */
     private Button buttonConnect;
 
@@ -79,15 +80,13 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
         buttonConnect = (Button) findViewById(R.id.button_connect);
 
-        buttonConnect.setOnClickListener(new ButtonConnectOnClickListener(this.audioRecorder));
+        buttonConnect.setOnClickListener(new ButtonConnectOnClickListener(this));
 
         buttonRecord = (Button) findViewById(R.id.button_record);
 
         buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
 
         updateInterface();
-
-        //testMixer();
     }
 
     @Override
@@ -101,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE) {
-            audioRecorder.enableBluetoothResult(resultCode);
+            audioRecorder.enableBluetoothActivityResult(resultCode);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -111,45 +110,55 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         return this;
     }
 
-    /**
-     * Updates the activity interface.
-     */
+    public void startConnectionWithAudioRecorder() {
+        audioRecorder.connectWithAudioRecorder();
+    }
+
     @Override
-    public void updateInterface() {
-        updateButtonConnectInterface();
-        updateButtonRecordInterface();
+    public void connectWithAudioRecorderResult(int result) {
+        String audioRecorderDeviceName;
+        switch (result) {
+            case BluetoothConnectReturnCodes.SUCCESS:
+                audioRecorderDeviceName = audioRecorder.getAudioRecorderDeviceName();
+                Toast.makeText(this, "Connected with \"" + audioRecorderDeviceName + "\".", Toast.LENGTH_SHORT).show();
+                break;
+            case BluetoothConnectReturnCodes.GENERIC_ERROR:
+                audioRecorderDeviceName = audioRecorder.getAudioRecorderDeviceName();
+                Toast.makeText(this, "Could not connect with \"" + audioRecorderDeviceName + "\".", Toast.LENGTH_LONG).show();
+                break;
+            case BluetoothConnectReturnCodes.CONNECTION_CANCELLED:
+                break;
+            default:
+                Log.e(LOG_TAG, "connectWithAudioRecorderResult, 132: Unknown result received from \"connectWithAudioRecorder\" method.");
+                break;
+        }
+        updateInterface();
     }
 
-    /**
-     * Updates the connect button interface.
-     */
-    private void updateButtonConnectInterface() {
-        if (audioRecorder != null) {
-            if (audioRecorder.isConnected()) {
-                buttonConnect.setText(R.string.button_connect_second_text);
-            } else {
-                buttonConnect.setText(R.string.button_connect_first_text);
-            }
-            buttonConnect.setEnabled(true);
-        }
+
+    public void startDisconnectionFromAudioRecorder() {
+        audioRecorder.disconnectFromAudioRecorder();
     }
 
-    /**
-     * Updates the record button interface.
-     */
-    private void updateButtonRecordInterface() {
-        if (audioRecorder != null) {
-            if (audioRecorder.isConnected()) {
-                if (audioRecorder.isRecording() && videoRecorder.isRecording()) {
-                    buttonRecord.setText(R.string.button_record_second_text);
-                } else {
-                    buttonRecord.setText(R.string.button_record_first_text);
-                }
-                buttonRecord.setEnabled(true);
-            } else {
-                buttonRecord.setEnabled(false);
-            }
+    @Override
+    public void disconnectFromAudioRecorderResult(int result) {
+        String audioRecorderDeviceName;
+        switch (result) {
+            case BluetoothConnectReturnCodes.SUCCESS:
+                audioRecorderDeviceName = audioRecorder.getAudioRecorderDeviceName();
+                Toast.makeText(this, "Disconnected from \"" + audioRecorderDeviceName + "\".", Toast.LENGTH_SHORT).show();
+                break;
+            case BluetoothConnectReturnCodes.GENERIC_ERROR:
+                audioRecorderDeviceName = audioRecorder.getAudioRecorderDeviceName();
+                Toast.makeText(this, "Error while disconnecting from \"" + audioRecorderDeviceName + "\".", Toast.LENGTH_LONG).show();
+                break;
+            case BluetoothConnectReturnCodes.CONNECTION_CANCELLED:
+                break;
+            default:
+                Log.e(LOG_TAG, "connectWithAudioRecorderResult, 132: Unknown result received from \"disconnectFromhAudioRecorder\" method.");
+                break;
         }
+        updateInterface();
     }
 
     @Override
@@ -172,34 +181,6 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         super.onPause();
     }
 
-    public void testMixer() {
-        File audioFile = new File("/storage/emulated/0/Music/org.marceloleite.projetoanna/20170515_124621.mp3");
-        File videoFile = new File("/storage/emulated/0/Movies/org.marceloleite.projetoanna/20170515_124613.mp4");
-        Chronometer startAudioChronometer = new Chronometer();
-        Chronometer stopAudioChronometer = new Chronometer();
-
-        startAudioChronometer.start();
-        try {
-            Thread.sleep(900);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        startAudioChronometer.stop();
-
-        stopAudioChronometer.start();
-        try {
-            Thread.sleep(900);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        stopAudioChronometer.stop();
-
-        MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this);
-
-        MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(audioFile, videoFile, 0, 0);
-        mixerAsyncTask.execute(mixerAsyncTaskParameters);
-    }
-
     @Override
     public AppCompatActivity getAppCompatActivity() {
         return this;
@@ -207,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     public void startRecording() {
         Log.d(LOG_TAG, "startRecording, 306: Initializing start record process.");
-        audioRecorder.startAudioRecord();
+        audioRecorder.startAudioRecording();
     }
 
     @Override
@@ -322,7 +303,17 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         File movieFile = videoRecorder.getVideoFile();
 
         long startAudioDelay = audioRecorder.getStartCommandDelay() + (startVideoRecodingChronometer.getDifference() / 1000l);
+
+        long cuttedDelay = 1000000L;
+        if (startAudioDelay > cuttedDelay) {
+            startAudioDelay -= cuttedDelay;
+        }
+
         long stopAudioDelay = audioRecorder.getStopCommandDelay() + (stopVideoRecordingChronometer.getDifference() / 1000l);
+
+        Toast.makeText(this, "Stop delay: " + (float) stopAudioDelay / 1000000f, Toast.LENGTH_LONG).show();
+
+        stopAudioDelay += cuttedDelay;
 
         Log.d(LOG_TAG, "requestAudioAndVideoMix, 327: Audio file: " + audioFile);
         Log.d(LOG_TAG, "requestAudioAndVideoMix, 328: Video file: " + movieFile);
@@ -344,5 +335,45 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     public void mixConcluded(File file) {
         Toast.makeText(this, "Movie saved on " + file.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
         updateInterface();
+    }
+
+    /**
+     * Updates the activity interface.
+     */
+    private void updateInterface() {
+        updateButtonConnectInterface();
+        updateButtonRecordInterface();
+    }
+
+    /**
+     * Updates the connectWithAudioRecorder button interface.
+     */
+    private void updateButtonConnectInterface() {
+        if (audioRecorder != null) {
+            if (audioRecorder.isConnected()) {
+                buttonConnect.setText(R.string.button_connect_second_text);
+            } else {
+                buttonConnect.setText(R.string.button_connect_first_text);
+            }
+            buttonConnect.setEnabled(true);
+        }
+    }
+
+    /**
+     * Updates the record button interface.
+     */
+    private void updateButtonRecordInterface() {
+        if (audioRecorder != null) {
+            if (audioRecorder.isConnected()) {
+                if (audioRecorder.isRecording() && videoRecorder.isRecording()) {
+                    buttonRecord.setText(R.string.button_record_second_text);
+                } else {
+                    buttonRecord.setText(R.string.button_record_first_text);
+                }
+                buttonRecord.setEnabled(true);
+            } else {
+                buttonRecord.setEnabled(false);
+            }
+        }
     }
 }

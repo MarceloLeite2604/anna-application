@@ -54,7 +54,8 @@ public class VideoRecorder {
 
     private static final int REQUEST_CAMERA_PERMISSION = 5010;
 
-    private static final int ENCODING_BIT_RATE = 10 * 1024 * 1024;
+    /* private static final int ENCODING_BIT_RATE = 10 * 1024 * 1024; */
+    private static final int ENCODING_BIT_RATE = 2 * 1024 * 1024;
 
     private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
 

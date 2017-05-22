@@ -10,7 +10,9 @@ public interface AudioRecorderActivityInterface {
 
     AppCompatActivity getActivity();
 
-    void updateInterface();
+    void connectWithAudioRecorderResult(int result);
+
+    void disconnectFromAudioRecorderResult(int result);
 
     void requestLatestAudioFileResult(int result);
 

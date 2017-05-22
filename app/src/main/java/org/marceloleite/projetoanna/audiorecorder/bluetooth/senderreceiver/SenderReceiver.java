@@ -26,7 +26,7 @@ public class SenderReceiver {
     /**
      * Maximum retry attempts to receive a package.
      */
-    private static final int MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS = 10;
+    private static final int MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS = 60;
 
     /**
      * The readerWriter between the application and the recorder.

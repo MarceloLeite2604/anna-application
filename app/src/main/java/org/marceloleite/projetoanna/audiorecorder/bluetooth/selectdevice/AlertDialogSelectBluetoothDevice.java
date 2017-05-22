@@ -4,8 +4,6 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,17 +22,17 @@ public class AlertDialogSelectBluetoothDevice extends AlertDialog implements Ada
 
     private static final String LOG_TAG = AlertDialogSelectBluetoothDevice.class.getSimpleName();
 
-    private SelectDeviceInterface selectDeviceInterface;
+    private SelectBluetoothDeviceInterface selectBluetoothDeviceInterface;
     private ArrayList<BluetoothDevice> bluetoothDeviceArrayList;
 
     private BluetoothDevice bluetoothDeviceSelected;
 
-    public AlertDialogSelectBluetoothDevice(SelectDeviceInterface selectDeviceInterface) {
-        super(selectDeviceInterface.getAppCompatActivity());
-        this.selectDeviceInterface = selectDeviceInterface;
+    public AlertDialogSelectBluetoothDevice(SelectBluetoothDeviceInterface selectBluetoothDeviceInterface) {
+        super(selectBluetoothDeviceInterface.getAppCompatActivity());
+        this.selectBluetoothDeviceInterface = selectBluetoothDeviceInterface;
         setIcon(0);
         setTitle("Select a device");
-        LayoutInflater layoutInflater = selectDeviceInterface.getAppCompatActivity().getLayoutInflater();
+        LayoutInflater layoutInflater = selectBluetoothDeviceInterface.getAppCompatActivity().getLayoutInflater();
         View convertView = layoutInflater.inflate(R.layout.bluetooth_devices_list, null);
         setView(convertView);
         ListView bluetoothDevicesListView = (ListView) convertView.findViewById(R.id.list_view_bluetooth_devices);
@@ -44,14 +42,13 @@ public class AlertDialogSelectBluetoothDevice extends AlertDialog implements Ada
             bluetoothDeviceArrayList.add(bluetoothDevice);
         }
 
-        bluetoothDevicesListView.setAdapter(new BluetoothDeviceAdapter(selectDeviceInterface.getAppCompatActivity(), R.layout.bluetooth_device_row, bluetoothDeviceArrayList));
+        bluetoothDevicesListView.setAdapter(new BluetoothDeviceAdapter(selectBluetoothDeviceInterface.getAppCompatActivity(), R.layout.bluetooth_device_row, bluetoothDeviceArrayList));
         bluetoothDevicesListView.setOnItemClickListener(this);
         setOnDismissListener(this);
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.d(LOG_TAG, "onItemClick, 51: Item selected.");
         bluetoothDeviceSelected = bluetoothDeviceArrayList.get(i);
         hide();
         dismiss();
@@ -60,6 +57,6 @@ public class AlertDialogSelectBluetoothDevice extends AlertDialog implements Ada
 
     @Override
     public void onDismiss(DialogInterface dialogInterface) {
-        selectDeviceInterface.setBluetoothDevice(this.bluetoothDeviceSelected);
+        selectBluetoothDeviceInterface.bluetoothDeviceSelected(this.bluetoothDeviceSelected);
     }
 }

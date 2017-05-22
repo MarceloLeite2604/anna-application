@@ -7,9 +7,9 @@ import android.support.v7.app.AppCompatActivity;
  * Created by Marcelo Leite on 19/03/2017.
  */
 
-public interface SelectDeviceInterface {
+public interface SelectBluetoothDeviceInterface {
 
     AppCompatActivity getAppCompatActivity();
 
-    void setBluetoothDevice(BluetoothDevice bluetoothDevice);
+    void bluetoothDeviceSelected(BluetoothDevice bluetoothDevice);
 }

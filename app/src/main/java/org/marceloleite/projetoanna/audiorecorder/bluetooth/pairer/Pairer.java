@@ -102,7 +102,7 @@ public class Pairer {
 
         if (devicePaired) {
             alertDialogPairingDevice.dismiss();
-            bluetooth.setBluetoothDevice(bluetoothDevice);
+            bluetooth.bluetoothDeviceSelected(bluetoothDevice);
         } else {
             Toast.makeText(bluetooth.getAppCompatActivity(), "Pairing with device \"" + bluetoothDevice.getName() + "\" failed.", Toast.LENGTH_SHORT).show();
         }

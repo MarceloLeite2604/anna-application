@@ -19,7 +19,7 @@ public class AlertDialogConnectingToDevice extends AlertDialog {
 
     private static final String LOG_TAG = AlertDialogConnectingToDevice.class.getSimpleName();
 
-    protected AlertDialogConnectingToDevice(AppCompatActivity appCompatActivity, BluetoothDevice bluetoothDevice) {
+    public AlertDialogConnectingToDevice(AppCompatActivity appCompatActivity, BluetoothDevice bluetoothDevice) {
         super(appCompatActivity);
         setTitle("Connecting");
         setCancelable(true);
