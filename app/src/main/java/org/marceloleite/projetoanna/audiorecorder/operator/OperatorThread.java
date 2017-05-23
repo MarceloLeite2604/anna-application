@@ -5,6 +5,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
+import org.marceloleite.projetoanna.audiorecorder.commander.CommandResult;
 import org.marceloleite.projetoanna.audiorecorder.commander.Commander;
 import org.marceloleite.projetoanna.audiorecorder.commander.CommanderException;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
@@ -13,7 +14,6 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.Op
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.OperationExecutorInterface;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultHandler;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.ResultType;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttemptsReturnCodes;
 
@@ -72,7 +72,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
 
     @Override
     public void executeOperation(Operation operation) {
-        Integer returnValue = null;
+        CommandResult commandResult = null;
         File latestAudioFile = null;
         Throwable throwable = null;
 
@@ -81,14 +81,14 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
             switch (operation.getCommand()) {
                 case START_AUDIO_RECORD:
                     try {
-                        returnValue = commander.startRecord();
+                        commandResult = commander.startRecord();
                     } catch (CommanderException commanderException) {
                         throwable = commanderException;
                     }
                     break;
                 case STOP_AUDIO_RECORD:
                     try {
-                        returnValue = commander.stopRecord();
+                        commandResult = commander.stopRecord();
                     } catch (CommanderException commanderException) {
                         throwable = commanderException;
                     }
@@ -102,7 +102,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
                     break;
                 case DISCONNECT:
                     try {
-                        returnValue = commander.disconnect();
+                        commandResult = commander.disconnect();
                     } catch (CommanderException commanderException) {
                         throwable = commanderException;
                     }
@@ -115,10 +115,11 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
                     break;
             }
 
-            if (returnValue != null) {
+            if (commandResult != null) {
                 operation.setResultType(ResultType.OBJECT_RETURNED);
                 operation.setReturnObjectClass(Integer.class);
-                operation.setReturnObject(returnValue);
+                operation.setReturnObject(commandResult.getResultValue());
+                operation.setExecutionDelay(commandResult.getExecutionDelay());
                 this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
             } else {
                 if (latestAudioFile != null) {
@@ -162,6 +163,10 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
 
         sendCheckOperationMessage();
 
+    }
+
+    public long getCommunicationDelay() {
+        return commander.getCommunicationDelay();
     }
 
     @Override

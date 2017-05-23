@@ -10,8 +10,8 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.Communication
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.senderreceiver.SenderReceiver;
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiver;
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiverException;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.Command;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 
@@ -33,31 +33,32 @@ public class Commander {
         }
     }
 
-    public int startRecord() throws CommanderException {
+    public CommandResult startRecord() throws CommanderException {
         return sendPackageAndWaitForResult(PackageType.START_RECORD);
     }
 
-    public int stopRecord() throws CommanderException {
-        int returnValue;
-        returnValue = sendPackageAndWaitForResult(PackageType.STOP_RECORD);
-        return returnValue;
+    public CommandResult stopRecord() throws CommanderException {
+        return sendPackageAndWaitForResult(PackageType.STOP_RECORD);
     }
 
-    public int disconnect() throws CommanderException {
-        int result = 0;
+    public CommandResult disconnect() throws CommanderException {
         DataPackage disconnectDataPackage = new DataPackage(PackageType.DISCONNECT, null);
         try {
             senderReceiver.sendPackage(disconnectDataPackage);
         } catch (CommunicationException communicationException) {
             throw new CommanderException("Error while sending \"disconnect\" package.");
         }
-        return result;
+        return new CommandResult(0, 0);
     }
 
-    private int sendPackageAndWaitForResult(PackageType packageType) throws CommanderException {
+    public long getCommunicationDelay() {
+        return senderReceiver.getCommunicationDelay();
+    }
+
+    private CommandResult sendPackageAndWaitForResult(PackageType packageType) throws CommanderException {
         Log.d(LOG_TAG, "sendPackageAndWaitForResult, 117: Sending command \"" + packageType + "\".");
         DataPackage dataPackage = new DataPackage(packageType, null);
-        int returnValue;
+        CommandResult commandResult;
 
         try {
             senderReceiver.sendPackage(dataPackage);
@@ -78,7 +79,10 @@ public class Commander {
                         switch (commandResultContent.getResultCode()) {
                             case GenericReturnCodes.SUCCESS:
                             case GenericReturnCodes.GENERIC_ERROR:
-                                returnValue = commandResultContent.getResultCode();
+                                int resultCode = commandResultContent.getResultCode();
+                                long executionDelay = commandResultContent.getExecutionDelayMicroseconds();
+                                executionDelay += commandResultContent.getExecutionDelaySeconds()* 1000000;
+                                commandResult = new CommandResult(resultCode, executionDelay);
                                 break;
                             default:
                                 throw new CommanderException("Unknown return value received from device after send \"" + packageType + "\" package.");
@@ -97,7 +101,7 @@ public class Commander {
             throw new CommanderException("Error while receiving result after send \"" + packageType + "\" package.", communicationException);
         }
 
-        return returnValue;
+        return commandResult;
     }
 
     public File requestLatestAudioFile() throws CommanderException {

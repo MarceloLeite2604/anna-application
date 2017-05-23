@@ -27,13 +27,20 @@ public abstract class Mixer {
 
     private static final String LOG_TAG = Mixer.class.getSimpleName();
 
-    public static File mixAudioAndVideo(File audioFile, File videoFile, long startAudioDelay, long stopAudioDelay) throws IOException {
-        File rawAudioFile = convertMp3ToRaw(audioFile, startAudioDelay, stopAudioDelay);
-        File mixedVideoFile = createMixedMp4File(rawAudioFile, videoFile);
+    public static File mixAudioAndVideo(File audioFile, File videoFile, long startAudioDelay) throws IOException {
+
+        /* Creates and configures the media extractor for video file. */
+        MediaExtractorWrapper videoFileMediaExtractorWrapper = new MediaExtractorWrapper(videoFile, MediaFormat.MIMETYPE_VIDEO_AVC);
+
+        long audioFileDuration = videoFileMediaExtractorWrapper.getMediaDuration()*1000;
+        Log.d(LOG_TAG, "mixAudioAndVideo (36): Audio file duration: " + audioFileDuration);
+
+        File rawAudioFile = convertMp3ToRaw(audioFile, startAudioDelay, audioFileDuration);
+        File mixedVideoFile = createMixedMp4File(rawAudioFile, videoFileMediaExtractorWrapper);
         return mixedVideoFile;
     }
 
-    private static File convertMp3ToRaw(File mp3File, long startAudioDelay, long stopAudioDelay) throws IOException {
+    private static File convertMp3ToRaw(File mp3File, long startAudioDelay, long audioDuration) throws IOException {
         Log.d(LOG_TAG, "convertMp3ToRaw, 40: Converting mp3 file to raw audio.");
 
         /* Creates and configures the mp3 file media extractor. */
@@ -43,7 +50,7 @@ public abstract class Mixer {
         File rawAudioFile = FileUtils.createFile(FileType.AUDIO_RAW_FILE);
 
         /* Creates and configures the mp3 media decoder. */
-        MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile, startAudioDelay, stopAudioDelay);
+        MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile, startAudioDelay, audioDuration);
 
         /* Waits the decodification to conclude. */
         Log.d(LOG_TAG, "convertMp3ToRaw, 56: Decoding mp3 file.");
@@ -53,19 +60,16 @@ public abstract class Mixer {
         return rawAudioFile;
     }
 
-    private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile, long startAudioDelay, long stopAudioDelay) throws IOException {
+    private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile, long startAudioDelay, long audioDuration) throws IOException {
         Log.d(LOG_TAG, "createMp3MediaDecoder, 119: Creating mp3 media decoder.");
         MediaCodecWrapper mediaCodecWrapper;
 
         MediaFormat mp3MediaFormat = mediaExtractorWrapper.getSelectedMediaTrackInfos().getMediaFormat();
-        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper, rawAudioFile, startAudioDelay, stopAudioDelay);
+        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper, rawAudioFile, startAudioDelay, audioDuration);
         return mediaCodecWrapper;
     }
 
-    private static File createMixedMp4File(File rawAudioFile, File videoFile) throws IOException {
-
-        /* Creates and configures the media extractor for video file. */
-        MediaExtractorWrapper videoFileMediaExtractorWrapper = new MediaExtractorWrapper(videoFile, MediaFormat.MIMETYPE_VIDEO_AVC);
+    private static File createMixedMp4File(File rawAudioFile, MediaExtractorWrapper videoFileMediaExtractorWrapper) throws IOException {
 
         /* Creates the mixed video file. */
         File mixedVideoFile = FileUtils.createFile(FileType.MOVIE_FILE);

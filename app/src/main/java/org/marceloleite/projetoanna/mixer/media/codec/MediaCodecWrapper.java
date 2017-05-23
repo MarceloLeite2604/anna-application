@@ -11,7 +11,6 @@ import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaCodecCallbac
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaDecoderCallback;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaEncoderCallback;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,9 +27,8 @@ public class MediaCodecWrapper {
 
     private MediaCodecCallback callback;
 
-    public MediaCodecWrapper(MediaFormat mediaFormat, MediaExtractorWrapper mediaExtractorWrapper, File outputFile, long startAudioDelay, long stopAudioDelay) throws IOException {
+    public MediaCodecWrapper(MediaFormat mediaFormat, MediaExtractorWrapper mediaExtractorWrapper, File outputFile, long startAudioDelay, long audioDuration) throws IOException {
         createMediaDecoder(mediaFormat);
-        long audioDuration = (mediaExtractorWrapper.getMediaDuration() * 1000l) - stopAudioDelay;
         createMediaDecoderCallback(mediaExtractorWrapper.getMediaExtractor(), outputFile, startAudioDelay, audioDuration);
         configureMediaCodec(mediaFormat, 0);
     }

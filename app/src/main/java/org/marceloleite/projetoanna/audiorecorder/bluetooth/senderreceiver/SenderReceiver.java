@@ -10,7 +10,8 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.PackageT
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.ConfirmationContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.Content;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.CommunicationException;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
+import org.marceloleite.projetoanna.utils.average.Average;
+import org.marceloleite.projetoanna.utils.chonometer.Chronometer;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttemptsReturnCodes;
 
@@ -26,7 +27,13 @@ public class SenderReceiver {
     /**
      * Maximum retry attempts to receive a package.
      */
-    private static final int MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS = 60;
+    private static final int RECEIVE_PACKAGE_MAXIMUM_RETRY_ATTEMPTS = 140;
+
+    private static final int RECEIVE_PACKAGE_MINIMUM_WAIT_TIME = 30;
+
+    private static final int RECEIVE_PACKAGE_STEP_TIME = 2;
+
+    private static final int COMMUNICATION_DELAY_AVERAGE_BUFFER_SIZE = 5;
 
     /**
      * The readerWriter between the application and the recorder.
@@ -34,6 +41,8 @@ public class SenderReceiver {
     ReaderWriter readerWriter;
 
     private byte[] remainingBytes;
+
+    private Average communicationDelayAverage;
 
     /**
      * Creates a new communication controller.
@@ -47,6 +56,7 @@ public class SenderReceiver {
             throw new CommunicationException("Error while creating SenderReceiver object.", ioException);
         }
         this.remainingBytes = null;
+        this.communicationDelayAverage = new Average(COMMUNICATION_DELAY_AVERAGE_BUFFER_SIZE);
     }
 
     /**
@@ -57,7 +67,7 @@ public class SenderReceiver {
      * @throws CommunicationException
      */
     public DataPackage receivePackage() throws CommunicationException {
-        RetryAttempts retryAttempts = new RetryAttempts(MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS);
+        RetryAttempts retryAttempts = new RetryAttempts(RECEIVE_PACKAGE_MAXIMUM_RETRY_ATTEMPTS, RECEIVE_PACKAGE_MINIMUM_WAIT_TIME, RECEIVE_PACKAGE_STEP_TIME);
         boolean doneReading = false;
         DataPackage dataPackage = null;
         byte[] bytes;
@@ -108,17 +118,12 @@ public class SenderReceiver {
     public boolean sendPackage(DataPackage dataPackage) throws CommunicationException {
         // Log.d(LOG_TAG, "sendPackage, 101: Sending \"" + dataPackage.getPackageType() + "\" package.");
 
-        Chronometer newCommunicationChronometer = new Chronometer();
-
         boolean returnValue;
         try {
             readerWriter.writeContentOnSocket(dataPackage.convertToBytes());
 
-            newCommunicationChronometer.start();
-
             if (receiveConfirmation(dataPackage)) {
                 returnValue = true;
-                newCommunicationChronometer.stop();
             } else {
                 returnValue = false;
             }
@@ -134,9 +139,12 @@ public class SenderReceiver {
         byte[] bytes;
         boolean returnValue = false;
         boolean doneReceivingConfirmation = false;
-        RetryAttempts retryAttempts = new RetryAttempts(MAXIMUM_RECEIVE_PACKAGE_RETRY_ATTEMPTS);
+        RetryAttempts retryAttempts = new RetryAttempts(RECEIVE_PACKAGE_MAXIMUM_RETRY_ATTEMPTS);
+        Chronometer delayChronometer = new Chronometer();
+
 
         try {
+            delayChronometer.start();
             while (!doneReceivingConfirmation) {
                 bytes = readFromSocket();
                 if (bytes != null) {
@@ -166,6 +174,8 @@ public class SenderReceiver {
                     }
                 }
             }
+            delayChronometer.stop();
+            communicationDelayAverage.add(delayChronometer.getDifference());
 
         } catch (ReaderWriterException readerWriterException) {
             throw new CommunicationException("Error receiving a confirmation package.", readerWriterException);
@@ -179,6 +189,10 @@ public class SenderReceiver {
         } catch (ReaderWriterException readerWriterException) {
             throw new CommunicationException("Error while disconnecting from equipment.", readerWriterException);
         }
+    }
+
+    public long getCommunicationDelay() {
+        return communicationDelayAverage.getAverage();
     }
 
     private byte[] readFromSocket() throws ReaderWriterException {

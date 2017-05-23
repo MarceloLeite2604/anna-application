@@ -11,6 +11,7 @@ public class Operation {
     private Throwable throwable;
     private Object returnObject;
     private Class returnObjectClass;
+    private Long executionDelay;
 
     public Operation(Command command) {
         this.command = command;
@@ -32,6 +33,10 @@ public class Operation {
         this.returnObjectClass = returnObjectClass;
     }
 
+    public void setExecutionDelay(Long executionDelay) {
+        this.executionDelay = executionDelay;
+    }
+
     public Command getCommand() {
         return command;
     }
@@ -50,5 +55,9 @@ public class Operation {
 
     public Class getReturnObjectClass() {
         return returnObjectClass;
+    }
+
+    public Long getExecutionDelay() {
+        return executionDelay;
     }
 }

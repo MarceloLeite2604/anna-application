@@ -6,8 +6,10 @@ import android.media.MediaFormat;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteOutputStream;
+import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.AudioData;
+import org.marceloleite.projetoanna.utils.ByteBufferUtils;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,22 +24,21 @@ public class MediaDecoderCallback extends MediaCodecCallback {
 
     private static final String LOG_TAG = MediaDecoderCallback.class.getSimpleName();
 
-    private FileOutputStream fileOutputStream;
+    private ByteBufferWriteOutputStream byteBufferWriteOutputStream;
 
     private MediaExtractor mediaExtractor;
 
     private volatile boolean finishedDecoding;
 
-    private long bytesIgnoredFromDelay;
-
-    private long bytesToDecode;
-
     public MediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile, long audioDelay, long audioDuration) throws IOException {
         this.mediaExtractor = mediaExtractor;
-        this.fileOutputStream = new FileOutputStream(outputFile);
         this.finishedDecoding = false;
-        this.bytesIgnoredFromDelay = AudioUtils.calculateBytesOnAudioTime(audioDelay);
-        this.bytesToDecode = AudioUtils.calculateBytesOnAudioTime(audioDuration);
+        Log.d(LOG_TAG, "MediaDecoderCallback (38): Audio duration: " + audioDuration + ", audio delay: " + audioDelay);
+
+        long bytesToIgnore = AudioUtils.calculateBytesOnAudioTime(audioDelay);
+        long bytesToRead = AudioUtils.calculateBytesOnAudioTime(audioDuration);
+        FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+        this.byteBufferWriteOutputStream = new ByteBufferWriteOutputStream(fileOutputStream, bytesToIgnore, bytesToRead);
     }
 
     @Override
@@ -64,62 +65,20 @@ public class MediaDecoderCallback extends MediaCodecCallback {
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outputBufferId, @NonNull MediaCodec.BufferInfo bufferInfo) {
         ByteBuffer outputBuffer = mediaCodec.getOutputBuffer(outputBufferId);
 
-        writeOutputStream(this.fileOutputStream, outputBuffer);
+        ByteBuffer byteBuffer = ByteBufferUtils.copyByteBuffer(outputBuffer);
+        AudioData audioData = new AudioData(byteBuffer, bufferInfo);
+
 
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
             Log.d(LOG_TAG, "onOutputBufferAvailable, 74: End of output stream.");
 
-            try {
-                fileOutputStream.close();
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "onOutputBufferAvailable, 67: Error while closing output file.");
-                e.printStackTrace();
-            }
-
+            byteBufferWriteOutputStream.concludeWriting();
             this.finishedDecoding = true;
+        } else {
+            byteBufferWriteOutputStream.add(audioData);
         }
 
         mediaCodec.releaseOutputBuffer(outputBufferId, false);
-    }
-
-    private void writeOutputStream(FileOutputStream fileOutputStream, ByteBuffer byteBuffer) {
-
-        int bytesToRead = 0;
-        int byteBufferSize = byteBuffer.limit();
-        int bytesIgnored = 0;
-
-        if (bytesIgnoredFromDelay <= byteBufferSize) {
-
-            bytesIgnored = (int) bytesIgnoredFromDelay;
-
-            byte[] buffer = new byte[byteBufferSize];
-
-            if (bytesIgnored > 0) {
-                byteBuffer.get(buffer, 0, bytesIgnored);
-            }
-
-            bytesToRead = (int) (byteBufferSize - bytesIgnoredFromDelay);
-
-            if (bytesToDecode <= bytesToRead) {
-                bytesToRead = (int) bytesToDecode;
-            }
-            byteBuffer.get(buffer, 0, bytesToRead);
-
-            try {
-                fileOutputStream.write(buffer, 0, bytesToRead);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "writeOutputStream, 88: Error while writing data on output file.");
-                e.printStackTrace();
-                this.finishedDecoding = true;
-            }
-
-            bytesIgnoredFromDelay -= bytesIgnored;
-            bytesToDecode -= bytesToRead;
-        } else {
-            bytesIgnored = byteBufferSize;
-            bytesIgnoredFromDelay -= bytesIgnored;
-            bytesToDecode -= byteBufferSize;
-        }
     }
 
     @Override

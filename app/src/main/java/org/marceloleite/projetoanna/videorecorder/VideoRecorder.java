@@ -22,13 +22,13 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
-import android.widget.Toast;
 
 import org.marceloleite.projetoanna.utils.CompareSizesByArea;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.SizeRatio;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
+import org.marceloleite.projetoanna.utils.chonometer.Chronometer;
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraCaptureSessionStateCallback;
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraDeviceStateCallback;
 import org.marceloleite.projetoanna.videorecorder.listeners.CameraSurfaceTextureListener;
@@ -113,6 +113,8 @@ public class VideoRecorder {
     private File videoFile;
 
     private boolean recording;
+
+    private Chronometer videoStartDelayChronometer;
 
 
     /*public VideoRecorder(AppCompatActivity appCompatActivity, TextureView textureView) {
@@ -385,6 +387,10 @@ public class VideoRecorder {
     }
 
     public void startRecord() {
+
+        videoStartDelayChronometer = new Chronometer();
+        videoStartDelayChronometer.start();
+
         Log.d(LOG_TAG, "startRecord, 368: Start record.");
 
         if (cameraDevice == null) {
@@ -427,6 +433,7 @@ public class VideoRecorder {
         videoRecorderActivityInterface.getAppCompatActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                videoStartDelayChronometer.stop();
                 recording = true;
                 mediaRecorder.start();
                 videoRecorderActivityInterface.startVideoRecordingResult(GenericReturnCodes.SUCCESS);
@@ -496,5 +503,9 @@ public class VideoRecorder {
                 break;
         }
         return orientationHint;
+    }
+
+    public long getStartRecordingDelay() {
+        return videoStartDelayChronometer.getDifference()/1000L;
     }
 }

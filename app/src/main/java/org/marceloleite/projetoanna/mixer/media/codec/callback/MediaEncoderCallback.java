@@ -2,11 +2,13 @@ package org.marceloleite.projetoanna.mixer.media.codec.callback;
 
 import android.media.MediaCodec;
 import android.media.MediaFormat;
-import android.media.MediaMuxer;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
+import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteMediaMuxerWrapper;
+import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.AudioData;
+import org.marceloleite.projetoanna.utils.ByteBufferUtils;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 
 import java.io.File;
@@ -24,21 +26,25 @@ public class MediaEncoderCallback extends MediaCodecCallback {
 
     private MediaMuxerWrapper mediaMuxerWrapper;
 
+    private ByteBufferWriteMediaMuxerWrapper byteBufferWriteMediaMuxerWrapper;
+
     private FileInputStream fileInputStream;
 
     private volatile boolean finishedEncoding;
 
     private long totalBytesRead;
 
-    private long lastPresentationTimeUs;
+    //private long lastPresentationTimeUs;
 
     public MediaEncoderCallback(File inputFile, MediaMuxerWrapper mediaMuxerWrapper) throws IOException {
         this.fileInputStream = new FileInputStream(inputFile);
         this.mediaMuxerWrapper = mediaMuxerWrapper;
+        this.byteBufferWriteMediaMuxerWrapper = new ByteBufferWriteMediaMuxerWrapper(mediaMuxerWrapper);
         this.finishedEncoding = false;
         this.totalBytesRead = 0;
-        this.lastPresentationTimeUs = 0;
+        // this.lastPresentationTimeUs = 0;
     }
+
 
     @Override
     public void onInputBufferAvailable(@NonNull MediaCodec mediaCodec, int inputBufferId) {
@@ -54,21 +60,25 @@ public class MediaEncoderCallback extends MediaCodecCallback {
     @Override
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outputBufferId, @NonNull MediaCodec.BufferInfo bufferInfo) {
         ByteBuffer outputBuffer = mediaCodec.getOutputBuffer(outputBufferId);
-        MediaMuxer mediaMuxer = mediaMuxerWrapper.getMediaMuxer();
-        int audioTrackIndex = mediaMuxerWrapper.getAudioTrackIndex();
 
 
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
             Log.d(LOG_TAG, "onOutputBufferAvailable, 63: End of encoding.");
             closeInputFile();
+            byteBufferWriteMediaMuxerWrapper.concludeWriting();
             this.finishedEncoding = true;
         } else {
+            ByteBuffer byteBuffer = ByteBufferUtils.copyByteBuffer(outputBuffer);
+            AudioData audioData = new AudioData(byteBuffer, bufferInfo);
+            byteBufferWriteMediaMuxerWrapper.add(audioData);
+            /*
             if (bufferInfo.presentationTimeUs >= lastPresentationTimeUs) {
                 mediaMuxer.writeSampleData(audioTrackIndex, outputBuffer, bufferInfo);
                 lastPresentationTimeUs = bufferInfo.presentationTimeUs;
             } else {
                 Log.e(LOG_TAG, "onOutputBufferAvailable, 77: Skipped audio presentation time: " + bufferInfo.presentationTimeUs);
             }
+            */
         }
 
         mediaCodec.releaseOutputBuffer(outputBufferId, false);

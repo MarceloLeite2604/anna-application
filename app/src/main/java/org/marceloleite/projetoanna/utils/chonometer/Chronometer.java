@@ -1,4 +1,4 @@
-package org.marceloleite.projetoanna.utils.chronometer;
+package org.marceloleite.projetoanna.utils.chonometer;
 
 /**
  * Created by Marcelo Leite on 13/05/2017.

@@ -12,7 +12,6 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.Command;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 
@@ -48,9 +47,9 @@ public class AudioRecorder implements BluetoothInterface {
 
     private File latestAudioFile;
 
-    private Chronometer startCommandChronometer;
+    private long startRecordCommandDelay;
 
-    private Chronometer stopCommandChronometer;
+    private long stopRecordCommandDelay;
 
     /**
      * Instantiates the Audio Recorder class.
@@ -122,16 +121,12 @@ public class AudioRecorder implements BluetoothInterface {
     public void startAudioRecording() {
         if (operator != null) {
             operator.executeCommand(Command.START_AUDIO_RECORD);
-            startCommandChronometer = new Chronometer();
-            startCommandChronometer.start();
         }
     }
 
     public void stopRecord() {
         if (operator != null) {
             operator.executeCommand(Command.STOP_AUDIO_RECORD);
-            stopCommandChronometer = new Chronometer();
-            stopCommandChronometer.start();
         }
     }
 
@@ -146,13 +141,19 @@ public class AudioRecorder implements BluetoothInterface {
     }
 
     public long getStartCommandDelay() {
-        return startCommandChronometer.getDifference() / 2000L;
+        /*Log.d(LOG_TAG, "getStartCommandDelay: Start record command delay: " + startRecordCommandDelay);
+        long communicationDelay = (operator.getCommunicationDelay()/1000L);
+        Log.d(LOG_TAG, "getStartCommandDelay: Original communication delay: " + communicationDelay);
+        communicationDelay *= 2;
+        Log.d(LOG_TAG, "getStartCommandDelay: Communication delay: " + communicationDelay);*/
+        return startRecordCommandDelay;
     }
 
     public long getStopCommandDelay() {
-        return stopCommandChronometer.getDifference() / 2000L;
+        Log.d(LOG_TAG, "getStopCommandDelay: Stop record command delay: " + stopRecordCommandDelay);
+        Log.d(LOG_TAG, "getStopCommandDelay: Communication delay: " + (operator.getCommunicationDelay()/1000L));
+        return stopRecordCommandDelay + (operator.getCommunicationDelay()/1000L);
     }
-
 
     public void checkOperationResult(Operation operation) {
         if (operation != null) {
@@ -182,7 +183,11 @@ public class AudioRecorder implements BluetoothInterface {
 
     private void checkStartAudioRecordCommandResult(Operation operation) {
         int startAudioRecordResult = GenericReturnCodes.GENERIC_ERROR;
-        startCommandChronometer.stop();
+        startRecordCommandDelay = operation.getExecutionDelay();
+        long communicationDelay = operator.getCommunicationDelay()/1000L;
+        Log.d(LOG_TAG, "checkStartAudioRecordCommandResult (188): Execution delay: " + startRecordCommandDelay);
+        Log.d(LOG_TAG, "checkStartAudioRecordCommandResult (190): Communication delay: " + communicationDelay);
+        startRecordCommandDelay += communicationDelay;
         switch (operation.getResultType()) {
             case OBJECT_RETURNED:
                 Class returnObjectClass = operation.getReturnObjectClass();
@@ -218,7 +223,7 @@ public class AudioRecorder implements BluetoothInterface {
 
     private void checkStopAudioRecordCommandResult(Operation operation) {
         int stopAudioRecordResult = GenericReturnCodes.GENERIC_ERROR;
-        stopCommandChronometer.stop();
+        stopRecordCommandDelay = operation.getExecutionDelay();
         switch (operation.getResultType()) {
             case OBJECT_RETURNED:
                 Class returnObjectClass = operation.getReturnObjectClass();

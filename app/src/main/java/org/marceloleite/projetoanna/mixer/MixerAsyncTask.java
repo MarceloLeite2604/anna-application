@@ -3,7 +3,6 @@ package org.marceloleite.projetoanna.mixer;
 import android.os.AsyncTask;
 
 import org.marceloleite.projetoanna.MainActivity;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +30,9 @@ public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, Integer,
             File movieFile = mixerAsyncTaskParameters.getMovieFile();
             File audioFile = mixerAsyncTaskParameters.getAudioFile();
             long startAudioDelay = mixerAsyncTaskParameters.getStartAudioDelay();
-            long stopAudioDelay = mixerAsyncTaskParameters.getStopAudioDelay();
+
             try {
-                mixedFile = Mixer.mixAudioAndVideo(audioFile, movieFile, startAudioDelay, stopAudioDelay);
+                mixedFile = Mixer.mixAudioAndVideo(audioFile, movieFile, startAudioDelay);
             } catch (IOException e) {
                 e.printStackTrace();
             }

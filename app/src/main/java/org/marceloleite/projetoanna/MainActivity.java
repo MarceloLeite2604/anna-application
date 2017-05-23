@@ -18,7 +18,6 @@ import org.marceloleite.projetoanna.mixer.MixerAsyncTaskParameters;
 import org.marceloleite.projetoanna.ui.ButtonConnectOnClickListener;
 import org.marceloleite.projetoanna.ui.ButtonRecordOnClickListener;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
-import org.marceloleite.projetoanna.utils.chronometer.Chronometer;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorderActivityInterface;
@@ -54,10 +53,6 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     private VideoRecorder videoRecorder;
 
-    private Chronometer startVideoRecodingChronometer;
-
-    private Chronometer stopVideoRecordingChronometer;
-
     public AudioRecorder getAudioRecorder() {
         return audioRecorder;
     }
@@ -87,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
 
         updateInterface();
+        // testMix();
     }
 
     @Override
@@ -196,8 +192,6 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         Log.d(LOG_TAG, "startAudioRecordingResult, 122: ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
-                startVideoRecodingChronometer = new Chronometer();
-                startVideoRecodingChronometer.start();
                 videoRecorder.startRecord();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
@@ -213,11 +207,8 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     @Override
     public void startVideoRecordingResult(int result) {
         Log.d(LOG_TAG, "startVideoRecordingResult, 255: ");
-        startVideoRecodingChronometer.stop();
-        Log.d(LOG_TAG, "startVideoRecordingResult, 237: Start video recording time: " + startVideoRecodingChronometer.getDifference());
         switch (result) {
             case GenericReturnCodes.SUCCESS:
-
                 Toast.makeText(this, "Recording.", Toast.LENGTH_LONG).show();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
@@ -233,16 +224,12 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     public void stopRecording() {
         Log.d(LOG_TAG, "stopRecording, 311: ");
-        stopVideoRecordingChronometer = new Chronometer();
-        stopVideoRecordingChronometer.start();
         videoRecorder.stopRecord();
     }
 
     @Override
     public void stopVideoRecordingResult(int result) {
         Log.d(LOG_TAG, "stopVideoRecordingResult, 274: ");
-        stopVideoRecordingChronometer.stop();
-        Log.d(LOG_TAG, "stopVideoRecordingResult, 261: Stop video time: " + stopVideoRecordingChronometer.getDifference());
         switch (result) {
             case GenericReturnCodes.SUCCESS:
                 Log.d(LOG_TAG, "stopVideoRecordingResult, 302: Video recording stopped.");
@@ -302,32 +289,42 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         File audioFile = audioRecorder.getLatestAudioFile();
         File movieFile = videoRecorder.getVideoFile();
 
-        long startAudioDelay = audioRecorder.getStartCommandDelay() + (startVideoRecodingChronometer.getDifference() / 1000l);
-
-        long cuttedDelay = 1000000L;
-        if (startAudioDelay > cuttedDelay) {
-            startAudioDelay -= cuttedDelay;
-        }
-
-        long stopAudioDelay = audioRecorder.getStopCommandDelay() + (stopVideoRecordingChronometer.getDifference() / 1000l);
-
-        Toast.makeText(this, "Stop delay: " + (float) stopAudioDelay / 1000000f, Toast.LENGTH_LONG).show();
-
-        stopAudioDelay += cuttedDelay;
+        long startAudioCommandDelay = audioRecorder.getStartCommandDelay();
 
         Log.d(LOG_TAG, "requestAudioAndVideoMix, 327: Audio file: " + audioFile);
         Log.d(LOG_TAG, "requestAudioAndVideoMix, 328: Video file: " + movieFile);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 329: Audio recorder start command delay (us): " + audioRecorder.getStartCommandDelay());
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 330: Video recorder start command delay (us): " + (startVideoRecodingChronometer.getDifference() / 1000l));
-        Log.d(LOG_TAG, "requestLatestAudioFileResult, 331: Total start audio delay (us): " + startAudioDelay);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 332: Audio recorder stop command delay (us): " + audioRecorder.getStopCommandDelay());
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 333: Video recorder stop command delay (us): " + (stopVideoRecordingChronometer.getDifference() / 1000l));
-        Log.d(LOG_TAG, "requestLatestAudioFileResult, 334: Total stop audio delay (us): " + stopAudioDelay);
+        Log.d(LOG_TAG, "requestAudioAndVideoMix, 329: Audio recorder start command delay (us): " + startAudioCommandDelay);
+        Log.d(LOG_TAG, "requestAudioAndVideoMix, 332: Video recorder start command delay (us): " + videoRecorder.getStartRecordingDelay());
+
+        startAudioCommandDelay += videoRecorder.getStartRecordingDelay();
 
         if (audioFile != null && movieFile != null) {
 
             MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this);
-            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(audioFile, movieFile, startAudioDelay, stopAudioDelay);
+            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(audioFile, movieFile, startAudioCommandDelay);
+            mixerAsyncTask.execute(mixerAsyncTaskParameters);
+        }
+    }
+
+    private void testMix() {
+        File audioFile = new File("/storage/emulated/0/Music/org.marceloleite.projetoanna/20170523_120021.mp3");
+        File movieFile = new File("/storage/emulated/0/Movies/org.marceloleite.projetoanna/20170523_115855.mp4");
+
+        //long startAudioCommandDelay = audioRecorder.getStartCommandDelay();
+        long startAudioCommandDelay = 560000;
+
+        Log.d(LOG_TAG, "requestAudioAndVideoMix, 327: Audio file: " + audioFile);
+        Log.d(LOG_TAG, "requestAudioAndVideoMix, 328: Video file: " + movieFile);
+        Log.d(LOG_TAG, "requestAudioAndVideoMix, 329: Audio recorder start command delay (us): " + startAudioCommandDelay);
+        //Log.d(LOG_TAG, "requestAudioAndVideoMix, 332: Video recorder start command delay (us): " + videoRecorder.getStartRecordingDelay());
+
+        //startAudioCommandDelay += videoRecorder.getStartRecordingDelay();
+        startAudioCommandDelay += 40000;
+
+        if (audioFile != null && movieFile != null) {
+
+            MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this);
+            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(audioFile, movieFile, startAudioCommandDelay);
             mixerAsyncTask.execute(mixerAsyncTaskParameters);
         }
     }
