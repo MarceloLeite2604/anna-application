@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 
 import org.marceloleite.projetoanna.R;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.util.ArrayList;
 
@@ -17,6 +18,18 @@ import java.util.ArrayList;
  */
 
 public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice> {
+
+    /**
+     * A tag to identify this class' messages on log.
+     */
+    private static final String LOG_TAG = BluetoothDeviceAdapter.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(BluetoothDeviceAdapter.class);
+    }
 
     private ArrayList<BluetoothDevice> bluetoothArrayList;
 

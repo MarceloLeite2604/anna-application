@@ -11,6 +11,7 @@ import android.widget.ListView;
 
 import org.marceloleite.projetoanna.R;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.BluetoothDeviceAdapter;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.util.ArrayList;
 
@@ -20,7 +21,17 @@ import java.util.ArrayList;
  */
 public class AlertDialogSelectBluetoothDevice extends AlertDialog implements AdapterView.OnItemClickListener, DialogInterface.OnDismissListener {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = AlertDialogSelectBluetoothDevice.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(AlertDialogSelectBluetoothDevice.class);
+    }
 
     private SelectBluetoothDeviceInterface selectBluetoothDeviceInterface;
     private ArrayList<BluetoothDevice> bluetoothDeviceArrayList;

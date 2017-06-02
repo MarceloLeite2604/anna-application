@@ -4,18 +4,28 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.IntentFilter;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
 import org.marceloleite.projetoanna.ui.InformationView;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 30/04/2016.
  */
 public class Pairer {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = Pairer.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(Pairer.class);
+    }
 
     private Bluetooth bluetooth;
 
@@ -86,7 +96,7 @@ public class Pairer {
     }
 
     public void pairingStarted() {
-        Log.i(LOG_TAG, "pairingStarted: Pairing started.");
+        Log.d(Pairer.class, LOG_TAG, "pairingStarted (99): ");
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(bluetooth.getAppCompatActivity());
         alertDialogBuilder.setTitle("Pairing");
@@ -98,7 +108,7 @@ public class Pairer {
     }
 
     public void pairingFinished(boolean devicePaired) {
-        Log.d(LOG_TAG, "pairingFinished, 109: Pairing finished.");
+        Log.d(Pairer.class, LOG_TAG, "pairingFinished (111): ");
 
         if (devicePaired) {
             alertDialogPairingDevice.dismiss();

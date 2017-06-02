@@ -1,8 +1,8 @@
 package org.marceloleite.projetoanna.utils.retryattempts;
 
-import android.util.Log;
 
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 18/04/2017.
@@ -10,7 +10,17 @@ import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 
 public class RetryAttempts {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = RetryAttempts.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(RetryAttempts.class);
+    }
 
     private static final int MINIMUM_WAIT_TIME = 150;
 
@@ -71,7 +81,7 @@ public class RetryAttempts {
             try {
                 Thread.sleep(waitTime);
             } catch (InterruptedException interruptedException) {
-                Log.e(LOG_TAG, "wait, 58: " + interruptedException);
+                Log.e(RetryAttempts.class, LOG_TAG, "wait (84): " + interruptedException);
             }
         } else {
             return RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED;

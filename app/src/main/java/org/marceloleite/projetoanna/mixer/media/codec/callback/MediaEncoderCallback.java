@@ -3,12 +3,12 @@ package org.marceloleite.projetoanna.mixer.media.codec.callback;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
-import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteMediaMuxerWrapper;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.AudioData;
+import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteMediaMuxerWrapper;
 import org.marceloleite.projetoanna.utils.ByteBufferUtils;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 
 import java.io.File;
@@ -22,7 +22,17 @@ import java.nio.ByteBuffer;
 
 public class MediaEncoderCallback extends MediaCodecCallback {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = MediaEncoderCallback.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(MediaEncoderCallback.class);
+    }
 
     private MediaMuxerWrapper mediaMuxerWrapper;
 
@@ -63,7 +73,7 @@ public class MediaEncoderCallback extends MediaCodecCallback {
 
 
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-            Log.d(LOG_TAG, "onOutputBufferAvailable, 63: End of encoding.");
+            Log.d(MediaEncoderCallback.class, LOG_TAG, "onOutputBufferAvailable (76): End of encoding.");
             closeInputFile();
             byteBufferWriteMediaMuxerWrapper.concludeWriting();
             this.finishedEncoding = true;
@@ -86,7 +96,7 @@ public class MediaEncoderCallback extends MediaCodecCallback {
 
     @Override
     public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException codecException) {
-        Log.e(LOG_TAG, "onError, 74: An error occurred while encoding.");
+        Log.e(MediaEncoderCallback.class, LOG_TAG, "onError (99): An error occurred while encoding.");
         codecException.printStackTrace();
         closeInputFile();
         this.finishedEncoding = true;
@@ -112,11 +122,11 @@ public class MediaEncoderCallback extends MediaCodecCallback {
                 byteBuffer.put(buffer, 0, totalRead);
 
             } else {
-                Log.d(LOG_TAG, "readInputStream, 98: End of file.");
+                Log.d(MediaEncoderCallback.class, LOG_TAG, "readInputStream (125): End of file.");
                 totalRead = 0;
             }
         } catch (IOException e) {
-            Log.e(LOG_TAG, "readInputStream, 129: Error while reading input file.");
+            Log.e(MediaEncoderCallback.class, LOG_TAG, "readInputStream (129): Error while reading input file.");
             e.printStackTrace();
             closeInputFile();
             finishedEncoding = true;
@@ -152,7 +162,7 @@ public class MediaEncoderCallback extends MediaCodecCallback {
         try {
             fileInputStream.close();
         } catch (IOException ioException) {
-            Log.d(LOG_TAG, "onError, 79: Error while closing input file.");
+            Log.d(MediaEncoderCallback.class, LOG_TAG, "closeInputFile (165): Error while closing input file.");
             ioException.printStackTrace();
             this.finishedEncoding = true;
         }

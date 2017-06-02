@@ -17,7 +17,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -25,10 +24,11 @@ import android.view.TextureView;
 
 import org.marceloleite.projetoanna.utils.CompareSizesByArea;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.SizeRatio;
+import org.marceloleite.projetoanna.utils.chonometer.Chronometer;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
-import org.marceloleite.projetoanna.utils.chonometer.Chronometer;
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraCaptureSessionStateCallback;
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraDeviceStateCallback;
 import org.marceloleite.projetoanna.videorecorder.listeners.CameraSurfaceTextureListener;
@@ -46,7 +46,18 @@ import java.util.List;
 
 public class VideoRecorder {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = VideoRecorder.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(VideoRecorder.class);
+    }
+
 
     private static final double[] PREFERRED_ASPECT_RATIOS = {16.0d / 9.0d, 4.0d / 3.0d};
 
@@ -178,7 +189,7 @@ public class VideoRecorder {
 
         while (!cameraSelected) {
             if (counter >= cameraIds.length) {
-                Log.d(LOG_TAG, "selectCamera, 177: Could not find a camera facing backwards.");
+                Log.d(VideoRecorder.class, LOG_TAG, "selectCamera (192): Could not find a camera facing backwards.");
                 selectedCameraId = cameraIds[0];
                 cameraSelected = true;
             } else {
@@ -201,9 +212,9 @@ public class VideoRecorder {
         CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(selectedCameraId);
         StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
         this.videoSize = chooseSize(streamConfigurationMap.getOutputSizes(MediaRecorder.class));
-        Log.d(LOG_TAG, "selectVideoAndPreviewSize, 184: Video size: " + videoSize);
+        Log.d(VideoRecorder.class, LOG_TAG, "selectVideoAndPreviewSize (215): Video size: " + videoSize);
         this.previewSize = chooseMinorSizeBiggerThan(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), previewSize, SizeRatio.getSizeRatio(videoSize));
-        Log.d(LOG_TAG, "selectVideoAndPreviewSize, 186: Preview size: " + previewSize);
+        Log.d(VideoRecorder.class, LOG_TAG, "selectVideoAndPreviewSize (217): Preview size: " + previewSize);
     }
 
     private int getSensorOrientation() {
@@ -241,7 +252,7 @@ public class VideoRecorder {
                 }
             } else {
                 selectedVideoSize = size[0];
-                Log.e(LOG_TAG, "chooseSize, 206: Could not find a size with a preferable aspect ratio. Selected " + selectedVideoSize + " instead.");
+                Log.e(VideoRecorder.class, LOG_TAG, "chooseSize (255): Could not find a size with a preferable aspect ratio. Selected " + selectedVideoSize + " instead.");
                 videoSizeSelected = true;
             }
         }
@@ -280,7 +291,7 @@ public class VideoRecorder {
                 } else {
                     if (sizeSelected == null) {
                         sizeSelected = sizeList.get(0);
-                        Log.e(LOG_TAG, "selectSizeWithWidth, 249: Could not find a size with the desired width. Selecting " + sizeSelected + ".'");
+                        Log.e(VideoRecorder.class, LOG_TAG, "selectSizeWithWidth (294): Could not find a size with the desired width. Selecting " + sizeSelected + ".'");
                         videoSizeSelected = true;
                     }
                 }
@@ -302,7 +313,7 @@ public class VideoRecorder {
 
     protected void updatePreview() {
         if (cameraDevice == null) {
-            Log.e(LOG_TAG, "updatePreview, 236: No camera!");
+            Log.e(VideoRecorder.class, LOG_TAG, "updatePreview (316): The device does not have a camera.");
         }
 
         captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
@@ -331,7 +342,7 @@ public class VideoRecorder {
     }
 
     public void resume(Size size) {
-        Log.d(LOG_TAG, "resume, 253: Resume");
+        Log.d(VideoRecorder.class, LOG_TAG, "resume (345): ");
         startBackgroundThread();
         if (textureView.isAvailable()) {
             openCamera(size);
@@ -341,7 +352,7 @@ public class VideoRecorder {
     }
 
     public void pause() {
-        Log.d(LOG_TAG, "pause, 262: Pause");
+        Log.d(VideoRecorder.class, LOG_TAG, "pause (355): ");
         closeCamera();
         stopBackgroundThread();
     }
@@ -380,7 +391,7 @@ public class VideoRecorder {
             selectedSize = Collections.min(selectedSizes, new CompareSizesByArea());
         } else {
             selectedSize = sizes[0];
-            Log.e(LOG_TAG, "chooseMinorSizeBiggerThan, 418: Couldn't find any size minor than " + minimumSize + ". Selected " + selectedSize + " instead.");
+            Log.e(VideoRecorder.class, LOG_TAG, "chooseMinorSizeBiggerThan (394): Couldn't find any size minor than " + minimumSize + ". Selected " + selectedSize + " instead.");
         }
 
         return selectedSize;
@@ -391,18 +402,18 @@ public class VideoRecorder {
         videoStartDelayChronometer = new Chronometer();
         videoStartDelayChronometer.start();
 
-        Log.d(LOG_TAG, "startRecord, 368: Start record.");
+        Log.d(VideoRecorder.class, LOG_TAG, "startRecord (405): Start record.");
 
         if (cameraDevice == null) {
-            Log.d(LOG_TAG, "startRecord, 371: Camera device is null.");
+            Log.d(VideoRecorder.class, LOG_TAG, "startRecord (408): Camera device is null.");
         }
 
         if (!textureView.isAvailable()) {
-            Log.d(LOG_TAG, "startRecord, 375: Texture view is not available.");
+            Log.d(VideoRecorder.class, LOG_TAG, "startRecord (412): Texture view is not available.");
         }
 
         if (previewSize == null) {
-            Log.d(LOG_TAG, "startRecord, 379: Preview size is not defined.");
+            Log.d(VideoRecorder.class, LOG_TAG, "startRecord (416): Preview size is not defined.");
         }
 
         try {
@@ -421,15 +432,15 @@ public class VideoRecorder {
             CameraCaptureSessionStateCallback cameraCaptureSessionStateCallback = new CameraCaptureSessionStateCallback(this, true);
             cameraDevice.createCaptureSession(surfaces, cameraCaptureSessionStateCallback, handler);
         } catch (CameraAccessException | IOException exception) {
-            Log.d(LOG_TAG, "startRecord, 388: " + exception.getMessage());
+            Log.d(VideoRecorder.class, LOG_TAG, "startRecord (435): " + exception.getMessage());
             exception.printStackTrace();
         }
 
-        Log.d(LOG_TAG, "startRecord, 423: Finished starting record.");
+        Log.d(VideoRecorder.class, LOG_TAG, "startRecord (439): Finished starting record.");
     }
 
     public void startMediaRecorder() {
-        Log.d(LOG_TAG, "startMediaRecorder, 407: ");
+        Log.d(VideoRecorder.class, LOG_TAG, "startMediaRecorder (443): ");
         videoRecorderActivityInterface.getAppCompatActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -442,7 +453,7 @@ public class VideoRecorder {
     }
 
     public void stopRecord() {
-        Log.d(LOG_TAG, "stopRecord, 414: ");
+        Log.d(VideoRecorder.class, LOG_TAG, "stopRecord (456): ");
         recording = false;
         mediaRecorder.stop();
         mediaRecorder.reset();
@@ -506,6 +517,6 @@ public class VideoRecorder {
     }
 
     public long getStartRecordingDelay() {
-        return videoStartDelayChronometer.getDifference()/1000L;
+        return videoStartDelayChronometer.getDifference() / 1000L;
     }
 }

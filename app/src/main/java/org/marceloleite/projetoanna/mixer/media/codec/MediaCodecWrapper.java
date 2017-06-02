@@ -10,6 +10,7 @@ import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaCodecCallback;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaDecoderCallback;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaEncoderCallback;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 
 import java.io.File;
@@ -21,7 +22,17 @@ import java.io.IOException;
 
 public class MediaCodecWrapper {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = MediaCodecWrapper.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(MediaCodecWrapper.class);
+    }
 
     private MediaCodec mediaCodec;
 

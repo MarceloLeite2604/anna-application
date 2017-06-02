@@ -1,6 +1,6 @@
 package org.marceloleite.projetoanna.utils.audio;
 
-import android.util.Log;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 09/05/2017.
@@ -8,7 +8,17 @@ import android.util.Log;
 
 public abstract class AudioUtils {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = AudioUtils.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(AudioUtils.class);
+    }
 
     public static final int BUFFER_OFFSET = 0;
 

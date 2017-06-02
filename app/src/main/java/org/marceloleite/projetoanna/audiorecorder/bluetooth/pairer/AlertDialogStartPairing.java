@@ -4,13 +4,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 30/04/2016.
  */
 public class AlertDialogStartPairing extends AlertDialog implements DialogInterface.OnClickListener {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = AlertDialogStartPairing.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(AlertDialogStartPairing.class);
+    }
 
     private Bluetooth bluetooth;
 

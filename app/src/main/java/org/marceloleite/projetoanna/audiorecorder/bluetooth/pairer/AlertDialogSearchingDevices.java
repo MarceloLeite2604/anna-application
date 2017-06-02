@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.marceloleite.projetoanna.R;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,18 @@ import java.util.ArrayList;
  */
 public class AlertDialogSearchingDevices extends AlertDialog implements View.OnClickListener, DialogInterface.OnClickListener, AdapterView.OnItemClickListener {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = AlertDialogSearchingDevices.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(AlertDialogSearchingDevices.class);
+    }
+
 
     private Pairer pairer;
 
@@ -120,7 +131,7 @@ public class AlertDialogSearchingDevices extends AlertDialog implements View.OnC
                 pairer.discoverDevicesCancelled();
                 break;
             default:
-                Log.e(LOG_TAG, "onClick, 118: Unknown button.");
+                Log.e(AlertDialogSearchingDevices.class, LOG_TAG, "onClick (134): Unknown button.");
                 break;
         }
         dismiss();

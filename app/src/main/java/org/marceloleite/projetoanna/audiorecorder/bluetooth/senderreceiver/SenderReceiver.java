@@ -1,15 +1,15 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.senderreceiver;
 
 import android.bluetooth.BluetoothSocket;
-import android.util.Log;
 
-import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReaderWriter;
-import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReaderWriterException;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.DataPackage;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.PackageType;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.ConfirmationContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.Content;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.CommunicationException;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReaderWriter;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReaderWriterException;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.average.Average;
 import org.marceloleite.projetoanna.utils.chonometer.Chronometer;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
@@ -22,7 +22,17 @@ import java.io.IOException;
  */
 public class SenderReceiver {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = SenderReceiver.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(SenderReceiver.class);
+    }
 
     /**
      * Maximum retry attempts to receive a package.
@@ -92,7 +102,7 @@ public class SenderReceiver {
                     }
                 }
             } catch (ReaderWriterException readerWriterException) {
-                Log.d(LOG_TAG, "receivePackage, 78: Exception thrown.");
+                Log.d(SenderReceiver.class, LOG_TAG, "receivePackage (105): Exception thrown.");
                 throw new CommunicationException("Error while receiving a package.", readerWriterException);
             }
         }
@@ -155,17 +165,17 @@ public class SenderReceiver {
                             doneReceivingConfirmation = true;
                             returnValue = true;
                         } else {
-                            Log.d(LOG_TAG, "receiveConfirmation, 137: Received a confirmation, but not for package id " + Integer.toHexString(dataPackage.getId()) + ".");
+                            Log.d(SenderReceiver.class, LOG_TAG, "receiveConfirmation (168): Received a confirmation, but not for package id " + Integer.toHexString(dataPackage.getId()) + ".");
                         }
                     } else {
-                        Log.d(LOG_TAG, "receiveConfirmation, 138: Received a \"" + receivedPackage.getPackageType() + "\" package");
+                        Log.d(SenderReceiver.class, LOG_TAG, "receiveConfirmation (171): Received a \"" + receivedPackage.getPackageType() + "\" package");
                     }
                 } else {
                     switch (RetryAttempts.wait(retryAttempts)) {
                         case RetryAttemptsReturnCodes.SUCCESS:
                             break;
                         case RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED:
-                            Log.d(LOG_TAG, "receiveConfirmation, 148: Maximum retries reached.");
+                            Log.d(SenderReceiver.class, LOG_TAG, "receiveConfirmation (178): Maximum retries reached.");
                             doneReceivingConfirmation = true;
                             returnValue = false;
                             break;

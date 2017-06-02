@@ -2,9 +2,9 @@ package org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter
 
 import android.media.MediaCodec;
 import android.media.MediaMuxer;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
@@ -15,7 +15,17 @@ import java.util.NoSuchElementException;
 
 public class ByteBufferWriteMediaMuxerWrapper extends ByteBufferWriter {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = ByteBufferWriteMediaMuxerWrapper.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(ByteBufferWriteMediaMuxerWrapper.class);
+    }
 
     private MediaMuxerWrapper mediaMuxerWrapper;
 

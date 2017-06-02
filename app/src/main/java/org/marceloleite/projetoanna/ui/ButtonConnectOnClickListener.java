@@ -5,6 +5,7 @@ import android.widget.Button;
 
 import org.marceloleite.projetoanna.MainActivity;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 17/03/2017.
@@ -12,7 +13,17 @@ import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 
 public class ButtonConnectOnClickListener implements View.OnClickListener {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = ButtonConnectOnClickListener.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(ButtonConnectOnClickListener.class);
+    }
 
     MainActivity mainActivity;
 

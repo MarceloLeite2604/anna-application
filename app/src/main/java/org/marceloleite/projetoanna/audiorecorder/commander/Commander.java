@@ -1,7 +1,6 @@
 package org.marceloleite.projetoanna.audiorecorder.commander;
 
 import android.bluetooth.BluetoothSocket;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.DataPackage;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.PackageType;
@@ -10,8 +9,8 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.Communication
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.senderreceiver.SenderReceiver;
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiver;
 import org.marceloleite.projetoanna.audiorecorder.commander.filereceiver.FileReceiverException;
-import org.marceloleite.projetoanna.audiorecorder.operator.operation.Command;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.File;
 
@@ -21,7 +20,17 @@ import java.io.File;
 
 public class Commander {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = Commander.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(Commander.class);
+    }
 
     private SenderReceiver senderReceiver;
 
@@ -56,7 +65,7 @@ public class Commander {
     }
 
     private CommandResult sendPackageAndWaitForResult(PackageType packageType) throws CommanderException {
-        Log.d(LOG_TAG, "sendPackageAndWaitForResult, 117: Sending command \"" + packageType + "\".");
+        Log.d(Commander.class, LOG_TAG, "sendPackageAndWaitForResult (68): Sending command \"" + packageType + "\".");
         DataPackage dataPackage = new DataPackage(packageType, null);
         CommandResult commandResult;
 
@@ -68,11 +77,11 @@ public class Commander {
 
         DataPackage receivedDataPackage;
         try {
-            Log.d(LOG_TAG, "sendPackageAndWaitForResult, 128: Waiting for command \"" + packageType + "\" result.");
+            Log.d(Commander.class, LOG_TAG, "sendPackageAndWaitForResult (80): Waiting for command \"" + packageType + "\" result.");
             receivedDataPackage = senderReceiver.receivePackage();
 
             if (receivedDataPackage != null) {
-                Log.d(LOG_TAG, "sendPackageAndWaitForResult, 129: Received a package.");
+                Log.d(Commander.class, LOG_TAG, "sendPackageAndWaitForResult (84): Received a package.");
                 switch (receivedDataPackage.getPackageType()) {
                     case COMMAND_RESULT:
                         CommandResultContent commandResultContent = (CommandResultContent) receivedDataPackage.getContent();
@@ -81,7 +90,7 @@ public class Commander {
                             case GenericReturnCodes.GENERIC_ERROR:
                                 int resultCode = commandResultContent.getResultCode();
                                 long executionDelay = commandResultContent.getExecutionDelayMicroseconds();
-                                executionDelay += commandResultContent.getExecutionDelaySeconds()* 1000000;
+                                executionDelay += commandResultContent.getExecutionDelaySeconds() * 1000000;
                                 commandResult = new CommandResult(resultCode, executionDelay);
                                 break;
                             default:
@@ -89,11 +98,11 @@ public class Commander {
                         }
                         break;
                     default:
-                        Log.d(LOG_TAG, "sendPackageAndWaitForResult, 143: The package received is not a \"" + PackageType.COMMAND_RESULT + "\" package.");
+                        Log.d(Commander.class, LOG_TAG, "sendPackageAndWaitForResult (101): The package received is not a \"" + PackageType.COMMAND_RESULT + "\" package.");
                         throw new CommanderException("Received a \"" + receivedDataPackage.getPackageType() + "\" package, when expecting a \"" + PackageType.COMMAND_RESULT + "\" package.");
                 }
             } else {
-                Log.d(LOG_TAG, "sendPackageAndWaitForResult, 145: Didn't received the \"" + packageType + "\" command result.");
+                Log.d(Commander.class, LOG_TAG, "sendPackageAndWaitForResult (105): Didn't received the \"" + packageType + "\" command result.");
                 throw new CommanderException("No package received.");
             }
 
@@ -105,7 +114,7 @@ public class Commander {
     }
 
     public File requestLatestAudioFile() throws CommanderException {
-        Log.d(LOG_TAG, "requestLatestAudioFile, 159: Requesting latest audio file.");
+        Log.d(Commander.class, LOG_TAG, "requestLatestAudioFile (117): Requesting latest audio file.");
 
         DataPackage requestAudioFilePackage = new DataPackage(PackageType.REQUEST_AUDIO_FILE, null);
         try {
@@ -135,7 +144,7 @@ public class Commander {
             senderReceiver.sendPackage(checkConnectionDataPackage);
             result = true;
         } catch (CommunicationException communicationException) {
-            Log.d(LOG_TAG, "checkConnection, 50: Error while checking connection: " + communicationException.getMessage());
+            Log.d(Commander.class, LOG_TAG, "checkConnection (147): Error while checking connection: " + communicationException.getMessage());
             communicationException.printStackTrace();
             result = false;
         }

@@ -1,10 +1,24 @@
 package org.marceloleite.projetoanna.utils.average;
 
+import org.marceloleite.projetoanna.utils.Log;
+
 /**
  * Created by marcelo on 22/05/17.
  */
 
 public class Average {
+
+    /**
+     * A tag to identify this class' messages on log.
+     */
+    private static final String LOG_TAG = Average.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(Average.class);
+    }
 
     private int itemsOnBuffer;
 
@@ -19,7 +33,7 @@ public class Average {
     }
 
     public void add(long value) {
-        buffer[itemsOnBuffer%buffer.length] = value;
+        buffer[itemsOnBuffer % buffer.length] = value;
         if (itemsOnBuffer < buffer.length) {
             itemsOnBuffer++;
         }
@@ -35,10 +49,10 @@ public class Average {
 
         long total = 0;
 
-        for (counter=0; counter < itemsOnBuffer; counter++) {
+        for (counter = 0; counter < itemsOnBuffer; counter++) {
             total += buffer[counter];
         }
 
-        average = total/itemsOnBuffer;
+        average = total / itemsOnBuffer;
     }
 }

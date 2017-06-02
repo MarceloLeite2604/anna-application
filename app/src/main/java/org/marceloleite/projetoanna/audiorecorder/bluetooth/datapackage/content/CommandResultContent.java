@@ -1,6 +1,6 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content;
 
-import android.util.Log;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -10,7 +10,17 @@ import java.util.Arrays;
  */
 public class CommandResultContent extends Content {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = CommandResultContent.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(CommandResultContent.class);
+    }
 
     /**
      * The size of the content (in bytes).
@@ -80,7 +90,7 @@ public class CommandResultContent extends Content {
 
         byteArraySlice = Arrays.copyOfRange(bytes, byteArrayCounter, byteArrayCounter + EXECUTION_DELAY_MICROSECONDS_BYTE_ARRAY_SIZE);
         executionDelayMicroseconds = Integer.reverseBytes(ByteBuffer.wrap(byteArraySlice).getInt());
-        Log.d(LOG_TAG, "CommandResultContent: Execution delay: " + executionDelaySeconds + " seconds, " + executionDelayMicroseconds + " microseconds.");
+        Log.d(CommandResultContent.class, LOG_TAG, "CommandResultContent (93): Execution delay: " + executionDelaySeconds + " seconds, " + executionDelayMicroseconds + " microseconds.");
     }
 
     @Override

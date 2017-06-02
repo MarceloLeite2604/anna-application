@@ -2,8 +2,8 @@ package org.marceloleite.projetoanna.videorecorder.callbacks;
 
 import android.hardware.camera2.CameraCaptureSession;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 /**
@@ -12,7 +12,17 @@ import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 public class CameraCaptureSessionStateCallback extends CameraCaptureSession.StateCallback {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = CameraCaptureSessionStateCallback.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(CameraCaptureSessionStateCallback.class);
+    }
 
     private VideoRecorder videoRecorder;
 
@@ -34,6 +44,6 @@ public class CameraCaptureSessionStateCallback extends CameraCaptureSession.Stat
 
     @Override
     public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
-        Log.d(LOG_TAG, "onConfigureFailed, 31: Camera capture configuration failed.");
+        Log.d(CameraCaptureSessionStateCallback.class, LOG_TAG, "onConfigureFailed (47): Camera capture configuration failed.");
     }
 }

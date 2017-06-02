@@ -2,11 +2,11 @@ package org.marceloleite.projetoanna.utils.file;
 
 import android.content.Context;
 import android.os.Environment;
-import android.util.Log;
+
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -18,9 +18,19 @@ import java.util.Date;
 
 public abstract class FileUtils {
 
-    private static final NullPointerException CONTEXT_NOT_DEFINED_EXCEPTION = new NullPointerException("Context for file creation is not specified. Use \"setContext\" method to define it.");
-
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = FileUtils.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(FileUtils.class);
+    }
+
+    private static final NullPointerException CONTEXT_NOT_DEFINED_EXCEPTION = new NullPointerException("Context for file creation is not specified. Use \"setContext\" method to define it.");
 
     private static final int COPY_FILE_BUFFER_SIZE = 1024 * 1024;
 
@@ -40,7 +50,7 @@ public abstract class FileUtils {
 
         if (!cacheDirectory.exists()) {
             if (!cacheDirectory.mkdirs()) {
-                Log.d(LOG_TAG, "createTemporaryFile, 26: Failed to create directory \"" + cacheDirectory.getPath() + "\".");
+                Log.d(FileUtils.class, LOG_TAG, "createTemporaryFile (53): Failed to create directory \"" + cacheDirectory.getPath() + "\".");
                 return null;
             }
         }
@@ -53,7 +63,7 @@ public abstract class FileUtils {
         try {
             temporaryFile.createNewFile();
         } catch (IOException ioException) {
-            Log.d(LOG_TAG, "createTemporaryFile, 45: Error while creating new temporary file \"" + temporaryFile.getAbsolutePath() + "\".");
+            Log.d(FileUtils.class, LOG_TAG, "createTemporaryFile (66): Error while creating new temporary file \"" + temporaryFile.getAbsolutePath() + "\".");
             ioException.printStackTrace();
         }
 
@@ -93,7 +103,7 @@ public abstract class FileUtils {
             if (!outputDirectory.mkdirs()) {
                 throw new IOException("Could not create directory \"" + outputDirectory.getAbsolutePath() + "\".");
             }
-            Log.d(LOG_TAG, "createFile, 85: Directory \"" + outputDirectory.getAbsolutePath() + "\" created.");
+            Log.d(FileUtils.class, LOG_TAG, "createFile (106): Directory \"" + outputDirectory.getAbsolutePath() + "\" created.");
         }
 
         String fileName = createFileName(fileType);
@@ -159,7 +169,7 @@ public abstract class FileUtils {
             return true;
 
         } catch (IOException ioException) {
-            Log.e(LOG_TAG, "copyFileContent, 143: Error while copying file \"" + sourceFile.getAbsolutePath() + "\" content to \"" + destinationFile.getAbsolutePath() + "\".");
+            Log.e(FileUtils.class, LOG_TAG, "copyFileContent (172): Error while copying file \"" + sourceFile.getAbsolutePath() + "\" content to \"" + destinationFile.getAbsolutePath() + "\".");
             ioException.printStackTrace();
             return false;
         }

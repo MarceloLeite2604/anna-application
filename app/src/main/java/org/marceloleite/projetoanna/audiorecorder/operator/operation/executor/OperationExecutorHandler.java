@@ -2,9 +2,9 @@ package org.marceloleite.projetoanna.audiorecorder.operator.operation.executor;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
@@ -12,7 +12,17 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
 
 public class OperationExecutorHandler extends Handler {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = OperationExecutorHandler.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(OperationExecutorHandler.class);
+    }
 
     public static final int CHECK_COMMAND_TO_EXECUTE = 0x391f;
 
@@ -36,7 +46,7 @@ public class OperationExecutorHandler extends Handler {
                 operationExecutorInterface.finishExecution();
                 break;
             default:
-                Log.d(LOG_TAG, "handleMessage, 33: Handling message to another handler.");
+                Log.d(OperationExecutorHandler.class, LOG_TAG, "handleMessage (49): Handling message to another handler.");
                 super.handleMessage(message);
                 break;
         }

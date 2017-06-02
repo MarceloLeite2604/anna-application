@@ -1,5 +1,7 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content;
 
+import org.marceloleite.projetoanna.utils.Log;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -7,7 +9,17 @@ import java.nio.ByteBuffer;
  */
 public class FileTrailerContent extends Content {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = FileTrailerContent.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(FileTrailerContent.class);
+    }
 
     /**
      * The code which identifies a file trailer content.

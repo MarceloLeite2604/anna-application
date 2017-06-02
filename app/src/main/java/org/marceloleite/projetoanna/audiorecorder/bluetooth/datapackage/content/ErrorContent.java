@@ -1,5 +1,7 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content;
 
+import org.marceloleite.projetoanna.utils.Log;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -8,7 +10,17 @@ import java.util.Arrays;
  */
 public class ErrorContent extends Content {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = ErrorContent.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(ErrorContent.class);
+    }
 
     /**
      * Minimum acceptable content size (in bytes).

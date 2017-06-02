@@ -1,6 +1,6 @@
 package org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter;
 
-import android.util.Log;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,7 +13,17 @@ import java.util.NoSuchElementException;
 
 public class ByteBufferWriteOutputStream extends ByteBufferWriter {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = ByteBufferWriteOutputStream.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(ByteBufferWriteOutputStream.class);
+    }
 
     private OutputStream outputStream;
 
@@ -26,7 +36,7 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
         this.outputStream = outputStream;
         this.bytesToIgnore = bytesToIgnore;
         this.bytesToWrite = bytesToWrite;
-        Log.d(LOG_TAG, "MediaDecoderCallback (38): Bytes do ignore: " + bytesToIgnore + ", bytes to write: " + bytesToWrite);
+        Log.d(ByteBufferWriteOutputStream.class, LOG_TAG, "ByteBufferWriteOutputStream (39): Bytes do ignore: " + bytesToIgnore + ", bytes to write: " + bytesToWrite);
     }
 
     public ByteBufferWriteOutputStream(OutputStream outputStream, int maximumItemsOnMap, long bytesToIgnore, long bytesToWrite) {
@@ -83,7 +93,7 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
             try {
                 outputStream.write(buffer);
             } catch (IOException e) {
-                Log.e(LOG_TAG, "writeOutput (92): Error while writing content on output stream.", e);
+                Log.e(ByteBufferWriteOutputStream.class, LOG_TAG, "writeOnOutput (96): Error while writing content on output stream.", e);
             }
 
             bytesToIgnore -= remainingBytesIgnored;
@@ -99,7 +109,7 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
         try {
             outputStream.close();
         } catch (IOException e) {
-            Log.e(LOG_TAG, "postConcludeWriting (103): Error while closing output stream.", e);
+            Log.e(ByteBufferWriteOutputStream.class, LOG_TAG, "postConcludeWriting (112): Error while closing output stream.", e);
         }
     }
 }

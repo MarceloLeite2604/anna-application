@@ -2,16 +2,16 @@ package org.marceloleite.projetoanna.audiorecorder.operator;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Message;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.Bluetooth;
-import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Command;
+import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.OperatorThreadParameters;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.executor.OperationExecutorHandler;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultHandler;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.OperationResultInterface;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
@@ -19,7 +19,17 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.result.Oper
 
 public class Operator implements OperationResultInterface, OperatorThreadParameters {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = Operator.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(Operator.class);
+    }
 
     private OperationResultHandler operationResultHandler;
 
@@ -46,19 +56,19 @@ public class Operator implements OperationResultInterface, OperatorThreadParamet
     }
 
     public void executeCommand(Command command) {
-        Log.d(LOG_TAG, "executeOperation, 46: " + command);
+        Log.d(Operator.class, LOG_TAG, "executeCommand (59): Command: " + command);
         Operation operation = new Operation(command);
 
         OperationExecutorHandler operationExecutorHandler = operatorThread.getOperationExecutorHandler();
         Message commandExecutorMessage = operationExecutorHandler.obtainMessage();
         commandExecutorMessage.what = OperationExecutorHandler.CHECK_COMMAND_TO_EXECUTE;
         commandExecutorMessage.obj = operation;
-        Log.d(LOG_TAG, "executeOperation, 51: Sending message to execute command \"" + command + "\".");
+        Log.d(Operator.class, LOG_TAG, "executeCommand (66): Sending message to execute command \"" + command + "\".");
         operatorThread.getOperationExecutorHandler().sendMessage(commandExecutorMessage);
     }
 
     public void finishOperatorThreadExecution() {
-        Log.d(LOG_TAG, "finishOperatorThreadExecution, 63: Finishing operator thread execution.");
+        Log.d(Operator.class, LOG_TAG, "finishOperatorThreadExecution (71): Finishing operator thread execution.");
         OperationExecutorHandler operationExecutorHandler = operatorThread.getOperationExecutorHandler();
         Message commandExecutorMessage = operationExecutorHandler.obtainMessage();
         commandExecutorMessage.what = OperationExecutorHandler.FINISH_EXECUTION;

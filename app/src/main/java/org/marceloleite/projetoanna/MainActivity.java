@@ -3,7 +3,6 @@ package org.marceloleite.projetoanna;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.Size;
 import android.view.TextureView;
 import android.widget.Button;
@@ -18,11 +17,14 @@ import org.marceloleite.projetoanna.mixer.MixerAsyncTaskParameters;
 import org.marceloleite.projetoanna.ui.ButtonConnectOnClickListener;
 import org.marceloleite.projetoanna.ui.ButtonRecordOnClickListener;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorderActivityInterface;
 
 import java.io.File;
+
+import static org.marceloleite.projetoanna.utils.Log.addClassToLog;
 
 /**
  * The application main activity.
@@ -33,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
      * A tag to identify this class' messages on log.
      */
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    /**
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        addClassToLog(MainActivity.class);
+    }
 
     /**
      * The button to connectWithAudioRecorder and disconnect from audio recorder.
@@ -125,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
             case BluetoothConnectReturnCodes.CONNECTION_CANCELLED:
                 break;
             default:
-                Log.e(LOG_TAG, "connectWithAudioRecorderResult, 132: Unknown result received from \"connectWithAudioRecorder\" method.");
+                Log.e(MainActivity.class, LOG_TAG, "connectWithAudioRecorderResult (137): Unknown result received from \"connectWithAudioRecorder\" method.");
                 break;
         }
         updateInterface();
@@ -151,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
             case BluetoothConnectReturnCodes.CONNECTION_CANCELLED:
                 break;
             default:
-                Log.e(LOG_TAG, "connectWithAudioRecorderResult, 132: Unknown result received from \"disconnectFromhAudioRecorder\" method.");
+                Log.e(MainActivity.class, LOG_TAG, "disconnectFromAudioRecorderResult (163): Unknown result received from \"disconnectFromhAudioRecorder\" method.");
                 break;
         }
         updateInterface();
@@ -160,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(LOG_TAG, "onResume, 154: OnResume");
+        Log.d(MainActivity.class, LOG_TAG, "onResume (172): ");
 
         if (textureView != null) {
             Size textureViewSize = new Size(textureView.getWidth(), textureView.getHeight());
@@ -170,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     @Override
     protected void onPause() {
-        Log.d(LOG_TAG, "onPause, 160: OnPause");
+        Log.d(MainActivity.class, LOG_TAG, "onPause (182): ");
         if (videoRecorder != null) {
             videoRecorder.pause();
         }
@@ -183,13 +192,13 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     }
 
     public void startRecording() {
-        Log.d(LOG_TAG, "startRecording, 306: Initializing start record process.");
+        Log.d(MainActivity.class, LOG_TAG, "startRecording (195): ");
         audioRecorder.startAudioRecording();
     }
 
     @Override
     public void startAudioRecordingResult(int result) {
-        Log.d(LOG_TAG, "startAudioRecordingResult, 122: ");
+        Log.d(MainActivity.class, LOG_TAG, "startAudioRecordingResult (201): ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
                 videoRecorder.startRecord();
@@ -198,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
                 Toast.makeText(this, "Could not start audio recorder.", Toast.LENGTH_LONG).show();
                 break;
             default:
-                Log.e(LOG_TAG, "startAudioRecordingResult, 135: Unknown return code received from \"start record\" command.");
+                Log.e(MainActivity.class, LOG_TAG, "startAudioRecordingResult (210): Unknown return code received from \"start record\" command.");
                 break;
         }
         updateInterface();
@@ -206,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     @Override
     public void startVideoRecordingResult(int result) {
-        Log.d(LOG_TAG, "startVideoRecordingResult, 255: ");
+        Log.d(MainActivity.class, LOG_TAG, "startVideoRecordingResult (218): ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
                 Toast.makeText(this, "Recording.", Toast.LENGTH_LONG).show();
@@ -215,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
                 Toast.makeText(this, "Could not start video recording.", Toast.LENGTH_LONG).show();
                 break;
             default:
-                Log.e(LOG_TAG, "stopVideoRecordingResult, 270: Unknown code returned from start video recording command: " + result);
+                Log.e(MainActivity.class, LOG_TAG, "startVideoRecordingResult (227): Unknown code returned from start video recording command: " + result);
                 Toast.makeText(this, "Could not start video recorder.", Toast.LENGTH_LONG).show();
                 break;
         }
@@ -223,23 +232,23 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     }
 
     public void stopRecording() {
-        Log.d(LOG_TAG, "stopRecording, 311: ");
+        Log.d(MainActivity.class, LOG_TAG, "stopRecording (235): ");
         videoRecorder.stopRecord();
     }
 
     @Override
     public void stopVideoRecordingResult(int result) {
-        Log.d(LOG_TAG, "stopVideoRecordingResult, 274: ");
+        Log.d(MainActivity.class, LOG_TAG, "stopVideoRecordingResult (241): ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
-                Log.d(LOG_TAG, "stopVideoRecordingResult, 302: Video recording stopped.");
+                Log.d(MainActivity.class, LOG_TAG, "stopVideoRecordingResult (244): Video recording stopped");
                 audioRecorder.stopRecord();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
                 Toast.makeText(this, "Could not stop video recorder.", Toast.LENGTH_LONG);
                 break;
             default:
-                Log.e(LOG_TAG, "stopVideoRecordingResult, 270: Unknown code returned from stop video recording command: " + result);
+                Log.e(MainActivity.class, LOG_TAG, "stopVideoRecordingResult (251): Unknown code returned from stop video recording command: " + result);
                 Toast.makeText(this, "Could not stop video recorder.", Toast.LENGTH_LONG);
                 break;
         }
@@ -248,17 +257,17 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     @Override
     public void stopAudioRecordingResult(int result) {
-        Log.d(LOG_TAG, "stopAudioRecordingResult, 271: ");
+        Log.d(MainActivity.class, LOG_TAG, "stopAudioRecordingResult (260): ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
-                Log.d(LOG_TAG, "stopAudioRecordingResult, 304: Audio record stopped.");
+                Log.d(MainActivity.class, LOG_TAG, "stopAudioRecordingResult (263): Audio record stopped.");
                 audioRecorder.requestLatestAudioFile();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
                 Toast.makeText(this, "Could not stop audio recording.", Toast.LENGTH_LONG);
                 break;
             default:
-                Log.e(LOG_TAG, "startAudioRecordingResult, 135: Unknown return code received from \"stop record\" command.");
+                Log.e(MainActivity.class, LOG_TAG, "stopAudioRecordingResult (270): Unknown return code received from \"stop record\" command.");
                 break;
         }
         updateInterface();
@@ -266,18 +275,18 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
 
     @Override
     public void requestLatestAudioFileResult(int result) {
-        Log.d(LOG_TAG, "requestLatestAudioFileResult, 288: ");
+        Log.d(MainActivity.class, LOG_TAG, "requestLatestAudioFileResult (278): ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
-                Log.d(LOG_TAG, "requestLatestAudioFileResult, 292: Received latest audio file succesfully.");
+                Log.d(MainActivity.class, LOG_TAG, "requestLatestAudioFileResult (282): Received latest audio file succesfully.");
                 requestAudioAndVideoMix();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
-                Log.e(LOG_TAG, "requestLatestAudioFileResult, 171: Error while receiving latest audio file.");
+                Log.e(MainActivity.class, LOG_TAG, "requestLatestAudioFileResult (285): Error while receiving latest audio file.");
                 Toast.makeText(this, "Error while receiving latest audio file.", Toast.LENGTH_LONG).show();
                 break;
             default:
-                Log.e(LOG_TAG, "requestLatestAudioFileResult, 175: Unknown result received from \"request latest audio file\" command.");
+                Log.e(MainActivity.class, LOG_TAG, "requestLatestAudioFileResult (289): Unknown result received from \"request latest audio file\" command.");
                 Toast.makeText(this, "Error while receiving latest audio file.", Toast.LENGTH_LONG).show();
                 break;
         }
@@ -285,16 +294,15 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
     }
 
     private void requestAudioAndVideoMix() {
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 142: Requesting audio and video mix.");
+        Log.d(MainActivity.class, LOG_TAG, "requestAudioAndVideoMix (297): Requesting audio and video mix.");
         File audioFile = audioRecorder.getLatestAudioFile();
         File movieFile = videoRecorder.getVideoFile();
 
         long startAudioCommandDelay = audioRecorder.getStartCommandDelay();
-
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 327: Audio file: " + audioFile);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 328: Video file: " + movieFile);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 329: Audio recorder start command delay (us): " + startAudioCommandDelay);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 332: Video recorder start command delay (us): " + videoRecorder.getStartRecordingDelay());
+        Log.d(MainActivity.class, LOG_TAG, "requestAudioAndVideoMix (302): Audio file: " + audioFile);
+        Log.d(MainActivity.class, LOG_TAG, "requestAudioAndVideoMix (303): Video file: " + movieFile);
+        Log.d(MainActivity.class, LOG_TAG, "requestAudioAndVideoMix (304): Audio recorder start command delay (us): " + startAudioCommandDelay);
+        Log.d(MainActivity.class, LOG_TAG, "requestAudioAndVideoMix (305): Video recorder start command delay (us): " + videoRecorder.getStartRecordingDelay());
 
         startAudioCommandDelay += videoRecorder.getStartRecordingDelay();
 
@@ -313,10 +321,9 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
         //long startAudioCommandDelay = audioRecorder.getStartCommandDelay();
         long startAudioCommandDelay = 560000;
 
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 327: Audio file: " + audioFile);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 328: Video file: " + movieFile);
-        Log.d(LOG_TAG, "requestAudioAndVideoMix, 329: Audio recorder start command delay (us): " + startAudioCommandDelay);
-        //Log.d(LOG_TAG, "requestAudioAndVideoMix, 332: Video recorder start command delay (us): " + videoRecorder.getStartRecordingDelay());
+        Log.d(MainActivity.class, LOG_TAG, "testMix (324): Audio file: " + audioFile);
+        Log.d(MainActivity.class, LOG_TAG, "testMix (325): Video file: " + movieFile);
+        Log.d(MainActivity.class, LOG_TAG, "testMix (326): Audio recorder start command delay (us): " + startAudioCommandDelay);
 
         //startAudioCommandDelay += videoRecorder.getStartRecordingDelay();
         startAudioCommandDelay += 40000;

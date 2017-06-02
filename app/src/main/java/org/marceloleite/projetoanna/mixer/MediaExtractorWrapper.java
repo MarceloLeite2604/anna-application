@@ -3,9 +3,9 @@ package org.marceloleite.projetoanna.mixer;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.MediaTrackInfos;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,17 @@ import java.io.IOException;
 
 public class MediaExtractorWrapper {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = MediaExtractorWrapper.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(MediaExtractorWrapper.class);
+    }
 
     private MediaExtractor mediaExtractor;
 
@@ -81,11 +91,11 @@ public class MediaExtractorWrapper {
 
         int totalTracks = mediaExtractor.getTrackCount();
 
-        Log.d(LOG_TAG, "findMediaTrack, 67: Total of tracks: " + totalTracks);
+        Log.d(MediaExtractorWrapper.class, LOG_TAG, "findMediaTrack (94): Total of tracks: " + totalTracks);
         for (int trackCounter = 0; trackCounter < totalTracks; trackCounter++) {
             MediaFormat trackMediaFormat = mediaExtractor.getTrackFormat(trackCounter);
             String mime = trackMediaFormat.getString(MediaFormat.KEY_MIME);
-            Log.d(LOG_TAG, "findMediaTrack, 70: Mimetype: " + mime);
+            Log.d(MediaExtractorWrapper.class, LOG_TAG, "findMediaTrack (98): Mimetype: " + mime);
             if (mimetype.equals(mime)) {
                 mediaTrackInfos = new MediaTrackInfos(trackCounter, trackMediaFormat);
                 break;
@@ -93,7 +103,7 @@ public class MediaExtractorWrapper {
         }
 
         if (mediaTrackInfos == null) {
-            Log.e(LOG_TAG, "findMediaTrack, 35: Could not find a track with mimetype \"" + mimetype + "\".");
+            Log.e(MediaExtractorWrapper.class, LOG_TAG, "findMediaTrack (106): Could not find a track with mimetype \"" + mimetype + "\".");
         }
 
         return mediaTrackInfos;

@@ -4,11 +4,11 @@ import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteOutputStream;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.AudioData;
 import org.marceloleite.projetoanna.utils.ByteBufferUtils;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 
 import java.io.File;
@@ -22,7 +22,18 @@ import java.nio.ByteBuffer;
 
 public class MediaDecoderCallback extends MediaCodecCallback {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = MediaDecoderCallback.class.getSimpleName();
+
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(MediaDecoderCallback.class);
+    }
 
     private ByteBufferWriteOutputStream byteBufferWriteOutputStream;
 
@@ -33,7 +44,7 @@ public class MediaDecoderCallback extends MediaCodecCallback {
     public MediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile, long audioDelay, long audioDuration) throws IOException {
         this.mediaExtractor = mediaExtractor;
         this.finishedDecoding = false;
-        Log.d(LOG_TAG, "MediaDecoderCallback (38): Audio duration: " + audioDuration + ", audio delay: " + audioDelay);
+        Log.d(MediaDecoderCallback.class, LOG_TAG, "MediaDecoderCallback (47): Audio duration: " + audioDuration + ", audio delay: " + audioDelay);
 
         long bytesToIgnore = AudioUtils.calculateBytesOnAudioTime(audioDelay);
         long bytesToRead = AudioUtils.calculateBytesOnAudioTime(audioDuration);
@@ -52,7 +63,7 @@ public class MediaDecoderCallback extends MediaCodecCallback {
             bufferInfo.flags = mediaExtractor.getSampleFlags();
             mediaExtractor.advance();
         } else {
-            Log.d(LOG_TAG, "onInputBufferAvailable, 51: End of mp3 file.");
+            Log.d(MediaDecoderCallback.class, LOG_TAG, "onInputBufferAvailable (66): End of mp3 file.");
             inputBuffer.clear();
             bufferInfo.size = 0;
             bufferInfo.presentationTimeUs = -1;
@@ -70,7 +81,7 @@ public class MediaDecoderCallback extends MediaCodecCallback {
 
 
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-            Log.d(LOG_TAG, "onOutputBufferAvailable, 74: End of output stream.");
+            Log.d(MediaDecoderCallback.class, LOG_TAG, "onOutputBufferAvailable (84): End of output stream.");
 
             byteBufferWriteOutputStream.concludeWriting();
             this.finishedDecoding = true;
@@ -83,14 +94,14 @@ public class MediaDecoderCallback extends MediaCodecCallback {
 
     @Override
     public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-        Log.e(LOG_TAG, "onError, 74: An error occurred on media codec" + mediaCodec);
+        Log.e(MediaDecoderCallback.class, LOG_TAG, "onError (97): An error occurred on media codec" + mediaCodec);
         e.printStackTrace();
 
     }
 
     @Override
     public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-        Log.d(LOG_TAG, "onOutputFormatChanged, 82: Output format changed to " + mediaFormat);
+        Log.d(MediaDecoderCallback.class, LOG_TAG, "onOutputFormatChanged (104): Output format changed to " + mediaFormat);
     }
 
     @Override

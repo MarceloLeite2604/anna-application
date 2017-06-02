@@ -1,6 +1,6 @@
 package org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter;
 
-import android.util.Log;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.util.TreeMap;
 
@@ -10,7 +10,17 @@ import java.util.TreeMap;
 
 public abstract class ByteBufferWriter {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = ByteBufferWriter.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(ByteBufferWriter.class);
+    }
 
     protected static final int DEFAULT_MAXIMUM_ITEMS_ON_MAP = 8;
 

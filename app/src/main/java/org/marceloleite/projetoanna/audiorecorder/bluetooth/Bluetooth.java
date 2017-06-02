@@ -5,19 +5,18 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import org.marceloleite.projetoanna.R;
-import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
-import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.AlertDialogStartPairing;
-import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.Pairer;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.connector.AsyncTaskConnectWithDevice;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.connector.AsyncTaskConnectWithDeviceParameters;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.connector.AsyncTaskConnectWithDeviceResult;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.AlertDialogStartPairing;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.Pairer;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.selectdevice.AlertDialogSelectBluetoothDevice;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.selectdevice.SelectBluetoothDeviceInterface;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.IOException;
 import java.util.Set;
@@ -32,6 +31,13 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
      * A tag to identify this class' messages on log.
      */
     private static final String LOG_TAG = Bluetooth.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(Bluetooth.class);
+    }
 
     public static final UUID BLUETOOTH_SERVICE_UUID = UUID.fromString("f5934b96-0110-11e6-8d22-5e5517507c66");
 
@@ -73,7 +79,7 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
                 requestBluetoothAdapterActivation();
             }
         } else {
-            Log.e(LOG_TAG, "connectWithAudioRecorder, 84: This device does not have a bluetooth adapter.");
+            Log.e(Bluetooth.class, LOG_TAG, "connectWithAudioRecorder (82): This device does not have a bluetooth adapter.");
             bluetoothInterface.connectWithAudioRecorderResult(BluetoothConnectReturnCodes.GENERIC_ERROR);
         }
     }
@@ -118,7 +124,7 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
 
     private boolean checkDeviceHasBluetoothAdapter() {
         if (bluetoothAdapter == null) {
-            Log.e(LOG_TAG, "isBluetoothAdapterActivated, 135: This device does not have a bluetooth adapter.");
+            Log.e(Bluetooth.class, LOG_TAG, "checkDeviceHasBluetoothAdapter (127): This device does not have a bluetooth adapter.");
             return false;
         }
         return true;
@@ -126,7 +132,7 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
 
     private boolean isBluetoothAdapterActivated() {
         if (bluetoothAdapter == null) {
-            Log.e(LOG_TAG, "isBluetoothAdapterActivated, 144: This device does not have a bluetooth adapter.");
+            Log.e(Bluetooth.class, LOG_TAG, "isBluetoothAdapterActivated (135): This device does not have a bluetooth adapter.");
             return false;
         } else {
             return bluetoothAdapter.isEnabled();
@@ -135,7 +141,7 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
 
     private void requestBluetoothAdapterActivation() {
         if (isBluetoothAdapterActivated()) {
-            Log.d(LOG_TAG, "activateBluetoothAdapter, 124: Bluetooth adapter is already active.");
+            Log.d(Bluetooth.class, LOG_TAG, "requestBluetoothAdapterActivation (144): Bluetooth adapter is already active.");
         } else {
             Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             bluetoothInterface.getAppCompatActivity().startActivityForResult(enableBluetoothIntent, Bluetooth.ENABLE_BLUETOOTH_REQUEST_CODE);
@@ -145,11 +151,11 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
     public void requestBluetoothAdapterActivationResult(int resultCode) {
         switch (resultCode) {
             case AppCompatActivity.RESULT_OK:
-                Log.d(LOG_TAG, "enableBluetoothActivityResult, 55: Bluetooth activated.");
+                Log.d(Bluetooth.class, LOG_TAG, "requestBluetoothAdapterActivationResult (154): Bluetooth activated.");
                 checkDeviceToConnect();
                 break;
             default:
-                Log.d(LOG_TAG, "enableBluetoothActivityResult, 59: Bluetooth not activated.");
+                Log.d(Bluetooth.class, LOG_TAG, "requestBluetoothAdapterActivationResult (158): Bluetooth not activated.");
                 bluetoothInterface.connectWithAudioRecorderResult(BluetoothConnectReturnCodes.CONNECTION_CANCELLED);
                 break;
         }
@@ -170,10 +176,10 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
         this.bluetoothDevice = bluetoothDevice;
 
         if (bluetoothDevice != null) {
-            Log.d(LOG_TAG, "bluetoothDeviceSelected, 93: Bluetooth device is " + bluetoothDevice.getAddress());
+            Log.d(Bluetooth.class, LOG_TAG, "bluetoothDeviceSelected (179): Bluetooth device is " + bluetoothDevice.getAddress());
             connectWithDevice();
         } else {
-            Log.d(LOG_TAG, "bluetoothDeviceSelected, 191: User didn't select any device.");
+            Log.d(Bluetooth.class, LOG_TAG, "bluetoothDeviceSelected (182): User didn't select any device.");
             bluetoothInterface.connectWithAudioRecorderResult(BluetoothConnectReturnCodes.CONNECTION_CANCELLED);
         }
     }
@@ -198,7 +204,7 @@ public class Bluetooth implements SelectBluetoothDeviceInterface, AsyncTaskConne
             try {
                 this.bluetoothSocket.close();
             } catch (IOException ioException) {
-                Log.e(LOG_TAG, "disconnectFromDevice, 227: Error while closing socket with device.");
+                Log.e(Bluetooth.class, LOG_TAG, "disconnectFromDevice (207): Error while closing socket with device.");
                 ioException.printStackTrace();
             }
         }

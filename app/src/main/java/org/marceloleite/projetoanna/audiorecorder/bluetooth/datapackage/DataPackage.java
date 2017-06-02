@@ -1,7 +1,5 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage;
 
-import android.util.Log;
-
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.CommandResultContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.ConfirmationContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.Content;
@@ -9,6 +7,7 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.FileChunkContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.FileHeaderContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.FileTrailerContent;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -20,7 +19,17 @@ import java.util.Random;
 
 public class DataPackage {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = DataPackage.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(DataPackage.class);
+    }
 
     /**
      * Minimum acceptable package size (in bytes).

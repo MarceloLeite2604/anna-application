@@ -5,10 +5,10 @@ import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
 import org.marceloleite.projetoanna.mixer.media.codec.MediaCodecWrapper;
+import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
@@ -25,15 +25,25 @@ public abstract class Mixer {
 
     private static final int VIDEO_COPY_BUFFER_SIZE = 1024 * 1024;
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = Mixer.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(Mixer.class);
+    }
 
     public static File mixAudioAndVideo(File audioFile, File videoFile, long startAudioDelay) throws IOException {
 
         /* Creates and configures the media extractor for video file. */
         MediaExtractorWrapper videoFileMediaExtractorWrapper = new MediaExtractorWrapper(videoFile, MediaFormat.MIMETYPE_VIDEO_AVC);
 
-        long audioFileDuration = videoFileMediaExtractorWrapper.getMediaDuration()*1000;
-        Log.d(LOG_TAG, "mixAudioAndVideo (36): Audio file duration: " + audioFileDuration);
+        long audioFileDuration = videoFileMediaExtractorWrapper.getMediaDuration() * 1000;
+        Log.d(Mixer.class, LOG_TAG, "mixAudioAndVideo (46): Audio file duration: " + audioFileDuration);
 
         File rawAudioFile = convertMp3ToRaw(audioFile, startAudioDelay, audioFileDuration);
         File mixedVideoFile = createMixedMp4File(rawAudioFile, videoFileMediaExtractorWrapper);
@@ -41,7 +51,7 @@ public abstract class Mixer {
     }
 
     private static File convertMp3ToRaw(File mp3File, long startAudioDelay, long audioDuration) throws IOException {
-        Log.d(LOG_TAG, "convertMp3ToRaw, 40: Converting mp3 file to raw audio.");
+        Log.d(Mixer.class, LOG_TAG, "convertMp3ToRaw (54): Converting mp3 file to raw audio.");
 
         /* Creates and configures the mp3 file media extractor. */
         MediaExtractorWrapper mp3FileMediaExtractorWrapper = new MediaExtractorWrapper(mp3File, MediaFormat.MIMETYPE_AUDIO_MPEG);
@@ -53,15 +63,15 @@ public abstract class Mixer {
         MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile, startAudioDelay, audioDuration);
 
         /* Waits the decodification to conclude. */
-        Log.d(LOG_TAG, "convertMp3ToRaw, 56: Decoding mp3 file.");
+        Log.d(Mixer.class, LOG_TAG, "convertMp3ToRaw (66): Decoding mp3 file.");
         mp3MediaDecoderWrapper.startAndWaitCodec();
-        Log.d(LOG_TAG, "convertMp3ToRaw, 262: Decodification complete.");
+        Log.d(Mixer.class, LOG_TAG, "convertMp3ToRaw (68): Decodification complete.");
 
         return rawAudioFile;
     }
 
     private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile, long startAudioDelay, long audioDuration) throws IOException {
-        Log.d(LOG_TAG, "createMp3MediaDecoder, 119: Creating mp3 media decoder.");
+        Log.d(Mixer.class, LOG_TAG, "createMp3MediaDecoder (74): Creating mp3 media decoder.");
         MediaCodecWrapper mediaCodecWrapper;
 
         MediaFormat mp3MediaFormat = mediaExtractorWrapper.getSelectedMediaTrackInfos().getMediaFormat();
@@ -83,7 +93,7 @@ public abstract class Mixer {
         /* Creates the AAC audio encoder */
         MediaCodecWrapper aacMediaEncoderWrapper = createAacMediaEncoder(rawAudioFile, mediaMuxerWrapper);
 
-        Log.d(LOG_TAG, "createMixedMp4File, 138: Encoding raw audio to AAC format.");
+        Log.d(Mixer.class, LOG_TAG, "createMixedMp4File (96): Encoding raw audio to AAC format.");
         aacMediaEncoderWrapper.startAndWaitCodec();
 
         /*
@@ -92,11 +102,11 @@ public abstract class Mixer {
          */
         // mediaMuxer = ((MediaEncoderCallback) aacMediaEncoderWrapper.getCallback()).getMediaMuxer();
 
-        Log.d(LOG_TAG, "createMixedMp4File, 118: Encoding complete.");
+        Log.d(Mixer.class, LOG_TAG, "createMixedMp4File (105): Encoding complete.");
 
-        Log.d(LOG_TAG, "createMixedMp4File, 106: Copying video to mix file.");
+        Log.d(Mixer.class, LOG_TAG, "createMixedMp4File (107): Copying video to mix file.");
         copyVideoToMixedFile(videoFileMediaExtractorWrapper, mediaMuxerWrapper);
-        Log.d(LOG_TAG, "createMixedMp4File, 106: Video copying complete.");
+        Log.d(Mixer.class, LOG_TAG, "createMixedMp4File (109): Video copying complete.");
 
         /* Stops the media muxer. */
         mediaMuxerWrapper.stopMediaMuxer();
@@ -133,7 +143,7 @@ public abstract class Mixer {
             bufferInfo.size = videoFileMediaExtractor.readSampleData(byteBuffer, AudioUtils.BUFFER_OFFSET);
 
             if (bufferInfo.size < 0) {
-                Log.d(LOG_TAG, "mixAudioAndVideo, 146: End of video copy.");
+                Log.d(Mixer.class, LOG_TAG, "copyVideoToMixedFile (146): End of video copy.");
                 videoExtractionConcluded = true;
                 bufferInfo.size = 0;
             } else {

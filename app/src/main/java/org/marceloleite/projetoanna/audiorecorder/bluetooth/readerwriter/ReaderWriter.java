@@ -1,10 +1,8 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter;
 
 import android.bluetooth.BluetoothSocket;
-import android.util.Log;
 
-import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.DataPackage;
-import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
+import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +15,17 @@ import java.nio.ByteBuffer;
 
 public class ReaderWriter {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = ReaderWriter.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(ReaderWriter.class);
+    }
 
     private static final ReaderWriterException CONNECTION_IS_CLOSED_EXCEPTION = new ReaderWriterException("Bluetooth connection is closed.");
 

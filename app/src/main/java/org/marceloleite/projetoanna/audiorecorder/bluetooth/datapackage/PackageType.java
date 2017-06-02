@@ -91,15 +91,6 @@ public enum PackageType {
     }
 
     /**
-     * Returns the package title.
-     *
-     * @return The package title.
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
      * Returns the package type according with the code informed.
      *
      * @param code The code to be checked.

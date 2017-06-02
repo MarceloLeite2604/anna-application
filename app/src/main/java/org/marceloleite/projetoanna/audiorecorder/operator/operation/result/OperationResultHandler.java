@@ -2,9 +2,9 @@ package org.marceloleite.projetoanna.audiorecorder.operator.operation.result;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
+import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by Marcelo Leite on 24/04/2017.
@@ -12,7 +12,17 @@ import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
 
 public class OperationResultHandler extends Handler {
 
+    /**
+     * A tag to identify this class' messages on log.
+     */
     private static final String LOG_TAG = OperationResultHandler.class.getSimpleName();
+
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(OperationResultHandler.class);
+    }
 
     public static final int RECEIVE_COMMAND_RESULT = 0xab7f;
 
@@ -36,7 +46,7 @@ public class OperationResultHandler extends Handler {
                 operationResultInterface.connectionLost();
                 break;
             default:
-                Log.d(LOG_TAG, "handleMessage, 33: Handling message to another handler.");
+                Log.d(OperationResultHandler.class, LOG_TAG, "handleMessage (49): Handling message to another handler.");
                 super.handleMessage(message);
                 break;
         }
