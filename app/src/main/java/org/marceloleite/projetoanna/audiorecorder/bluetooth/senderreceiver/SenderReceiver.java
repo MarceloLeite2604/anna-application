@@ -7,6 +7,7 @@ import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.PackageT
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.ConfirmationContent;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.datapackage.content.Content;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.pairer.CommunicationException;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReadSocketContentResult;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReaderWriter;
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.readerwriter.ReaderWriterException;
 import org.marceloleite.projetoanna.utils.Log;
@@ -206,14 +207,15 @@ public class SenderReceiver {
     }
 
     private byte[] readFromSocket() throws ReaderWriterException {
-        byte[] contentRead;
-        contentRead = readerWriter.readSocketContent();
+        ReadSocketContentResult readSocketContentResult;
+        readSocketContentResult = readerWriter.readSocketContent();
         /*if (contentRead != null) {
             Log.d(LOG_TAG, "readFromSocket, 179: Read " + contentRead.length + " byte(s) from socket.");
         }*/
-        contentRead = concatenateRemainingBytes(contentRead);
-        contentRead = removeRemainingBytes(contentRead);
-        return contentRead;
+        byte[] bytes = readSocketContentResult.getContentRead();
+        bytes = concatenateRemainingBytes(bytes);
+        bytes = removeRemainingBytes(bytes);
+        return bytes;
     }
 
     private byte[] removeRemainingBytes(byte[] bytes) {

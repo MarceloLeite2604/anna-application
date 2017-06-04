@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * Created by Marcelo Leite on 18/04/2017.
+ * Controls the input and output of data from a bluetooth socket.
  */
 
 public class ReaderWriter {
@@ -27,12 +27,19 @@ public class ReaderWriter {
         Log.addClassToLog(ReaderWriter.class);
     }
 
-    private static final ReaderWriterException CONNECTION_IS_CLOSED_EXCEPTION = new ReaderWriterException("Bluetooth connection is closed.");
-
+    /**
+     * The bluetooth socket which the reading and writing is being controlled.
+     */
     private BluetoothSocket bluetoothSocket;
 
+    /**
+     * The bluetooth socket input stream.
+     */
     private InputStream bluetoothSocketInputStream;
 
+    /**
+     * The bluetooth socket output stream.
+     */
     private OutputStream bluetoothSocketOuptutStream;
 
     public ReaderWriter(BluetoothSocket bluetoothSocket) throws IOException {
@@ -42,16 +49,18 @@ public class ReaderWriter {
         this.bluetoothSocketOuptutStream = bluetoothSocket.getOutputStream();
     }
 
-    public byte[] readSocketContent() throws ReaderWriterException {
+    public ReadSocketContentResult readSocketContent() throws IOException {
+        ReadSocketContentResult readSocketContentResult;
         byte[] bytes = null;
         byte[] previousBytes = null;
         boolean doneReading = false;
         if (isBluetoothConnected()) {
             while (!doneReading) {
                 try {
+                    /* Checks the total of bytes available on input stream. */
                     int totalBytesAvailable = bluetoothSocketInputStream.available();
                     if (totalBytesAvailable > 0) {
-                        /*Log.d(LOG_TAG, "readSocketContent, 37: Total of bytes available on socket: " + totalBytesAvailable);*/
+
                         if (bytes == null) {
                             bytes = new byte[totalBytesAvailable];
                         } else {
@@ -59,32 +68,31 @@ public class ReaderWriter {
                             bytes = new byte[totalBytesAvailable];
                         }
 
+                        /* Read content from input socket. */
                         int totalRead = bluetoothSocketInputStream.read(bytes);
-                        /*Log.d(LOG_TAG, "readSocketContent, 47: Total of bytes read from socket: " + totalRead);*/
 
                         if (previousBytes != null) {
+                            /* Concatenates on content the bytes read on previous reading. */
                             bytes = ByteBuffer.allocate(previousBytes.length + bytes.length).put(previousBytes).put(bytes).array();
                         }
-                        /*Log.d(LOG_TAG, "readSocketContent, 52: Total of bytes on buffer: " + bytes.length);*/
 
                     } else {
                         doneReading = true;
                     }
+                    /* If something went wrong while checking bluetooth input stream. */
                 } catch (IOException ioException) {
-                    String exceptionMessage = "Error reading socket content.";
-                    throw new ReaderWriterException(exceptionMessage, ioException);
+                    String exceptionMessage = "Error while reading bluetooth socket input stream.";
+                    throw new IOException(exceptionMessage, ioException);
                 }
             }
+            readSocketContentResult = new ReadSocketContentResult(ReaderWriterReturnValues.SUCCESS, bytes);
         } else {
-            throw CONNECTION_IS_CLOSED_EXCEPTION;
+            readSocketContentResult = new ReadSocketContentResult(ReaderWriterReturnValues.CONNECTION_LOST, null);
         }
-        /*if (bytes != null) {
-            Log.d(LOG_TAG, "readSocketContent, 67: Total os bytes on buffer: " + bytes.length);
-        }*/
-        return bytes;
+        return readSocketContentResult;
     }
 
-    public void writeContentOnSocket(byte[] bytes) throws ReaderWriterException {
+    public int writeContentOnSocket(byte[] bytes) throws ReaderWriterException {
 
         if (isBluetoothConnected()) {
             try {
@@ -95,11 +103,10 @@ public class ReaderWriter {
                 String exceptionMessage = "Error writing content on socket.";
                 throw new ReaderWriterException(exceptionMessage, ioException);
             }
+            return ReaderWriterReturnValues.SUCCESS;
         } else {
-            throw CONNECTION_IS_CLOSED_EXCEPTION;
+            return ReaderWriterReturnValues.CONNECTION_LOST;
         }
-
-
     }
 
     public void closeConnection() throws ReaderWriterException {
@@ -113,6 +120,11 @@ public class ReaderWriter {
         }
     }
 
+    /**
+     * Checks is bluetooth socket is still connected.
+     *
+     * @return True if bluetooth socket is still connected. False otherwise.
+     */
     private boolean isBluetoothConnected() {
         return bluetoothSocket.isConnected();
     }
