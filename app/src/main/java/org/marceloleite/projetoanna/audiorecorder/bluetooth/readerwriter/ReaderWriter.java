@@ -12,7 +12,6 @@ import java.nio.ByteBuffer;
 /**
  * Controls the input and output of data from a bluetooth socket.
  */
-
 public class ReaderWriter {
 
     /**
@@ -28,7 +27,7 @@ public class ReaderWriter {
     }
 
     /**
-     * The bluetooth socket which the reading and writing is being controlled.
+     * The bluetooth socket where the reading and writing is being controlled.
      */
     private BluetoothSocket bluetoothSocket;
 
@@ -40,15 +39,25 @@ public class ReaderWriter {
     /**
      * The bluetooth socket output stream.
      */
-    private OutputStream bluetoothSocketOuptutStream;
+    private OutputStream bluetoothSocketOutputStream;
 
-    public ReaderWriter(BluetoothSocket bluetoothSocket) throws IOException {
-
+    public ReaderWriter(BluetoothSocket bluetoothSocket) {
+        Log.d(ReaderWriter.class, LOG_TAG, "ReaderWriter (46): ");
         this.bluetoothSocket = bluetoothSocket;
-        this.bluetoothSocketInputStream = bluetoothSocket.getInputStream();
-        this.bluetoothSocketOuptutStream = bluetoothSocket.getOutputStream();
+        try {
+            this.bluetoothSocketInputStream = bluetoothSocket.getInputStream();
+            this.bluetoothSocketOutputStream = bluetoothSocket.getOutputStream();
+        } catch (IOException ioException) {
+            throw new RuntimeException("Could not create ReaderWriter object.", ioException);
+        }
     }
 
+    /**
+     * Reads a content from bluetooth socket.
+     *
+     * @return A {@link ReadSocketContentResult} object with the code returned and the content read from it. If the bluetooth socket is still connected, the code returned will be {@link ReaderWriterReturnValues#SUCCESS}. Otherwise, it will be {@link ReaderWriterReturnValues#CONNECTION_LOST}.
+     * @throws IOException If an exception occurred while reading bluetooth socket.
+     */
     public ReadSocketContentResult readSocketContent() throws IOException {
         ReadSocketContentResult readSocketContentResult;
         byte[] bytes = null;
@@ -71,9 +80,14 @@ public class ReaderWriter {
                         /* Read content from input socket. */
                         int totalRead = bluetoothSocketInputStream.read(bytes);
 
-                        if (previousBytes != null) {
+
+                        if (totalRead >= 0) {
+                            if (previousBytes != null) {
                             /* Concatenates on content the bytes read on previous reading. */
-                            bytes = ByteBuffer.allocate(previousBytes.length + bytes.length).put(previousBytes).put(bytes).array();
+                                bytes = ByteBuffer.allocate(previousBytes.length + bytes.length).put(previousBytes).put(bytes).array();
+                            }
+                        } else {
+                            throw new RuntimeException("Error while reading content from bluetooth socket input stream.");
                         }
 
                     } else {
@@ -92,16 +106,25 @@ public class ReaderWriter {
         return readSocketContentResult;
     }
 
-    public int writeContentOnSocket(byte[] bytes) throws ReaderWriterException {
+    /**
+     * Writes a content on bluetooth socket.
+     *
+     * @param bytes The content to be written.
+     * @return {@link ReaderWriterReturnValues#SUCCESS} if content was written successfully. {@link ReaderWriterReturnValues#CONNECTION_LOST} if bluetooth connection was lost.
+     * @throws IOException If an exception occurred while writing content on bluetooth socket.
+     */
+    public int writeContentOnSocket(byte[] bytes) throws IOException {
 
+        /* Checks if bluetooth socket is connected. */
         if (isBluetoothConnected()) {
             try {
-                /*Log.d(LOG_TAG, "writeContentOnSocket, 70: Writing " + bytes.length + " byte(s) on socket.");*/
-                bluetoothSocketOuptutStream.write(bytes);
-                bluetoothSocketOuptutStream.flush();
+
+                /* Writes content on bluetooth socket. */
+                bluetoothSocketOutputStream.write(bytes);
+                bluetoothSocketOutputStream.flush();
             } catch (IOException ioException) {
-                String exceptionMessage = "Error writing content on socket.";
-                throw new ReaderWriterException(exceptionMessage, ioException);
+                String exceptionMessage = "Error while writing content on bluetooth socket.";
+                throw new IOException(exceptionMessage, ioException);
             }
             return ReaderWriterReturnValues.SUCCESS;
         } else {
@@ -109,13 +132,18 @@ public class ReaderWriter {
         }
     }
 
-    public void closeConnection() throws ReaderWriterException {
+    /**
+     * Closes bluetooth socket connection.
+     *
+     * @throws IOException If an exception occurred while closing bluetooth socket connection.
+     */
+    public void closeConnection() throws IOException {
         if (isBluetoothConnected()) {
             try {
                 bluetoothSocket.close();
             } catch (IOException ioException) {
-                String exceptionMessage = "Error closing socket connection.";
-                throw new ReaderWriterException(exceptionMessage, ioException);
+                String exceptionMessage = "Error while closing bluetooth socket.";
+                throw new IOException(exceptionMessage, ioException);
             }
         }
     }

@@ -1,13 +1,18 @@
 package org.marceloleite.projetoanna.utils;
 
 /**
- * Created by Marcelo Leite on 18/04/2017.
+ * Generic codes returned from some of this application methods.
  */
-
 public abstract class GenericReturnCodes {
 
-        public static final int SUCCESS = 0;
+    /**
+     * Code returned when a method was executed successfully.
+     */
+    public static final int SUCCESS = 0;
 
-        public static final int GENERIC_ERROR = 1;
+    /**
+     * Code returned when a generic error occurred while a method was being executed.
+     */
+    public static final int GENERIC_ERROR = 1;
 
 }

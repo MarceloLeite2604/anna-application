@@ -3,9 +3,8 @@ package org.marceloleite.projetoanna.utils.audio;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 09/05/2017.
+ * Stores the constants utilized to inform the audio encoding and decoding quality and some generic methods related to audio.
  */
-
 public abstract class AudioUtils {
 
     /**
@@ -20,10 +19,19 @@ public abstract class AudioUtils {
         Log.addClassToLog(AudioUtils.class);
     }
 
+    /**
+     * The offset utilized on audio buffers.
+     */
     public static final int BUFFER_OFFSET = 0;
 
+    /**
+     * Sample rate of the audio received.
+     */
     public static final int SAMPLE_RATE = 44100;
 
+    /**
+     * Number of channels on audio received.
+     */
     public static final int CHANNELS = 2;
 
     /**
