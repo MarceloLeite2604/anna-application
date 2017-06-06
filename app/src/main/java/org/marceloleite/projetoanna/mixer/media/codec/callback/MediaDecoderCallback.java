@@ -46,8 +46,8 @@ public class MediaDecoderCallback extends MediaCodecCallback {
         this.finishedDecoding = false;
         Log.d(MediaDecoderCallback.class, LOG_TAG, "MediaDecoderCallback (47): Audio duration: " + audioDuration + ", audio delay: " + audioDelay);
 
-        long bytesToIgnore = AudioUtils.calculateBytesOnAudioTime(audioDelay);
-        long bytesToRead = AudioUtils.calculateBytesOnAudioTime(audioDuration);
+        long bytesToIgnore = AudioUtils.calculateBytesOnAudioDuration(audioDelay);
+        long bytesToRead = AudioUtils.calculateBytesOnAudioDuration(audioDuration);
         FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
         this.byteBufferWriteOutputStream = new ByteBufferWriteOutputStream(fileOutputStream, bytesToIgnore, bytesToRead);
     }

@@ -40,19 +40,36 @@ public abstract class AudioUtils {
      */
     private static final int SAMPLE_FORMAT = 2;
 
+    /**
+     * Bit rate used to encode audio on AAC format.
+     */
     public static final int AAC_ENCODING_BIT_RATE = 128000;
 
+    /**
+     * Maximum input size of an audio sample to encode on AAC format.
+     */
     public static final int AAC_ENCODING_MAX_INPUT_SIZE = 16 * 1024;
 
-    public static long calculatePresentationTimeUs(long totalBytes) {
-        long presentationTimeUs = (long) (1000000f * ((float) totalBytes / (float) (CHANNELS * SAMPLE_RATE * SAMPLE_FORMAT)));
-        return presentationTimeUs;
+    /**
+     * Calculates the duration of an audio based on its number of bytes.
+     *
+     * @param totalBytes The number of bytes that compose the audio.
+     * @return The audio time duration (in microseconds).
+     */
+    public static long calculateAudioDuration(long totalBytes) {
+        Log.d(AudioUtils.class, LOG_TAG, "calculateAudioDuration (60): ");
+        return (long) (1000000f * ((float) totalBytes / (float) (CHANNELS * SAMPLE_RATE * SAMPLE_FORMAT)));
     }
 
-    public static long calculateBytesOnAudioTime(long timeUs) {
-        long samplesOnTime = Math.round((float) SAMPLE_RATE * (float) timeUs / 1000000f);
-        long totalBytes = samplesOnTime * CHANNELS * SAMPLE_FORMAT;
-        return totalBytes;
+    /**
+     * Calculates the quantity of bytes required to compose an audio with the duration specified.
+     *
+     * @param audioDuration The duration of the audio requested
+     * @return The quantity of bytes required to compose an audio with the duration specified.
+     */
+    public static long calculateBytesOnAudioDuration(long audioDuration) {
+        long samplesOnTime = Math.round((float) SAMPLE_RATE * (float) audioDuration / 1000000f);
+        return samplesOnTime * CHANNELS * SAMPLE_FORMAT;
     }
 
 

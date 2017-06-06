@@ -144,7 +144,7 @@ public class MediaEncoderCallback extends MediaCodecCallback {
             if (oldBufferInfo.size < byteBuffer.capacity()) {
                 newBufferInfo.flags = newBufferInfo.flags | MediaCodec.BUFFER_FLAG_END_OF_STREAM;
             }
-            newBufferInfo.presentationTimeUs = AudioUtils.calculatePresentationTimeUs(totalBytesRead);
+            newBufferInfo.presentationTimeUs = AudioUtils.calculateAudioDuration(totalBytesRead);
         } else {
             newBufferInfo.size = 0;
             newBufferInfo.flags = newBufferInfo.flags | MediaCodec.BUFFER_FLAG_END_OF_STREAM;
