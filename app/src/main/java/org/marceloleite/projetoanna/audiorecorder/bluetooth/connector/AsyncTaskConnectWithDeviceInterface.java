@@ -13,4 +13,10 @@ public interface AsyncTaskConnectWithDeviceResult {
      * @param bluetoothSocket The bluetooth socket connection with the remove device.
      */
     void connectWithDeviceProcessFinished(BluetoothSocket bluetoothSocket);
+
+    /**
+     * Returns the parameters required to execute the bluetooth connection task.
+     * @return The parameters required to execute the bluetooth connection task.
+     */
+    AsyncTaskConnectWithDeviceParameters getAsyncTaskConnectWithDeviceParameters();
 }
