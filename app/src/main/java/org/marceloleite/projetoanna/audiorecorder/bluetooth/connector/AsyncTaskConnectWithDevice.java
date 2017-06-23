@@ -9,33 +9,45 @@ import org.marceloleite.projetoanna.utils.Log;
 import java.io.IOException;
 
 /**
- * Created by Marcelo Leite on 20/03/2017.
+ * A asynchronous task which stablishes a bluetooth connection with a device.
  */
-public class AsyncTaskConnectWithDevice extends AsyncTask<AsyncTaskConnectWithDeviceParameters, Integer, BluetoothSocket> {
+public class AsyncTaskConnectWithDevice extends AsyncTask<Void, Integer, BluetoothSocket> {
 
     /**
      * A tag to identify this class' messages on log.
      */
     private static final String LOG_TAG = AsyncTaskConnectWithDevice.class.getSimpleName();
 
+    /*
+     * Enables messages of this class to be shown on log.
+     */
+    static {
+        Log.addClassToLog(LOG_TAG);
+    }
+
+    /**
+     * The alert dialog to inform the user that a bluetooth connection is being established.
+     */
     private AlertDialogConnectingToDevice alertDialogConnectingToDevice;
 
+    /**
+     * The parameters to execute the bluetooth connection asynchronous task.
+     */
     private AsyncTaskConnectWithDeviceParameters parameters;
 
+    /**
+     * The object which should be executed after the bluetooth connection is concluded.
+     */
     private AsyncTaskConnectWithDeviceResult result;
-
-    private BluetoothSocket bluetoothSocket;
 
     public AsyncTaskConnectWithDevice(AsyncTaskConnectWithDeviceParameters asyncTaskConnectWithDeviceParameters, AsyncTaskConnectWithDeviceResult asyncTaskConnectWithDeviceResult) {
         this.parameters = asyncTaskConnectWithDeviceParameters;
         this.result = asyncTaskConnectWithDeviceResult;
-
-
     }
 
     @Override
     protected void onPreExecute() {
-        alertDialogConnectingToDevice = new AlertDialogConnectingToDevice(parameters.getAppCompatActivity(), parameters.getBluetoothDevice());
+        alertDialogConnectingToDevice = new AlertDialogConnectingToDevice(parameters.getAppCompatActivity(), parameters.getBluetoothDevice(), parameters.getViewGroup());
         alertDialogConnectingToDevice.show();
     }
 
@@ -46,33 +58,25 @@ public class AsyncTaskConnectWithDevice extends AsyncTask<AsyncTaskConnectWithDe
     }
 
     @Override
-    protected BluetoothSocket doInBackground(AsyncTaskConnectWithDeviceParameters... asyncTaskConnectWithDeviceParameterses) {
-
-        BluetoothSocket temporaryBluetoothSocket = null;
+    protected BluetoothSocket doInBackground(Void... voids) {
 
         try {
-            temporaryBluetoothSocket = parameters.getBluetoothDevice().createRfcommSocketToServiceRecord(Bluetooth.BLUETOOTH_SERVICE_UUID);
-        } catch (IOException ioException) {
-            Log.e(AsyncTaskConnectWithDevice.class, LOG_TAG, "doInBackground (55): Could not create RFCOMM socket to service.", ioException);
-        }
-        bluetoothSocket = temporaryBluetoothSocket;
-        Log.d(AsyncTaskConnectWithDevice.class, LOG_TAG, "doInBackground (59): " + bluetoothSocket.toString());
-
-        try {
-            bluetoothSocket.connect();
-        } catch (IOException connectException) {
-            Log.w(AsyncTaskConnectWithDevice.class, LOG_TAG, "doInBackground (64): Could not connectWithAudioRecorder to device " + parameters.getBluetoothDevice().getAddress() + "\".", connectException);
+            BluetoothSocket bluetoothSocket = parameters.getBluetoothDevice().createRfcommSocketToServiceRecord(Bluetooth.BLUETOOTH_SERVICE_UUID);
 
             try {
-                bluetoothSocket.close();
-            } catch (IOException closeException) {
-                Log.w(AsyncTaskConnectWithDevice.class, LOG_TAG, "doInBackground (69): Could not close socket with device " + parameters.getBluetoothDevice().getAddress() + "\".");
+                bluetoothSocket.connect();
+            } catch (IOException connectException) {
+                Log.e(LOG_TAG, "doInBackground (69): Exception while connecting: " + connectException.getMessage());
+                try {
+                    bluetoothSocket.close();
+                } catch (IOException closeException) {
+                    Log.e(LOG_TAG, "doInBackground (73): Exception while closing connection: " + closeException.getMessage());
+                }
+                throw new RuntimeException("Could not connect with device \"" + parameters.getBluetoothDevice().getAddress() + "\".", connectException);
             }
-            bluetoothSocket = null;
+            return bluetoothSocket;
+        } catch (IOException ioException) {
+            throw new RuntimeException("Exception while creating RFCOMM socket with service.", ioException);
         }
-
-        // The connection attempt succeeded. Perform work associated with
-        // the connection in a separate thread.
-        return bluetoothSocket;
     }
 }

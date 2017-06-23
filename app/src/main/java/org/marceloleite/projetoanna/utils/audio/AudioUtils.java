@@ -40,19 +40,32 @@ public abstract class AudioUtils {
      */
     private static final int SAMPLE_FORMAT = 2;
 
+    /**
+     * The bit rate used to encode audio.
+     */
     public static final int AAC_ENCODING_BIT_RATE = 128000;
 
-    public static final int AAC_ENCODING_MAX_INPUT_SIZE = 16 * 1024;
-
-    public static long calculatePresentationTimeUs(long totalBytes) {
-        long presentationTimeUs = (long) (1000000f * ((float) totalBytes / (float) (CHANNELS * SAMPLE_RATE * SAMPLE_FORMAT)));
-        return presentationTimeUs;
+    /**
+     * Calculates the audio duration of an raw audio sample with the size specified (in microseconds).
+     *
+     * @param rawAudioSampleSize Size of the raw audio sample to calculate the duration
+     * @return The audio duration of an raw audio with the specified size.
+     */
+    public static long calculateAudioTime(long rawAudioSampleSize) {
+        Log.d(AudioUtils.class, LOG_TAG, "calculateAudioTime (55): ");
+        return (long) (1000000f * ((float) rawAudioSampleSize / (float) (CHANNELS * SAMPLE_RATE * SAMPLE_FORMAT)));
     }
 
-    public static long calculateBytesOnAudioTime(long timeUs) {
-        long samplesOnTime = Math.round((float) SAMPLE_RATE * (float) timeUs / 1000000f);
-        long totalBytes = samplesOnTime * CHANNELS * SAMPLE_FORMAT;
-        return totalBytes;
+    /**
+     * Calculates the size of an raw audio sample with the specified duration.
+     *
+     * @param audioDuration The duration of the audio (in microseconds).
+     * @return The size of the audio sample which represents the audio duration.
+     */
+    public static long calculateSizeOfAudioSample(long audioDuration) {
+        Log.d(AudioUtils.class, LOG_TAG, "calculateSizeOfAudioSample (65): ");
+        long samplesOnTime = Math.round((float) SAMPLE_RATE * (float) audioDuration / 1000000f);
+        return samplesOnTime * CHANNELS * SAMPLE_FORMAT;
     }
 
 

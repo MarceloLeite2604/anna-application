@@ -1,13 +1,13 @@
 package org.marceloleite.projetoanna.utils.retryattempts;
 
 
-import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 18/04/2017.
+ * Stores the number of attempts made to retry an operation and waits a specified amount of time
+ * before retry the operation. Each time a retry attempt is waited, it will sleep its minimum wait
+ * time, plus the step time multiplied by the current number of attempts.
  */
-
 public class RetryAttempts {
 
     /**
@@ -22,25 +22,55 @@ public class RetryAttempts {
         Log.addClassToLog(RetryAttempts.class);
     }
 
-    private static final int MINIMUM_WAIT_TIME = 150;
+    /**
+     * The default value for the minimum time to wait to retry an operation.
+     */
+    private static final int DEFAULT_MINIMUM_WAIT_TIME = 150;
 
-    private static final int WAIT_TIME_STEP = 10;
+    /**
+     * The default value for the wait time step.
+     */
+    private static final int DEFAULT_WAIT_TIME_STEP = 10;
 
+    /**
+     * The maximum attempts to retry an operation.
+     */
     private int maximumAttempts;
 
+    /**
+     * The total of attempts to realize an operation,
+     */
     private int totalAttempts;
 
+    /**
+     * The minimum time to wait to retry an operation.
+     */
     private int minimumWaitTime;
 
+    /**
+     * The step time to retry an operation.
+     */
     private int waitTimeStep;
 
+    /**
+     * Object constructor.
+     *
+     * @param maximumAttempts The maximum number of attempts to retry.
+     */
     public RetryAttempts(int maximumAttempts) {
         this.maximumAttempts = maximumAttempts;
-        this.minimumWaitTime = MINIMUM_WAIT_TIME;
-        this.waitTimeStep = WAIT_TIME_STEP;
+        this.minimumWaitTime = DEFAULT_MINIMUM_WAIT_TIME;
+        this.waitTimeStep = DEFAULT_WAIT_TIME_STEP;
         this.totalAttempts = 0;
     }
 
+    /**
+     * Object constructor.
+     *
+     * @param maximumAttempts The maximum number of attempts to retry.
+     * @param minimumWaitTime The minimum time to wait before a new attempt is realized.
+     * @param waitTimeStep    The step time to increase each wait time.
+     */
     public RetryAttempts(int maximumAttempts, int minimumWaitTime, int waitTimeStep) {
         this.maximumAttempts = maximumAttempts;
         this.minimumWaitTime = minimumWaitTime;
@@ -48,6 +78,11 @@ public class RetryAttempts {
         this.totalAttempts = 0;
     }
 
+    /**
+     * Increase the number of retry attempts.
+     *
+     * @return True if the number of attempts was increased. False if it has reached its limit.
+     */
     private boolean increateAttempts() {
         if (this.totalAttempts < this.maximumAttempts) {
             totalAttempts++;
@@ -57,26 +92,16 @@ public class RetryAttempts {
         }
     }
 
-    public int getTotalAttempts() {
-        return totalAttempts;
-    }
-
-    public int getMaximumAttempts() {
-        return maximumAttempts;
-    }
-
-    public int getMinimumWaitTime() {
-        return minimumWaitTime;
-    }
-
-    public int getWaitTimeStep() {
-        return waitTimeStep;
-    }
-
-    public static int wait(RetryAttempts retryAttempts) {
-        if (retryAttempts.increateAttempts()) {
-            int waitTime = retryAttempts.getMinimumWaitTime();
-            waitTime += retryAttempts.getTotalAttempts() * retryAttempts.getWaitTimeStep();
+    /**
+     * Waits for the next retry attempt. The wait time is calculated by its minimum wait
+     * time, plus the step time multiplied by the current number of attempts.
+     *
+     * @return {@link RetryAttemptsReturnCodes#MAX_RETRY_ATTEMPTS_REACHED} if the maximum numbers of retry attempts was reached, {@link RetryAttemptsReturnCodes#SUCCESS} otherwise.
+     */
+    public int waitForNextAttempt() {
+        if (increateAttempts()) {
+            int waitTime = minimumWaitTime;
+            waitTime += totalAttempts * waitTimeStep;
 
             try {
                 Thread.sleep(waitTime);
@@ -87,11 +112,6 @@ public class RetryAttempts {
             return RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED;
         }
 
-        return RetryAttemptsReturnCode.SUCCESS;
-    }
-
-    public abstract class RetryAttemptsReturnCode extends GenericReturnCodes {
-
-
+        return RetryAttemptsReturnCodes.SUCCESS;
     }
 }

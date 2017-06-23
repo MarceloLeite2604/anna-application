@@ -1,13 +1,16 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetooth.connector;
 
 import android.bluetooth.BluetoothSocket;
-import android.support.v7.app.AppCompatActivity;
 
 /**
- * Created by Marcelo Leite on 20/03/2017.
+ * Implements the process to be executed after the bluetooth connection attempt is concluded.
  */
-
 public interface AsyncTaskConnectWithDeviceResult {
 
+    /**
+     * Process to be executed after the bluetooth connection with a remove device is concluded.
+     *
+     * @param bluetoothSocket The bluetooth socket connection with the remove device.
+     */
     void connectWithDeviceProcessFinished(BluetoothSocket bluetoothSocket);
 }

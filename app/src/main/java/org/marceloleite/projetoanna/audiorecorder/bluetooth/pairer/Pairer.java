@@ -24,7 +24,7 @@ public class Pairer {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(Pairer.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     private Bluetooth bluetooth;

@@ -37,6 +37,12 @@ public abstract class Mixer {
         Log.addClassToLog(Mixer.class);
     }
 
+    /**
+     * Maximum size of a buffer of to encode (in bytes).
+     */
+    public static final int AAC_ENCODING_MAX_INPUT_SIZE = 16 * 1024;
+
+
     public static File mixAudioAndVideo(File audioFile, File videoFile, long startAudioDelay) throws IOException {
 
         /* Creates and configures the media extractor for video file. */
@@ -125,7 +131,7 @@ public abstract class Mixer {
         MediaFormat aacMediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AudioUtils.SAMPLE_RATE, 2);
         aacMediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
         aacMediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, AudioUtils.AAC_ENCODING_BIT_RATE);
-        aacMediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, AudioUtils.AAC_ENCODING_MAX_INPUT_SIZE);
+        aacMediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, AAC_ENCODING_MAX_INPUT_SIZE);
         return aacMediaFormat;
     }
 

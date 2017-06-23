@@ -31,7 +31,7 @@ public class AlertDialogSearchingDevices extends AlertDialog implements View.OnC
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(AlertDialogSearchingDevices.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
 
@@ -76,19 +76,19 @@ public class AlertDialogSearchingDevices extends AlertDialog implements View.OnC
         changeViewMode(ViewMode.SEARCH_STARTED);
     }
 
-    public void addBluetoothDeviceToList(BluetoothDevice bluetoothDevice) {
+    private void addBluetoothDeviceToList(BluetoothDevice bluetoothDevice) {
         bluetoothDeviceArrayList.add(bluetoothDevice);
         bluetoothDeviceAdapter.notifyDataSetChanged();
     }
 
-    public void discoveryDevicesStarted() {
+    private void discoveryDevicesStarted() {
         if (!isShowing()) {
             show();
         }
         changeViewMode(ViewMode.SEARCH_STARTED);
     }
 
-    public void discoveryDevicesFinished() {
+    private void discoveryDevicesFinished() {
         changeViewMode(ViewMode.SEARCH_FINISHED);
     }
 

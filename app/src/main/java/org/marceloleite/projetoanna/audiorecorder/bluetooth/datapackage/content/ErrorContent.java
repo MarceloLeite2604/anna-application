@@ -19,7 +19,7 @@ public class ErrorContent extends Content {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(ErrorContent.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -53,6 +53,7 @@ public class ErrorContent extends Content {
      * @param errorCode    The error code to be stored.
      * @param errorMessage The error message to be stored.
      */
+    @SuppressWarnings("unused")
     public ErrorContent(int errorCode, String errorMessage) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
@@ -63,6 +64,7 @@ public class ErrorContent extends Content {
      *
      * @return The error code stored on the content.
      */
+    @SuppressWarnings("unused")
     public int getErrorCode() {
         return errorCode;
     }
@@ -72,6 +74,7 @@ public class ErrorContent extends Content {
      *
      * @return The error message stored on the content.
      */
+    @SuppressWarnings("unused")
     public String getErrorMessage() {
         return errorMessage;
     }

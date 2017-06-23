@@ -18,19 +18,28 @@ public class CommandResultContent extends Content {
     /*
      * Enables messages of this class to be shown on log.
      */
-    static {
-        Log.addClassToLog(CommandResultContent.class);
-    }
+     static {
+        Log.addClassToLog(LOG_TAG);
+     }
 
     /**
      * The size of the content (in bytes).
      */
     private static final int CONTENT_SIZE = 12;
 
+    /**
+     * Size of the result code byte array (in bytes).
+     */
     private static final int RESULT_CODE_BYTE_ARRAY_SIZE = 4;
 
+    /**
+     * Size of the seconds section of the execution delay byte array (in bytes).
+     */
     private static final int EXECUTION_DELAY_SECONDS_BYTE_ARRAY_SIZE = 4;
 
+    /**
+     * Size of the microseconds of the execution delay byte array (in bytes).
+     */
     private static final int EXECUTION_DELAY_MICROSECONDS_BYTE_ARRAY_SIZE = 4;
 
     /**
@@ -38,15 +47,22 @@ public class CommandResultContent extends Content {
      */
     private int resultCode;
 
+    /**
+     * The quantity of seconds informed on the command execution delay.
+     */
     private int executionDelaySeconds;
 
+    /**
+     * The quantity of microseconds informed on the command execution delay.
+     */
     private int executionDelayMicroseconds;
 
     /**
-     * Creates a new "command result" content.
+     * Object constructor
      *
      * @param resultCode The result code to be stored in the content.
      */
+    @SuppressWarnings("unused")
     public CommandResultContent(int resultCode) {
         this.resultCode = resultCode;
     }
@@ -90,7 +106,7 @@ public class CommandResultContent extends Content {
 
         byteArraySlice = Arrays.copyOfRange(bytes, byteArrayCounter, byteArrayCounter + EXECUTION_DELAY_MICROSECONDS_BYTE_ARRAY_SIZE);
         executionDelayMicroseconds = Integer.reverseBytes(ByteBuffer.wrap(byteArraySlice).getInt());
-        Log.d(CommandResultContent.class, LOG_TAG, "CommandResultContent (93): Execution delay: " + executionDelaySeconds + " seconds, " + executionDelayMicroseconds + " microseconds.");
+        Log.d(LOG_TAG, "CommandResultContent (93): Execution delay: " + executionDelaySeconds + " seconds, " + executionDelayMicroseconds + " microseconds.");
     }
 
     @Override

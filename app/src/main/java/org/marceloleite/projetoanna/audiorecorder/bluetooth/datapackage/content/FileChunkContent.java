@@ -19,7 +19,7 @@ public class FileChunkContent extends Content {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(FileChunkContent.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -45,14 +45,15 @@ public class FileChunkContent extends Content {
     /**
      * The fileChunk stored in the content.
      */
-    byte[] fileChunk;
+    private byte[] fileChunk;
 
     /**
      * Creates a new file chunk content.
      *
      * @param data          The fileChunk to be stored on the content.
-     * @param fileChunkSize The szie of the file chunk to be stored on the content.
+     * @param fileChunkSize The size of the file chunk to be stored on the content.
      */
+    @SuppressWarnings("unused")
     public FileChunkContent(byte[] data, int fileChunkSize) {
         if (fileChunkSize != data.length) {
             throw new IllegalArgumentException("The file chunk specified does not match the file chunk length.");

@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import org.marceloleite.projetoanna.audiorecorder.bluetooth.BluetoothConnectReturnCodes;
-import org.marceloleite.projetoanna.audiorecorder.bluetooth.BluetoothInterface;
+import org.marceloleite.projetoanna.audiorecorder.bluetooth.BluetoothConnectionInterface;
 import org.marceloleite.projetoanna.audiorecorder.operator.Operator;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Command;
 import org.marceloleite.projetoanna.audiorecorder.operator.operation.Operation;
@@ -19,7 +19,7 @@ import java.io.File;
 /**
  * Controls the audio recorder device.
  */
-public class AudioRecorder implements BluetoothInterface {
+public class AudioRecorder implements BluetoothConnectionInterface {
 
     /**
      * Tag to identify log messages written by this class.
@@ -100,17 +100,17 @@ public class AudioRecorder implements BluetoothInterface {
         bluetooth.connectWithAudioRecorder();
     }
 
-    public void connectWithAudioRecorderResult(int result) {
+    public void bluetoothConnectionResult(int result) {
         switch (result) {
             case BluetoothConnectReturnCodes.SUCCESS:
                 operator = new Operator(this, bluetooth);
                 operator.startExecution();
                 break;
             case BluetoothConnectReturnCodes.GENERIC_ERROR:
-                Log.e(AudioRecorder.class, LOG_TAG, "connectWithAudioRecorderResult (110): Error while connecting with audio recorder device.");
+                Log.e(AudioRecorder.class, LOG_TAG, "bluetoothConnectionResult (110): Error while connecting with audio recorder device.");
                 break;
             default:
-                Log.e(AudioRecorder.class, LOG_TAG, "connectWithAudioRecorderResult (113): Unknown result received from \"connectWithAudioRecorder\" method: " + result);
+                Log.e(AudioRecorder.class, LOG_TAG, "bluetoothConnectionResult (113): Unknown result received from \"connectWithAudioRecorder\" method: " + result);
                 break;
         }
 

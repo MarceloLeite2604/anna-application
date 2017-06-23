@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderActi
             case BluetoothConnectReturnCodes.CONNECTION_CANCELLED:
                 break;
             default:
-                Log.e(MainActivity.class, LOG_TAG, "connectWithAudioRecorderResult (137): Unknown result received from \"connectWithAudioRecorder\" method.");
+                Log.e(MainActivity.class, LOG_TAG, "bluetoothConnectionResult (137): Unknown result received from \"connectWithAudioRecorder\" method.");
                 break;
         }
         updateInterface();

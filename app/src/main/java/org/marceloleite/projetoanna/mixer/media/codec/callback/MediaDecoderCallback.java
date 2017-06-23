@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteOutputStream;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.AudioData;
-import org.marceloleite.projetoanna.utils.ByteBufferUtils;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 
@@ -46,8 +45,8 @@ public class MediaDecoderCallback extends MediaCodecCallback {
         this.finishedDecoding = false;
         Log.d(MediaDecoderCallback.class, LOG_TAG, "MediaDecoderCallback (47): Audio duration: " + audioDuration + ", audio delay: " + audioDelay);
 
-        long bytesToIgnore = AudioUtils.calculateBytesOnAudioTime(audioDelay);
-        long bytesToRead = AudioUtils.calculateBytesOnAudioTime(audioDuration);
+        long bytesToIgnore = AudioUtils.calculateSizeOfAudioSample(audioDelay);
+        long bytesToRead = AudioUtils.calculateSizeOfAudioSample(audioDuration);
         FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
         this.byteBufferWriteOutputStream = new ByteBufferWriteOutputStream(fileOutputStream, bytesToIgnore, bytesToRead);
     }
@@ -76,7 +75,7 @@ public class MediaDecoderCallback extends MediaCodecCallback {
     public void onOutputBufferAvailable(@NonNull MediaCodec mediaCodec, int outputBufferId, @NonNull MediaCodec.BufferInfo bufferInfo) {
         ByteBuffer outputBuffer = mediaCodec.getOutputBuffer(outputBufferId);
 
-        ByteBuffer byteBuffer = ByteBufferUtils.copyByteBuffer(outputBuffer);
+        ByteBuffer byteBuffer = MediaCodecCallback.copyByteBuffer(outputBuffer);
         AudioData audioData = new AudioData(byteBuffer, bufferInfo);
 
 

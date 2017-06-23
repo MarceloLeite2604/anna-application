@@ -8,7 +8,7 @@ public abstract class Content {
     /**
      * Converts the content into a byte array.
      *
-     * @return A byte array with the informations stored on this content.
+     * @return A byte array with the information stored on this content.
      */
     public abstract byte[] convertToBytes();
 }

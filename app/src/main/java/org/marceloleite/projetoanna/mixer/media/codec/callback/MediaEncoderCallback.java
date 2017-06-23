@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.AudioData;
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteMediaMuxerWrapper;
-import org.marceloleite.projetoanna.utils.ByteBufferUtils;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 
@@ -78,7 +77,7 @@ public class MediaEncoderCallback extends MediaCodecCallback {
             byteBufferWriteMediaMuxerWrapper.concludeWriting();
             this.finishedEncoding = true;
         } else {
-            ByteBuffer byteBuffer = ByteBufferUtils.copyByteBuffer(outputBuffer);
+            ByteBuffer byteBuffer = MediaCodecCallback.copyByteBuffer(outputBuffer);
             AudioData audioData = new AudioData(byteBuffer, bufferInfo);
             byteBufferWriteMediaMuxerWrapper.add(audioData);
             /*
@@ -144,7 +143,7 @@ public class MediaEncoderCallback extends MediaCodecCallback {
             if (oldBufferInfo.size < byteBuffer.capacity()) {
                 newBufferInfo.flags = newBufferInfo.flags | MediaCodec.BUFFER_FLAG_END_OF_STREAM;
             }
-            newBufferInfo.presentationTimeUs = AudioUtils.calculatePresentationTimeUs(totalBytesRead);
+            newBufferInfo.presentationTimeUs = AudioUtils.calculateAudioTime(totalBytesRead);
         } else {
             newBufferInfo.size = 0;
             newBufferInfo.flags = newBufferInfo.flags | MediaCodec.BUFFER_FLAG_END_OF_STREAM;

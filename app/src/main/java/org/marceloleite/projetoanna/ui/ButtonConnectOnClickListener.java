@@ -21,9 +21,9 @@ public class ButtonConnectOnClickListener implements View.OnClickListener {
     /*
      * Enables messages of this class to be shown on log.
      */
-    static {
-        Log.addClassToLog(ButtonConnectOnClickListener.class);
-    }
+     static {
+        Log.addClassToLog(LOG_TAG);
+     }
 
     MainActivity mainActivity;
 

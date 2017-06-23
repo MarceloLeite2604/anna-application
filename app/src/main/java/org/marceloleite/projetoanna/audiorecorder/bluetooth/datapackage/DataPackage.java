@@ -28,7 +28,7 @@ public class DataPackage {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(DataPackage.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -59,7 +59,7 @@ public class DataPackage {
     /**
      * Code to identify a package trailer.
      */
-    public static final int PACKAGE_TRAILER = 0x04c22892;
+    private static final int PACKAGE_TRAILER = 0x04c22892;
 
     /**
      * Size of a package trailer (in bytes).
@@ -79,7 +79,7 @@ public class DataPackage {
     /**
      * The package content.
      */
-    Content content;
+    private Content content;
 
     /**
      * Creates a new package.
@@ -104,7 +104,7 @@ public class DataPackage {
     }
 
     /**
-     * Returna the package type.
+     * Returns the package type.
      *
      * @return The package type.
      */

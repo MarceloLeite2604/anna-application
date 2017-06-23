@@ -19,7 +19,7 @@ public class FileHeaderContent extends Content {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(FileHeaderContent.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -42,31 +42,39 @@ public class FileHeaderContent extends Content {
      */
     private static final int FILE_SIZE_BYTE_ARRAY_SIZE = 4;
 
+    /**
+     * Size of the byte array which contains the file name size.
+     */
     private static final int FILE_NAME_SIZE_BYTE_ARRAY_SIZE = 4;
 
+    /**
+     * Size of the file.
+     */
     private int fileSize;
 
+    /**
+     * Name of the file.
+     */
     private String fileName;
 
-    public FileHeaderContent(int fileSize, String fileName) {
-        this.fileSize = fileSize;
+    /**
+     * Object constructor.
+     *
+     * @param fileSize Size of the file.
+     * @param fileName Name of the file.
+     */
+    @SuppressWarnings("unused")
+    public FileHeaderContent(String fileName, int fileSize) {
         this.fileName = fileName;
+        this.fileSize = fileSize;
     }
 
     public int getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(int fileSize) {
-        this.fileSize = fileSize;
-    }
-
     public String getFileName() {
         return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     /**

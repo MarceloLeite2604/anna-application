@@ -18,7 +18,7 @@ public class FileTrailerContent extends Content {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(FileTrailerContent.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -30,12 +30,6 @@ public class FileTrailerContent extends Content {
      * Size of a file trailer content (in bytes).
      */
     private static final int CONTENT_SIZE = 4;
-
-    /**
-     * Creates a new file trailer content.
-     */
-    public FileTrailerContent() {
-    }
 
     /**
      * Creates a file trailer content with the information stored on the byte array.

@@ -4,77 +4,150 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by marcelo on 02/06/17.
+ * Controls which messages should be registered on log.
  */
-
 public class Log {
 
-    private static List<Class> classList = new ArrayList<>();
+    /**
+     * The list of classes which can register its messages on log.
+     */
+    private static List<String> logTagList = new ArrayList<>();
 
+    /**
+     * Object constructor.
+     */
     private Log() {
     }
 
-    public static void addClassToLog(Class clazz) {
-        if (!isClassOnList(clazz)) {
-            classList.add(clazz);
+    /**
+     * Adds a log tag to the class list, enabling its messages to be printed on log.
+     *
+     * @param tag The tag enabled to show its messages on log.
+     */
+    public static void addClassToLog(String tag) {
+        if (!isLogTagEnabled(tag)) {
+            logTagList.add(tag);
         }
     }
 
-    public static void removeClassFromLog(Class clazz) {
-        if (isClassOnList(clazz)) {
-            classList.remove(clazz);
+    /**
+     * Removes a log tag from the list, prohibiting its messages to be printed on log.
+     *
+     * @param tag The tag which will be restrained on log.
+     */
+    public static void removeClassFromLog(String tag) {
+        if (isLogTagEnabled(tag)) {
+            logTagList.remove(tag);
         }
     }
 
-    private static boolean isClassOnList(Class clazz) {
-        int classPosition = classList.indexOf(clazz);
+    /**
+     * Checks if a log tag is enabled to print its messages.
+     *
+     * @param logTag The log tag to be checked.
+     * @return True if log tag is enabled to print its messages on log. False otherwise.
+     */
+    private static boolean isLogTagEnabled(String logTag) {
+        int classPosition = logTagList.indexOf(logTag);
         return (classPosition != -1);
     }
 
-    public static void w(Class clazz, String tag, String message) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints a warning message on log if its log tag is enabled.
+     *
+     * @param tag     The log tag to be used on this message.
+     * @param message The message to be registered.
+     */
+    public static void w(String tag, String message) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.w(tag, message);
         }
     }
 
-    public static void w(Class clazz, String tag, String message, Throwable throwable) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints a warning message on log if its log tag is enabled.
+     *
+     * @param tag       The log tag to be used on this message.
+     * @param message   The message to be registered.
+     * @param throwable The throwable to be printed on log message.
+     */
+    public static void w(String tag, String message, Throwable throwable) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.w(tag, message, throwable);
         }
     }
 
-    public static void e(Class clazz, String tag, String message) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints an error message on log if its log tag is enabled.
+     *
+     * @param tag     The log tag to be used on this message.
+     * @param message The message to be registered.
+     */
+    public static void e(String tag, String message) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.e(tag, message);
         }
     }
 
-    public static void e(Class clazz, String tag, String message, Throwable throwable) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints an error message on log if its log tag is enabled.
+     *
+     * @param tag       The log tag to be used on this message.
+     * @param message   The message to be registered.
+     * @param throwable The throwable to be printed on log message.
+     */
+    public static void e(String tag, String message, Throwable throwable) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.e(tag, message, throwable);
         }
     }
 
-    public static void i(Class clazz, String tag, String message) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints an information message on log if its log tag is enabled.
+     *
+     * @param tag     The log tag to be used on this message.
+     * @param message The message to be registered.
+     */
+    public static void i(String tag, String message) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.i(tag, message);
         }
     }
 
-    public static void i(Class clazz, String tag, String message, Throwable throwable) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints an information message on log if its log tag is enabled.
+     *
+     * @param tag       The log tag to be used on this message.
+     * @param message   The message to be registered.
+     * @param throwable The throwable to be printed on log message.
+     */
+    public static void i(String tag, String message, Throwable throwable) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.i(tag, message, throwable);
         }
     }
 
-    public static void d(Class clazz, String tag, String message) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints a debug message on log if its log tag is enabled.
+     *
+     * @param tag     The log tag to be used on this message.
+     * @param message The message to be registered.
+     */
+    public static void d(String tag, String message) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.d(tag, message);
         }
     }
 
-    public static void d(Class clazz, String tag, String message, Throwable throwable) {
-        if (isClassOnList(clazz)) {
+    /**
+     * Prints a debug message on log if its log tag is enabled.
+     *
+     * @param tag       The log tag to be used on this message.
+     * @param message   The message to be registered.
+     * @param throwable The throwable to be printed on log message.
+     */
+    public static void d(String tag, String message, Throwable throwable) {
+        if (isLogTagEnabled(tag)) {
             android.util.Log.d(tag, message, throwable);
         }
     }

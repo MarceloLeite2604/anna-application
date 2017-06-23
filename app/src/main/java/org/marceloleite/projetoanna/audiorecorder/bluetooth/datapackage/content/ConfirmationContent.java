@@ -17,9 +17,9 @@ public class ConfirmationContent extends Content {
     /*
      * Enables messages of this class to be shown on log.
      */
-    static {
-        Log.addClassToLog(ConfirmationContent.class);
-    }
+     static {
+        Log.addClassToLog(LOG_TAG);
+     }
 
     /**
      * Size of a confirmation content (in bytes).

@@ -3,9 +3,12 @@ package org.marceloleite.projetoanna.utils.retryattempts;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 
 /**
- * Created by Marcelo Leite on 18/04/2017.
+ * The codes returned from a {@link RetryAttempts#wait()} operation.
  */
-
 public class RetryAttemptsReturnCodes extends GenericReturnCodes {
+
+    /**
+     * Indicates that the maximum numbers of retry attempts was reached.
+     */
     public static final int MAX_RETRY_ATTEMPTS_REACHED = 50;
 }
