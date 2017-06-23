@@ -1,7 +1,7 @@
 package org.marceloleite.projetoanna.utils.file;
 
 /**
- * Types of file which the application recognizes.
+ * Enumerates the type of files the application works with.
  */
 public enum FileType {
     TEMPORARY_FILE("tmp", "Temporary file"),
@@ -12,7 +12,7 @@ public enum FileType {
     VIDEO_FILE("h264", "Video file");
 
     /**
-     * The file type's description.
+     * Description of the file type.
      */
     private String description;
 
@@ -22,10 +22,10 @@ public enum FileType {
     private String fileExtension;
 
     /**
-     * Constructor.
+     * Creates a new {@link FileType} enumeration.
      *
      * @param fileExtension The extension used to identify the file type.
-     * @param description   The file type's description.
+     * @param description   The description of the file type.
      */
     FileType(String fileExtension, String description) {
         this.fileExtension = fileExtension;

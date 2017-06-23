@@ -3,7 +3,7 @@ package org.marceloleite.projetoanna.utils.chonometer;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * A chronometer to calculate the difference between times.
+ * A chronometer object which stores the time it had been started, stopped and returns the difference between these two instants.
  */
 public class Chronometer {
 
@@ -53,7 +53,7 @@ public class Chronometer {
     }
 
     /**
-     * Retrieves the difference between the chronometer's stop and start time.
+     * Returns the difference between the chronometer's stop and start time.
      *
      * @return The difference between the chronometer's stop and start time.
      */

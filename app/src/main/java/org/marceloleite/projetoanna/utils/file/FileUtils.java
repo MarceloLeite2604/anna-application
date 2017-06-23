@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Stores some components which helps to manipulate files.
+ * Stores some components which are utils to manipulate files.
  */
 public abstract class FileUtils {
 
@@ -37,7 +37,7 @@ public abstract class FileUtils {
     private static final int COPY_FILE_BUFFER_SIZE = 1024 * 1024;
 
     /**
-     * Creates a temporary file.
+     * Creates a temporary file based on application context and the file type.
      *
      * @param context  The context which the temporary file will be created.
      * @param fileType The type of temporary file to be created.
@@ -71,6 +71,7 @@ public abstract class FileUtils {
     }
 
     /**
+<<<<<<< HEAD
      * Creates a new file.
      *
      * @param context  The context which the file will be created.
@@ -79,6 +80,7 @@ public abstract class FileUtils {
      */
     public static File createFile(@NonNull Context context, @NonNull FileType fileType) {
 
+        /* Checks if external storage is available. */
         if (!isExternalStorageWritable()) {
             throw new RuntimeException("External storage is not available.");
         }
@@ -97,7 +99,7 @@ public abstract class FileUtils {
                 rootDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getAbsolutePath();
                 break;
             default:
-                throw new IllegalArgumentException("Unknown file type " + fileType);
+                throw new RuntimeException("Unknown file type " + fileType);
         }
 
         File outputDirectory = new File(rootDirectory + File.separator + context.getPackageName());
@@ -209,10 +211,7 @@ public abstract class FileUtils {
      */
     private static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     /**
@@ -225,5 +224,4 @@ public abstract class FileUtils {
         String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         return formattedDate + "." + fileType.getFileExtension();
     }
-
 }

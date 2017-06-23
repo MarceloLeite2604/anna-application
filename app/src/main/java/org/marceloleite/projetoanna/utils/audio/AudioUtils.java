@@ -41,7 +41,7 @@ public abstract class AudioUtils {
     private static final int SAMPLE_FORMAT = 2;
 
     /**
-     * The bit rate used to encode audio.
+     * Bit rate used to encode audio on AAC format.
      */
     public static final int AAC_ENCODING_BIT_RATE = 128000;
 
@@ -67,6 +67,5 @@ public abstract class AudioUtils {
         long samplesOnTime = Math.round((float) SAMPLE_RATE * (float) audioDuration / 1000000f);
         return samplesOnTime * CHANNELS * SAMPLE_FORMAT;
     }
-
 
 }

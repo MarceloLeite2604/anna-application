@@ -20,66 +20,66 @@ public class Average {
     }
 
     /**
-     * Total of items on buffer.
+     * Quantity of items on array.
      */
-    private int itemsOnBuffer;
+    private int itemsOnArray;
 
     /**
-     * The buffer which contains the values to calculate the average value.
+     * Stores the values to calculate the average value.
      */
-    private long[] buffer;
+    private long[] array;
 
     /**
-     * The average value of the numbers on buffer.
+     * The average calculated based on the values stored on array.
      */
     private long average;
 
-    /**
-     * Constructor.
+    /***
+     * Creates a new {@link Average} object.
      *
-     * @param bufferSize Size of the buffer which stores the values to calculate the average value.
+     * @param arraySize Size of the array to store values and calculate the average value.
      */
-    public Average(int bufferSize) {
+    public Average(int arraySize) {
         Log.d(Average.class, LOG_TAG, "Average (43): ");
-        this.buffer = new long[bufferSize];
-        this.itemsOnBuffer = 0;
+        this.array = new long[arraySize];
+        this.itemsOnArray = 0;
         this.average = 0;
     }
 
     /**
-     * Adds a new value to the buffer. If buffer is on its limit it overwrites the its oldest value.
+     * Add a new value on array.
      *
-     * @param value Value to add on buffer.
+     * @param value The value to be inserted on array.
      */
     public void add(long value) {
-        buffer[itemsOnBuffer % buffer.length] = value;
-        if (itemsOnBuffer < buffer.length) {
-            itemsOnBuffer++;
+        array[itemsOnArray % array.length] = value;
+        if (itemsOnArray < array.length) {
+            itemsOnArray++;
         }
         calculateAverage();
     }
 
     /**
-     * Returns the average value of values stored on buffer.
+     * Returns the average of the values stored.
      *
-     * @return The average value of values stored on buffer.
+     * @return The average of the values stored.
      */
     public long getAverage() {
         return average;
     }
 
     /**
-     * Calculates the average of the values stored on buffer.
+     * Calculates the average of the values stored.
      */
     private void calculateAverage() {
         int counter;
 
         long total = 0;
 
-        for (counter = 0; counter < itemsOnBuffer; counter++) {
-            total += buffer[counter];
+        for (counter = 0; counter < itemsOnArray; counter++) {
+            total += array[counter];
         }
 
-        average = total / itemsOnBuffer;
+        average = total / itemsOnArray;
     }
 }
