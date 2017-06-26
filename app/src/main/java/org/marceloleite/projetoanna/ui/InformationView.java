@@ -1,6 +1,7 @@
 package org.marceloleite.projetoanna.ui;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -23,22 +24,18 @@ public class InformationView extends LinearLayout {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(InformationView.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     private ProgressBar progressBar;
     private TextView textView;
 
-    public InformationView(Context context){
+    public InformationView(@NonNull Context context) {
         super(context);
 
-        if ( context == null) {
-            throw new IllegalArgumentException("Context cannot be null.");
-        }
-
         View.inflate(context, R.layout.information, this);
-        textView = (TextView)findViewById(R.id.information_text);
-        progressBar = (ProgressBar)findViewById(R.id.information_progressbar);
+        textView = (TextView) findViewById(R.id.information_text);
+        progressBar = (ProgressBar) findViewById(R.id.information_progressbar);
     }
 
     public void showProgressBar(boolean show) {

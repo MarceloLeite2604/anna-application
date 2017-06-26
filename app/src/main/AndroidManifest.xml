@@ -18,7 +18,7 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="org.marceloleite.projetoanna.MainActivity">
+        <activity android:name="org.marceloleite.projetoanna.Main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

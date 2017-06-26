@@ -95,7 +95,7 @@ public class VideoRecorder {
     private static final int FRAME_RATE = 30;
 
     // private AppCompatActivity appCompatActivity;
-    private VideoRecorderActivityInterface videoRecorderActivityInterface;
+    private VideoRecorderInterface videoRecorderInterface;
 
     private TextureView textureView;
 
@@ -136,9 +136,9 @@ public class VideoRecorder {
         this.textureListener = new CameraSurfaceTextureListener(this);
     }*/
 
-    public VideoRecorder(VideoRecorderActivityInterface videoRecorderActivityInterface, TextureView textureView) {
+    public VideoRecorder(VideoRecorderInterface videoRecorderInterface, TextureView textureView) {
         this.textureView = textureView;
-        this.videoRecorderActivityInterface = videoRecorderActivityInterface;
+        this.videoRecorderInterface = videoRecorderInterface;
         this.recording = false;
         this.stateCallback = new CameraDeviceStateCallback(this);
         this.textureListener = new CameraSurfaceTextureListener(this);
@@ -232,7 +232,7 @@ public class VideoRecorder {
     }
 
     private CameraManager getCameraManager() {
-        return (CameraManager) videoRecorderActivityInterface.getAppCompatActivity().getSystemService(Context.CAMERA_SERVICE);
+        return (CameraManager) videoRecorderInterface.getAppCompatActivity().getSystemService(Context.CAMERA_SERVICE);
     }
 
     private Size chooseSize(Size[] size) {
@@ -303,7 +303,7 @@ public class VideoRecorder {
 
     private void openSelectedCamera(String selectedCameraId) throws CameraAccessException {
         CameraManager cameraManager = getCameraManager();
-        AppCompatActivity appCompatActivity = videoRecorderActivityInterface.getAppCompatActivity();
+        AppCompatActivity appCompatActivity = videoRecorderInterface.getAppCompatActivity();
         if (ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(appCompatActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_CAMERA_PERMISSION);
             return;
@@ -441,13 +441,13 @@ public class VideoRecorder {
 
     public void startMediaRecorder() {
         Log.d(VideoRecorder.class, LOG_TAG, "startMediaRecorder (443): ");
-        videoRecorderActivityInterface.getAppCompatActivity().runOnUiThread(new Runnable() {
+        videoRecorderInterface.getAppCompatActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 videoStartDelayChronometer.stop();
                 recording = true;
                 mediaRecorder.start();
-                videoRecorderActivityInterface.startVideoRecordingResult(GenericReturnCodes.SUCCESS);
+                videoRecorderInterface.startVideoRecordingResult(GenericReturnCodes.SUCCESS);
             }
         });
     }
@@ -458,7 +458,7 @@ public class VideoRecorder {
         mediaRecorder.stop();
         mediaRecorder.reset();
         createCameraPreview();
-        videoRecorderActivityInterface.stopVideoRecordingResult(GenericReturnCodes.SUCCESS);
+        videoRecorderInterface.stopVideoRecordingResult(GenericReturnCodes.SUCCESS);
     }
 
     protected void createCameraPreview() {
@@ -503,7 +503,7 @@ public class VideoRecorder {
     private int setMediaRecorderOrientation() {
         int orientationHint = 0;
 
-        int rotation = videoRecorderActivityInterface.getAppCompatActivity().getWindowManager().getDefaultDisplay().getRotation();
+        int rotation = videoRecorderInterface.getAppCompatActivity().getWindowManager().getDefaultDisplay().getRotation();
         int sensorOrientation = getSensorOrientation();
         switch (sensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:

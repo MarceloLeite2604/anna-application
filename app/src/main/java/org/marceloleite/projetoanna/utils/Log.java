@@ -35,6 +35,7 @@ public class Log {
      *
      * @param tag The tag which will be restrained on log.
      */
+    @SuppressWarnings("unused")
     public static void removeClassFromLog(String tag) {
         if (isLogTagEnabled(tag)) {
             logTagList.remove(tag);
@@ -71,6 +72,7 @@ public class Log {
      * @param message   The message to be registered.
      * @param throwable The throwable to be printed on log message.
      */
+    @SuppressWarnings("unused")
     public static void w(String tag, String message, Throwable throwable) {
         if (isLogTagEnabled(tag)) {
             android.util.Log.w(tag, message, throwable);
@@ -121,6 +123,7 @@ public class Log {
      * @param message   The message to be registered.
      * @param throwable The throwable to be printed on log message.
      */
+    @SuppressWarnings("unused")
     public static void i(String tag, String message, Throwable throwable) {
         if (isLogTagEnabled(tag)) {
             android.util.Log.i(tag, message, throwable);

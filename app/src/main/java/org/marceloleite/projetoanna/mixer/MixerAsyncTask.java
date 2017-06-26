@@ -2,7 +2,7 @@ package org.marceloleite.projetoanna.mixer;
 
 import android.os.AsyncTask;
 
-import org.marceloleite.projetoanna.MainActivity;
+import org.marceloleite.projetoanna.Main;
 import org.marceloleite.projetoanna.utils.Log;
 
 import java.io.File;
@@ -26,9 +26,9 @@ public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, Integer,
         Log.addClassToLog(MixerAsyncTask.class);
     }
 
-    private MainActivity mainActivity;
+    private Main mainActivity;
 
-    public MixerAsyncTask(MainActivity mainActivity) {
+    public MixerAsyncTask(Main mainActivity) {
         this.mainActivity = mainActivity;
     }
 

@@ -28,7 +28,7 @@ public abstract class FileUtils {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(FileUtils.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -43,6 +43,7 @@ public abstract class FileUtils {
      * @param fileType The type of temporary file to be created.
      * @return The temporary file created.
      */
+    @SuppressWarnings("unused")
     public static File createTemporaryFile(@NonNull Context context, FileType fileType) {
 
         File cacheDirectory = context.getCacheDir();
@@ -61,7 +62,7 @@ public abstract class FileUtils {
         try {
             boolean fileExists = temporaryFile.createNewFile();
             if (fileExists) {
-                Log.w(FileUtils.class, LOG_TAG, "createTemporaryFile (64): Temporary file \"" + temporaryFile.getAbsolutePath() + "\" already exists.");
+                Log.w(LOG_TAG, "createTemporaryFile (64): Temporary file \"" + temporaryFile.getAbsolutePath() + "\" already exists.");
             }
         } catch (IOException ioException) {
             throw new RuntimeException("Could not create temporary file \"" + temporaryFile.getAbsolutePath() + "\".");
@@ -108,7 +109,7 @@ public abstract class FileUtils {
             if (!outputDirectory.mkdirs()) {
                 throw new RuntimeException("Could not create directory \"" + outputDirectory.getAbsolutePath() + "\".");
             }
-            Log.i(FileUtils.class, LOG_TAG, "createFile (106): Directory \"" + outputDirectory.getAbsolutePath() + "\" created.");
+            Log.i(LOG_TAG, "createFile (106): Directory \"" + outputDirectory.getAbsolutePath() + "\" created.");
         }
 
         String fileName = createFileName(fileType);
@@ -118,7 +119,7 @@ public abstract class FileUtils {
         try {
             boolean fileAlreadyExists = file.createNewFile();
             if (fileAlreadyExists) {
-                Log.i(FileUtils.class, LOG_TAG, "createFile (120): File \"" + file.getAbsolutePath() + "\" already exists.");
+                Log.i(LOG_TAG, "createFile (120): File \"" + file.getAbsolutePath() + "\" already exists.");
             }
         } catch (IOException ioException) {
             throw new RuntimeException("Could not create file \"" + file.getAbsolutePath() + "\".", ioException);
@@ -133,6 +134,7 @@ public abstract class FileUtils {
      * @param file File to be copied.
      * @return The copy file.
      */
+    @SuppressWarnings("unused")
     public static File copyFile(File file) {
 
         String copyFilePath = createCopyFilePath(file);
@@ -199,7 +201,7 @@ public abstract class FileUtils {
             }
 
         } catch (IOException ioException) {
-            Log.e(FileUtils.class, LOG_TAG, "copyFileContent (172): Error while copying file \"" + sourceFile.getAbsolutePath() + "\" content to \"" + destinationFile.getAbsolutePath() + "\".");
+            Log.e(LOG_TAG, "copyFileContent (172): Error while copying file \"" + sourceFile.getAbsolutePath() + "\" content to \"" + destinationFile.getAbsolutePath() + "\".");
             throw new RuntimeException("Error while copying file \"" + sourceFile.getAbsolutePath() + "\" to \"" + destinationFile.getAbsolutePath() + "\".", ioException);
         }
     }
