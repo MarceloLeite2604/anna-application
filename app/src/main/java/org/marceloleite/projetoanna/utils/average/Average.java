@@ -16,7 +16,7 @@ public class Average {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(Average.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -40,7 +40,6 @@ public class Average {
      * @param arraySize Size of the array to store values and calculate the average value.
      */
     public Average(int arraySize) {
-        Log.d(Average.class, LOG_TAG, "Average (43): ");
         this.array = new long[arraySize];
         this.itemsOnArray = 0;
         this.average = 0;

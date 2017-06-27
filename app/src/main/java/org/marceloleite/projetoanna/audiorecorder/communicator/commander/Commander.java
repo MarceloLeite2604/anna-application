@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderReturnCodes;
+import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.ReceiveFileResult;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.DataPackage;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.content.CommandResultContent;
@@ -167,8 +168,13 @@ public class Commander {
         int requestAudioFilePackageResult = senderReceiver.sendPackage(requestAudioFilePackage);
         if (requestAudioFilePackageResult == AudioRecorderReturnCodes.SUCCESS) {
             FileReceiver fileReceiver = new FileReceiver(context, senderReceiver);
-            fileReceiver.startFileReception();
-            return new RequestLatestAudioFileResult(GenericReturnCodes.SUCCESS, fileReceiver.getFile());
+            ReceiveFileResult receiveFileResult = fileReceiver.receiveFile();
+            if (receiveFileResult.getReturnCode() == GenericReturnCodes.SUCCESS) {
+                return new RequestLatestAudioFileResult(GenericReturnCodes.SUCCESS, receiveFileResult.getFileReceived());
+            } else {
+                return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+            }
+
         } else {
             return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);
         }

@@ -1,7 +1,5 @@
 package org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.selectdevice;
 
-import android.bluetooth.BluetoothDevice;
-
 /**
  * Defines the parameters required to select a bluetooth device and the method to be executed after a bluetooth device is selected.
  */

@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -57,12 +56,10 @@ public class AlertDialogSearchingDevices extends AlertDialog implements View.OnC
 
     private SearchingDevicesInterface searchingDevicesInterface;
 
-    private SearchingDevicesParameters searchingDevicesParameters;
-
     public AlertDialogSearchingDevices(SearchingDevicesInterface searchingDevicesInterface) {
         super(searchingDevicesInterface.getSearchingDevicesParameters().getContext());
         this.searchingDevicesInterface = searchingDevicesInterface;
-        this.searchingDevicesParameters = searchingDevicesInterface.getSearchingDevicesParameters();
+        SearchingDevicesParameters searchingDevicesParameters = searchingDevicesInterface.getSearchingDevicesParameters();
 
         setIcon(0);
         setTitle("Pairing");
@@ -70,15 +67,15 @@ public class AlertDialogSearchingDevices extends AlertDialog implements View.OnC
         setButton(AlertDialog.BUTTON_POSITIVE, "Search again", this);
 
         View contentView = View.inflate(searchingDevicesParameters.getContext(), R.layout.bluetooth_device_pair, null);
-        progressBar = (ProgressBar) contentView.findViewById(R.id.bluetooth_device_pair_progress_bar);
-        textViewInformation = (TextView) contentView.findViewById(R.id.bluetooth_device_pair_text_view);
+        progressBar = contentView.findViewById(R.id.bluetooth_device_pair_progress_bar);
+        textViewInformation = contentView.findViewById(R.id.bluetooth_device_pair_text_view);
         setView(contentView);
 
-        ListView bluetoothDevicesListView = (ListView) contentView.findViewById(R.id.list_view_bluetooth_devices);
+        ListView bluetoothDevicesListView = contentView.findViewById(R.id.list_view_bluetooth_devices);
 
         bluetoothDeviceArrayList = new ArrayList<>();
 
-        bluetoothDeviceAdapter = new BluetoothDeviceAdapter(searchingDevicesParameters.getContext(), R.layout.bluetooth_device_row, bluetoothDeviceArrayList);
+        bluetoothDeviceAdapter = new BluetoothDeviceAdapter(searchingDevicesParameters.getContext(), bluetoothDeviceArrayList);
 
         bluetoothDevicesListView.setAdapter(bluetoothDeviceAdapter);
         bluetoothDevicesListView.setOnItemClickListener(this);

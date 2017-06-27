@@ -38,11 +38,11 @@ public class BluetoothDeviceAdapter extends ArrayAdapter<BluetoothDevice> {
      * Constructor
      *
      * @param context            The application context which requested the
-     * @param resource           The layout which should be used to show the bluetooth device's information.
      * @param bluetoothArrayList The array list which contains all the bluetooth devices discovered.
      */
-    public BluetoothDeviceAdapter(Context context, int resource, ArrayList<BluetoothDevice> bluetoothArrayList) {
-        super(context, resource, bluetoothArrayList);
+    public BluetoothDeviceAdapter(Context context, ArrayList<BluetoothDevice> bluetoothArrayList) {
+        super(context, R.layout.bluetooth_device_row, bluetoothArrayList);
+
         this.bluetoothArrayList = bluetoothArrayList;
     }
 

@@ -16,13 +16,13 @@ import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.pairer.disc
  */
 public class Discoverer implements DiscoverBluetoothDevicesInterface, SearchingDevicesInterface {
 
-    private AlertDialogSearchingDevices alertDialogSearchingDevices;
+    private final AlertDialogSearchingDevices alertDialogSearchingDevices;
 
-    private DiscovererInterface discovererInterface;
+    private final DiscovererInterface discovererInterface;
 
-    private DiscovererParameters discovererParameters;
+    private final DiscovererParameters discovererParameters;
 
-    private BroadcastReceiverDiscoverBluetoothDevices broadcastReceiverDiscoverBluetoothDevices;
+    private final BroadcastReceiverDiscoverBluetoothDevices broadcastReceiverDiscoverBluetoothDevices;
 
     public Discoverer(DiscovererInterface discovererInterface) {
         this.discovererInterface = discovererInterface;

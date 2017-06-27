@@ -7,9 +7,9 @@ import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 /**
- * Created by Marcelo Leite on 03/05/2017.
+ * A {@link CameraDevice.StateCallback} object to receive updates about the state of a camera device
+ * and define which camera should be used to record videos on application.
  */
-
 public class CameraDeviceStateCallback extends CameraDevice.StateCallback {
 
     /**
@@ -21,33 +21,43 @@ public class CameraDeviceStateCallback extends CameraDevice.StateCallback {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(CameraDeviceStateCallback.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
-    private VideoRecorder videoRecorder;
+    /**
+     * The object which defines the camera to be used to record videos for the application.
+     */
+    private CameraDeviceStateInterface cameraDeviceStateInterface;
 
 
-    public CameraDeviceStateCallback(VideoRecorder videoRecorder) {
-        this.videoRecorder = videoRecorder;
+    /**
+     * Constructor.
+     *
+     * @param cameraDeviceStateInterface The object which defines the camera to be used to record videos for the application.
+     */
+    public CameraDeviceStateCallback(CameraDeviceStateInterface cameraDeviceStateInterface) {
+        this.cameraDeviceStateInterface = cameraDeviceStateInterface;
     }
 
     @Override
     public void onOpened(@NonNull CameraDevice cameraDevice) {
-        Log.d(CameraDeviceStateCallback.class, LOG_TAG, "onOpened (36): Opened the camera.");
-        videoRecorder.setCameraDevice(cameraDevice);
+        Log.d(LOG_TAG, "onOpened (36): Opened the camera.");
+        cameraDeviceStateInterface.setCameraDevice(cameraDevice);
 
 
     }
 
     @Override
     public void onDisconnected(@NonNull CameraDevice cameraDevice) {
-        Log.d(CameraDeviceStateCallback.class, LOG_TAG, "onDisconnected (44): Camera disconnected.");
+        Log.d(LOG_TAG, "onDisconnected (44): Camera disconnected.");
+        /* TODO: Test if this is correct. */
+        cameraDeviceStateInterface.setCameraDevice(null);
     }
 
     @Override
     public void onError(@NonNull CameraDevice cameraDevice, int i) {
-        Log.d(CameraDeviceStateCallback.class, LOG_TAG, "onError (49): An error occurred with the camera.");
+        Log.d(LOG_TAG, "onError (49): An error occurred with the camera.");
         cameraDevice.close();
-        videoRecorder.setCameraDevice(null);
+        cameraDeviceStateInterface.setCameraDevice(null);
     }
 }

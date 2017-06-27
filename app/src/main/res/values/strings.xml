@@ -4,7 +4,7 @@
     <string name="button_connect_second_text">Disconnect</string>
     <string name="button_record_first_text">Start Record</string>
     <string name="button_record_second_text">Stop Record</string>
-    <string name="text_view_searching_devices_information_first_text">Searching devices...</string>
+    <string name="text_view_searching_devices_information_first_text">Searching devices&#8230;</string>
     <string name="alert_dialog_title_start_search_devices">No devices paired yet. Start discovering Bluetooth devices?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

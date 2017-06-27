@@ -10,22 +10,23 @@ import android.widget.Toast;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderInterface;
-import org.marceloleite.projetoanna.audiorecorder.AudioRecorderParameters;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnector;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorInterface;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorParameters;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorResult;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorReturnCodes;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTask;
+import org.marceloleite.projetoanna.mixer.MixerAsyncTaskInterface;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTaskParameters;
+import org.marceloleite.projetoanna.ui.listeners.buttonconnect.ButtonConnectInterface;
 import org.marceloleite.projetoanna.ui.listeners.buttonconnect.ButtonConnectOnClickListener;
 import org.marceloleite.projetoanna.ui.listeners.buttonrecord.ButtonRecordInterface;
 import org.marceloleite.projetoanna.ui.listeners.buttonrecord.ButtonRecordOnClickListener;
-import org.marceloleite.projetoanna.ui.listeners.buttonconnect.ButtonConnectInterface;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorderInterface;
+import org.marceloleite.projetoanna.videorecorder.VideoRecorderParameters;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,7 @@ import static org.marceloleite.projetoanna.utils.Log.addClassToLog;
 /**
  * The application main activity.
  */
-public class Main extends AppCompatActivity implements ButtonConnectInterface, ButtonRecordInterface, BluetoothConnectorInterface, AudioRecorderInterface, VideoRecorderInterface {
+public class Main extends AppCompatActivity implements ButtonConnectInterface, ButtonRecordInterface, BluetoothConnectorInterface, AudioRecorderInterface, VideoRecorderInterface, MixerAsyncTaskInterface {
 
     /**
      * A tag to identify this class' messages on log.
@@ -84,7 +85,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
 
         textureView = (TextureView) findViewById(R.id.texture_view_camera_preview);
 
-        videoRecorder = new VideoRecorder(this, textureView);
+        videoRecorder = new VideoRecorder(this);
 
         buttonConnect = (Button) findViewById(R.id.button_connect);
 
@@ -124,22 +125,27 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         bluetoothConnector.startConnectionProcess();
     }
 
-    public void connectWithAudioRecorderResult(int result) {
-        String audioRecorderDeviceName;
-        switch (result) {
+    @Override
+    public void bluetoothConnectionResult(BluetoothConnectorResult bluetoothConnectorResult) {
+
+        switch (bluetoothConnectorResult.getReturnCode()) {
             case BluetoothConnectorReturnCodes.SUCCESS:
-                audioRecorderDeviceName = audioRecorder.getAudioRecorderDeviceName();
-                Toast.makeText(this, "Connected with \"" + audioRecorderDeviceName + "\".", Toast.LENGTH_SHORT).show();
+                audioRecorder = bluetoothConnectorResult.getAudioRecorder();
+                Toast.makeText(this, "Connected with \"" + audioRecorder.getAudioRecorderDeviceName() + "\".", Toast.LENGTH_SHORT).show();
                 break;
-            case BluetoothConnectorReturnCodes.GENERIC_ERROR:
-                audioRecorderDeviceName = audioRecorder.getAudioRecorderDeviceName();
-                Toast.makeText(this, "Could not connect with \"" + audioRecorderDeviceName + "\".", Toast.LENGTH_LONG).show();
+            case BluetoothConnectorReturnCodes.BLUETOOTH_ACTIVATION_DENIED:
+            case BluetoothConnectorReturnCodes.DISCOVERING_CANCELLED:
+            case BluetoothConnectorReturnCodes.DEVICE_SELECTION_CANCELLED:
                 break;
-            case BluetoothConnectorReturnCodes.CONNECTION_CANCELLED:
+            case BluetoothConnectorReturnCodes.PAIRING_FAILED:
+                Toast.makeText(this, "Failed to pair with device.", Toast.LENGTH_LONG).show();
+                break;
+            case BluetoothConnectorReturnCodes.CONNECTION_FAILED:
+                Toast.makeText(this, "Failed to connect with device.", Toast.LENGTH_LONG).show();
                 break;
             default:
                 Log.e(LOG_TAG, "bluetoothConnectionResult (137): Unknown result received from \"startConnectionProcess\" method.");
-                break;
+                throw new RuntimeException("Unknown code returned from audio recorder connection process.");
         }
         updateInterface();
     }
@@ -164,7 +170,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
             case BluetoothConnectorReturnCodes.CONNECTION_CANCELLED:
                 break;
             default:
-                Log.e(LOG_TAG, "disconnectFromAudioRecorderResult (163): Unknown result received from \"disconnectFromhAudioRecorder\" method.");
+                Log.e(LOG_TAG, "disconnectFromAudioRecorderResult (163): Unknown result received from \"disconnectFromAudioRecorder\" method.");
                 break;
         }
         updateInterface();
@@ -188,11 +194,6 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
             videoRecorder.pause();
         }
         super.onPause();
-    }
-
-    @Override
-    public AppCompatActivity getAppCompatActivity() {
-        return this;
     }
 
     @Override
@@ -267,6 +268,11 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
     }
 
     @Override
+    public VideoRecorderParameters getVideoRecorderParameters() {
+        return new VideoRecorderParameters(this, textureView);
+    }
+
+    @Override
     public void stopAudioRecordingResult(int result) {
         Log.d(LOG_TAG, "stopAudioRecordingResult (260): ");
         switch (result) {
@@ -289,7 +295,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         Log.d(LOG_TAG, "requestLatestAudioFileResult (278): ");
         switch (result) {
             case GenericReturnCodes.SUCCESS:
-                Log.d(LOG_TAG, "requestLatestAudioFileResult (282): Received latest audio file succesfully.");
+                Log.d(LOG_TAG, "requestLatestAudioFileResult (282): Received latest audio file successfully.");
                 requestAudioAndVideoMix();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
@@ -320,12 +326,12 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         if (audioFile != null && movieFile != null) {
 
             MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this);
-            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(audioFile, movieFile, startAudioCommandDelay);
+            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(this, audioFile, movieFile, startAudioCommandDelay);
             mixerAsyncTask.execute(mixerAsyncTaskParameters);
         }
     }
 
-    private void testMix() {
+    /*private void testMix() {
         File audioFile = new File("/storage/emulated/0/Music/org.marceloleite.projetoanna/20170523_120021.mp3");
         File movieFile = new File("/storage/emulated/0/Movies/org.marceloleite.projetoanna/20170523_115855.mp4");
 
@@ -342,11 +348,12 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         if (audioFile != null && movieFile != null) {
 
             MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this);
-            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(audioFile, movieFile, startAudioCommandDelay);
+            MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(this, audioFile, movieFile, startAudioCommandDelay);
             mixerAsyncTask.execute(mixerAsyncTaskParameters);
         }
-    }
+    }*/
 
+    @Override
     public void mixConcluded(File file) {
         Toast.makeText(this, "Movie saved on " + file.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
         updateInterface();
@@ -394,11 +401,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
 
     @Override
     public BluetoothConnectorParameters getBluetoothConnectionParameters() {
-        return new BluetoothConnectorParameters(this);
+        return new BluetoothConnectorParameters(this, this);
     }
 
-    @Override
-    public void bluetoothConnectionResult(BluetoothConnectorResult bluetoothConnectorResult) {
-
-    }
 }

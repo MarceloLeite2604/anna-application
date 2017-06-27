@@ -1,6 +1,8 @@
 package org.marceloleite.projetoanna.audiorecorder;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.widget.Toast;
 
 import org.marceloleite.projetoanna.audiorecorder.communicator.Communicator;
@@ -33,7 +35,11 @@ public class AudioRecorder implements CommunicatorInterface {
 
     private AudioRecorderInterface audioRecorderInterface;
 
-    private AudioRecorderParameters audioRecorderParameters;
+    private BluetoothDevice bluetoothDevice;
+
+    private BluetoothSocket bluetoothSocket;
+
+    private Context context;
 
     /**
      * Controls the bluetooth communication.
@@ -49,17 +55,18 @@ public class AudioRecorder implements CommunicatorInterface {
 
     private long startRecordCommandDelay;
 
-    private long stopRecordCommandDelay;
-
     /**
      * Instantiates the Audio Recorder class.
      *
      * @param audioRecorderInterface The activity which request the Audio Record Instantiation.
      */
-    public AudioRecorder(AudioRecorderInterface audioRecorderInterface) {
+    public AudioRecorder(BluetoothDevice bluetoothDevice, BluetoothSocket bluetoothSocket, Context context, AudioRecorderInterface audioRecorderInterface) {
         this.audioRecorderInterface = audioRecorderInterface;
-        this.audioRecorderParameters = audioRecorderInterface.getAudioRecorderParameters();
+        this.bluetoothDevice = bluetoothDevice;
+        this.bluetoothSocket = bluetoothSocket;
+        this.context = context;
         this.communicator = new Communicator(this);
+        this.communicator.startExecution();
         this.recording = false;
     }
 
@@ -76,8 +83,6 @@ public class AudioRecorder implements CommunicatorInterface {
     }
 
     public String getAudioRecorderDeviceName() {
-        BluetoothDevice bluetoothDevice = audioRecorderParameters.getBluetoothDevice();
-
         String deviceName = bluetoothDevice.getName();
         if (deviceName == null) {
             deviceName = bluetoothDevice.getAddress();
@@ -113,7 +118,7 @@ public class AudioRecorder implements CommunicatorInterface {
 
     @Override
     public CommunicatorParameters getCommunicatorParameters() {
-        return new CommunicatorParameters(audioRecorderParameters.getBluetoothSocket(), audioRecorderParameters.getAppCompatActivity());
+        return new CommunicatorParameters(bluetoothSocket, context);
     }
 
     @Override
@@ -184,7 +189,6 @@ public class AudioRecorder implements CommunicatorInterface {
 
     private void checkStopAudioRecordCommandResult(Operation operation) {
         int stopAudioRecordResult = GenericReturnCodes.GENERIC_ERROR;
-        stopRecordCommandDelay = operation.getExecutionDelay();
         switch (operation.getResultType()) {
             case OBJECT_RETURNED:
                 Class returnObjectClass = operation.getReturnObjectClass();
@@ -210,7 +214,7 @@ public class AudioRecorder implements CommunicatorInterface {
                 Throwable throwable = operation.getThrowable();
                 Log.e(LOG_TAG, "checkStopAudioRecordCommandResult (258): Stop audio operation returned an exception.");
                 throwable.printStackTrace();
-                Toast.makeText(audioRecorderParameters.getAppCompatActivity(), "Could not stop audio record.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Could not stop audio record.", Toast.LENGTH_SHORT).show();
                 recording = true;
                 break;
         }
@@ -236,7 +240,7 @@ public class AudioRecorder implements CommunicatorInterface {
                 break;
         }
 
-        communicator.finishExecution();
+        communicator.finishCommunication();
         audioRecorderInterface.disconnectFromAudioRecorderResult(result);
     }
 
@@ -261,7 +265,7 @@ public class AudioRecorder implements CommunicatorInterface {
                 Log.e(LOG_TAG, "checkRequestLatestAudioFileResult (309): Request latest audio file returned an exception.");
                 throwable.printStackTrace();
                 result = GenericReturnCodes.GENERIC_ERROR;
-                Toast.makeText(audioRecorderParameters.getAppCompatActivity(), "Error while disconnecting from " + getAudioRecorderDeviceName() + ".", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Error while disconnecting from " + getAudioRecorderDeviceName() + ".", Toast.LENGTH_LONG).show();
                 break;
         }
 

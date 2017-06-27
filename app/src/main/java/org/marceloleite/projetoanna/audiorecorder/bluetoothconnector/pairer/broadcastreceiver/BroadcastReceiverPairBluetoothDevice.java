@@ -7,9 +7,9 @@ import android.content.Intent;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by marcelo on 26/06/17.
+ * A {@link android.content.BroadcastReceiver} to control the pairing states received when Android
+ * is pairing with a bluetooth device.
  */
-
 public class BroadcastReceiverPairBluetoothDevice extends android.content.BroadcastReceiver {
 
     /**
@@ -24,8 +24,17 @@ public class BroadcastReceiverPairBluetoothDevice extends android.content.Broadc
         Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The object which contains the methods to be executed when the pairing state changes.
+     */
     private PairBluetoothDeviceInterface pairBluetoothDeviceInterface;
 
+    /**
+     * Constructor.
+     *
+     * @param pairBluetoothDeviceInterface The object which contains the methods to be executed
+     *                                     when the pairing state changes.
+     */
     public BroadcastReceiverPairBluetoothDevice(PairBluetoothDeviceInterface pairBluetoothDeviceInterface) {
         this.pairBluetoothDeviceInterface = pairBluetoothDeviceInterface;
     }

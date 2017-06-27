@@ -14,12 +14,12 @@ public enum FileType {
     /**
      * Description of the file type.
      */
-    private String description;
+    private final String description;
 
     /**
      * The extension used to identify the file type.
      */
-    private String fileExtension;
+    private final String fileExtension;
 
     /**
      * Creates a new {@link FileType} enumeration.

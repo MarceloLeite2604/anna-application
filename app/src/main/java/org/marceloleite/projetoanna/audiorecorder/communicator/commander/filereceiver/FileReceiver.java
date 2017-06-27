@@ -43,11 +43,6 @@ public class FileReceiver {
     private SenderReceiver senderReceiver;
 
     /**
-     * The file received from audio recorder.
-     */
-    private File file;
-
-    /**
      * THe size of the file received from audio recorder.
      */
     private int fileSize;
@@ -65,30 +60,37 @@ public class FileReceiver {
     public FileReceiver(Context context, SenderReceiver senderReceiver) {
         this.context = context;
         this.senderReceiver = senderReceiver;
-        this.file = null;
         this.fileSize = 0;
     }
 
     /**
-     * Returns the file received from audio recorder.
+     * Receives the file.
      *
-     * @return The file received from audio recorder.
+     * @return {@link GenericReturnCodes#SUCCESS} if file was received successfully. {@link GenericReturnCodes#GENERIC_ERROR} otherwise.
      */
-    public File getFile() {
-        return file;
-    }
+    public ReceiveFileResult receiveFile() {
+        Log.d(LOG_TAG, "receiveFile (54): Receiving file.");
 
-    /**
-     * Starts the file reception.
-     */
-    public void startFileReception() {
-        Log.d(LOG_TAG, "startFileReception (54): Receiving file.");
+        File receivedFile;
+        ReceiveFileResult receiveFileResult;
 
-        receiveFileHeader();
-        receiveFileContent();
-        receiveFileTrailer();
-
-        Log.d(LOG_TAG, "startFileReception (59): File stored on \"" + file.getAbsolutePath() + "\".");
+        if (receiveFileHeader() == GenericReturnCodes.SUCCESS) {
+            ReceiveFileResult receiveFileContentResult = receiveFileContent();
+            if (receiveFileContentResult.getReturnCode() == GenericReturnCodes.SUCCESS) {
+                receivedFile = receiveFileContentResult.getFileReceived();
+                if (receiveFileTrailer() == GenericReturnCodes.SUCCESS) {
+                    Log.d(LOG_TAG, "receiveFile (59): File stored on \"" + receivedFile.getAbsolutePath() + "\".");
+                    receiveFileResult = new ReceiveFileResult(GenericReturnCodes.SUCCESS, receivedFile);
+                } else {
+                    receiveFileResult = new ReceiveFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+                }
+            } else {
+                receiveFileResult = new ReceiveFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+            }
+        } else {
+            receiveFileResult = new ReceiveFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+        }
+        return receiveFileResult;
     }
 
     /**
@@ -133,24 +135,28 @@ public class FileReceiver {
     /**
      * Creates an empty file to receive the file content sent from audio recorder.
      */
-    private void createFile() {
-        this.file = FileUtils.createFile(context, FileType.AUDIO_MP3_FILE);
+    private File createFile() {
+        return FileUtils.createFile(context, FileType.AUDIO_MP3_FILE);
     }
 
     /**
      * Receives the file content from audio recorder.
      *
-     * @return {@link GenericReturnCodes#SUCCESS} if the file content was received successfully.
-     * {@link GenericReturnCodes#GENERIC_ERROR} otherwise.
+     * @return A {@link ReceiveFileResult} object with the status code of the execution and the file
+     * received. If file was received successfully the code returned will be
+     * {@link GenericReturnCodes#SUCCESS} and the file will be available. If an error occurred the
+     * code returned will be {@link GenericReturnCodes#GENERIC_ERROR} and no file will be available.
      */
-    private int receiveFileContent() {
+    private ReceiveFileResult receiveFileContent() {
         Log.d(LOG_TAG, "receiveFileContent (151): Receiving file content.");
         int totalBytesReceived = 0;
         boolean doneReceiveFileContent = false;
         BufferedOutputStream bufferedOutputStream;
 
+        File fileToReceiveContent = createFile();
+
         try {
-            bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(this.file));
+            bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(fileToReceiveContent));
         } catch (FileNotFoundException fileNotFoundException) {
             throw new RuntimeException("Error while creating a buffered output stream to write the received file content.", fileNotFoundException);
         }
@@ -193,14 +199,20 @@ public class FileReceiver {
                     }
                 } else {
                     Log.e(LOG_TAG, "receiveFileContent (202): No package received.");
-                    return GenericReturnCodes.GENERIC_ERROR;
+                    return new ReceiveFileResult(GenericReturnCodes.GENERIC_ERROR, null);
                 }
             } else {
                 Log.e(LOG_TAG, "receiveFileContent (203): Error while receiving a package.");
-                return GenericReturnCodes.GENERIC_ERROR;
+                return new ReceiveFileResult(GenericReturnCodes.GENERIC_ERROR, null);
             }
         }
-        return GenericReturnCodes.SUCCESS;
+
+        try {
+            bufferedOutputStream.close();
+        } catch (IOException ioException) {
+            throw new RuntimeException("Exception thrown while closing the buffered output stream used to receive file from audio recorder.");
+        }
+        return new ReceiveFileResult(GenericReturnCodes.SUCCESS, fileToReceiveContent);
     }
 
     /**

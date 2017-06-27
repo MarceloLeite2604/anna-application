@@ -8,12 +8,12 @@ public class CommandResult {
     /**
      * The command result value returned from audio recorder.
      */
-    private int returnedValue;
+    private final int returnedValue;
 
     /**
      * The delay of the command execution on audio recorder (in microseconds).
      */
-    private long executionDelay;
+    private final long executionDelay;
 
     /**
      * Constructor.

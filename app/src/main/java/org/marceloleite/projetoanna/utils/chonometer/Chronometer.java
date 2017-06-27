@@ -16,7 +16,7 @@ public class Chronometer {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(Chronometer.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -33,7 +33,6 @@ public class Chronometer {
      * Constructor.
      */
     public Chronometer() {
-        Log.d(Chronometer.class, LOG_TAG, "Chronometer (36): ");
         this.stopTime = 0;
         this.startTime = 0;
     }

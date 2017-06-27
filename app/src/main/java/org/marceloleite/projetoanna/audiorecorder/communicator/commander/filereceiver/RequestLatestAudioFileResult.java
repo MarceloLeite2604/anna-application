@@ -12,12 +12,12 @@ public class RequestLatestAudioFileResult {
     /**
      * The code returned from {@link Commander#requestLatestAudioFile()} method execution.
      */
-    private int returnCode;
+    private final int returnCode;
 
     /**
      * The audio file received from audio recorder.
      */
-    private File audioFile;
+    private final File audioFile;
 
     /**
      * Constructor.

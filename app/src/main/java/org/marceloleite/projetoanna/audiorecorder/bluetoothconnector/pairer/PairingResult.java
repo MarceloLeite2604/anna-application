@@ -3,24 +3,45 @@ package org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.pairer;
 import android.bluetooth.BluetoothDevice;
 
 /**
- * Created by marcelo on 26/06/17.
+ * The result of the pairing process.
  */
-
 public class PairingResult {
 
-    private int returnCode;
+    /**
+     * The code returned by the pairing process.
+     */
+    private final int returnCode;
 
-    private BluetoothDevice bluetoothDevice;
+    /**
+     * The bluetooth device paired.
+     */
+    private final BluetoothDevice bluetoothDevice;
 
-    public PairingResult(int returnCode, BluetoothDevice bluetoothDevice) {
+    /**
+     * Constructor.
+     *
+     * @param returnCode      The code returned by the pairing process.
+     * @param bluetoothDevice The bluetooth device paired.
+     */
+    PairingResult(int returnCode, BluetoothDevice bluetoothDevice) {
         this.returnCode = returnCode;
         this.bluetoothDevice = bluetoothDevice;
     }
 
+    /**
+     * Returns the code returned by the pairing process.
+     *
+     * @return The code returned by the pairing process.
+     */
     public int getReturnCode() {
         return returnCode;
     }
 
+    /**
+     * Returns the bluetooth device paired.
+     *
+     * @return The bluetooth device paired.
+     */
     public BluetoothDevice getBluetoothDevice() {
         return bluetoothDevice;
     }

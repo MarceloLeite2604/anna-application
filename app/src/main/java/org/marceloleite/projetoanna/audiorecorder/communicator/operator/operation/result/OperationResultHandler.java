@@ -7,9 +7,9 @@ import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operatio
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 24/04/2017.
+ * Extends the {@link Handler} to controls the result of the operations executed on the audio
+ * recorder.
  */
-
 public class OperationResultHandler extends Handler {
 
     /**
@@ -21,15 +21,29 @@ public class OperationResultHandler extends Handler {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(OperationResultHandler.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The code which defines a message requesting to receive a command result.
+     */
     public static final int RECEIVE_COMMAND_RESULT = 0xab7f;
 
+    /**
+     * The code which defines a message informing that the connection with the audio recorder was lost.
+     */
     public static final int CONNECTION_LOST = 0xb82d2;
 
+    /**
+     * The object which controls the result of the operations.
+     */
     private OperationResultInterface operationResultInterface;
 
+    /**
+     * Constructor.
+     *
+     * @param operationResultInterface The object which controls the result of the operations.
+     */
     public OperationResultHandler(OperationResultInterface operationResultInterface) {
         super();
         this.operationResultInterface = operationResultInterface;
@@ -46,7 +60,7 @@ public class OperationResultHandler extends Handler {
                 operationResultInterface.connectionLost();
                 break;
             default:
-                Log.d(OperationResultHandler.class, LOG_TAG, "handleMessage (49): Handling message to another handler.");
+                Log.d(LOG_TAG, "handleMessage (49): Handling message to another handler.");
                 super.handleMessage(message);
                 break;
         }

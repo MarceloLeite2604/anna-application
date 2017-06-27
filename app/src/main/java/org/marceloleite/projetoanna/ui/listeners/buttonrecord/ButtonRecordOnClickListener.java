@@ -3,15 +3,11 @@ package org.marceloleite.projetoanna.ui.listeners.buttonrecord;
 import android.view.View;
 import android.widget.Button;
 
-import org.marceloleite.projetoanna.Main;
-import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.utils.Log;
-import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 /**
- * Created by Marcelo Leite on 20/03/2017.
+ * A {@link android.view.View.OnClickListener} for the button which controls the audio and video recording for the application.
  */
-
 public class ButtonRecordOnClickListener implements View.OnClickListener {
 
     /**
@@ -26,8 +22,16 @@ public class ButtonRecordOnClickListener implements View.OnClickListener {
         Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The object which contains the methods used by this class to control the audio and video recording.
+     */
     private ButtonRecordInterface buttonRecordInterface;
 
+    /**
+     * Constructor.
+     *
+     * @param buttonRecordInterface The object which contains the methods used by this class to control the audio and video recording.
+     */
     public ButtonRecordOnClickListener(ButtonRecordInterface buttonRecordInterface) {
         this.buttonRecordInterface = buttonRecordInterface;
     }

@@ -10,9 +10,9 @@ import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 
 /**
- * Created by marcelo on 23/05/17.
+ * Writes of the audio data pieces received on a {@link MediaMuxer} wrapped on a
+ * {@link MediaMuxerWrapper} object.
  */
-
 public class ByteBufferWriteMediaMuxerWrapper extends ByteBufferWriter {
 
     /**
@@ -24,16 +24,25 @@ public class ByteBufferWriteMediaMuxerWrapper extends ByteBufferWriter {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(ByteBufferWriteMediaMuxerWrapper.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The wrapper class of the {@link MediaMuxer} object.
+     */
     private MediaMuxerWrapper mediaMuxerWrapper;
 
+    /**
+     * Constructor.
+     *
+     * @param mediaMuxerWrapper The wrapper class of the {@link MediaMuxer} object.
+     */
     public ByteBufferWriteMediaMuxerWrapper(MediaMuxerWrapper mediaMuxerWrapper) {
         super();
         this.mediaMuxerWrapper = mediaMuxerWrapper;
     }
 
+    @SuppressWarnings("unused")
     public ByteBufferWriteMediaMuxerWrapper(MediaMuxerWrapper mediaMuxerWrapper, int maximumItemsOnMap) {
         super(maximumItemsOnMap);
         this.mediaMuxerWrapper = mediaMuxerWrapper;

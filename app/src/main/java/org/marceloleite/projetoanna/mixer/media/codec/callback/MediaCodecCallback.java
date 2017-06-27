@@ -5,9 +5,8 @@ import android.media.MediaCodec;
 import java.nio.ByteBuffer;
 
 /**
- * Created by Marcelo Leite on 09/05/2017.
+ * An abstract class based on {@link android.media.MediaCodec.Callback} class to help the coding and decoding process of audio and video.
  */
-
 public abstract class MediaCodecCallback extends MediaCodec.Callback {
 
     /**

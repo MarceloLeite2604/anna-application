@@ -19,7 +19,7 @@ import org.marceloleite.projetoanna.ui.InformationView;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 30/04/2016.
+ * Controls the pairing process with bluetooth devices.
  */
 public class Pairer implements StartDiscoveringInterface, DiscovererInterface, PairBluetoothDeviceInterface {
 
@@ -35,31 +35,64 @@ public class Pairer implements StartDiscoveringInterface, DiscovererInterface, P
         Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The alert dialog which informs the user that the pairing with the selected bluetooth device
+     * is being executed.
+     */
     private AlertDialog alertDialogPairingDevice;
 
+    /**
+     * A {@link android.content.BroadcastReceiver} which receives Android information about the
+     * pairing process.
+     */
     private BroadcastReceiverPairBluetoothDevice broadcastReceiverPairBluetoothDevice;
 
+    /**
+     * The parameters informed to construct this object.
+     */
     private PairerParameters pairerParameters;
 
+    /**
+     * The object which contains the parameters informed to create this object and the method to be
+     * executed once the pairing process is concluded.
+     */
     private PairerInterface pairerInterface;
 
+    /**
+     * The bluetooth device to pair with.
+     */
     private BluetoothDevice bluetoothDeviceToPair;
 
+    /**
+     * Constructor.
+     *
+     * @param pairerInterface The object which contains the parameters informed to create this object and the method to be
+     *                        executed once the pairing process is concluded.
+     */
     public Pairer(PairerInterface pairerInterface) {
         this.pairerInterface = pairerInterface;
         this.pairerParameters = pairerInterface.getPairerParameters();
     }
 
+    /**
+     * Starts the pairing process.
+     */
     public void startPairingProcess() {
         new AlertDialogStartDiscovering(this);
 
     }
 
+    /**
+     * Start the discovery of visible bluetooth devices to pair with.
+     */
     private void startDiscoveringDevices() {
         Discoverer discoverer = new Discoverer(this);
         discoverer.startDeviceDiscover();
     }
 
+    /**
+     * Starts the pairing process with the selected device.
+     */
     private void pairWithDevice() {
         if (bluetoothDeviceToPair != null) {
             registerBroadcastReceiver();
@@ -67,6 +100,10 @@ public class Pairer implements StartDiscoveringInterface, DiscovererInterface, P
         }
     }
 
+    /**
+     * Registers on Android a broadcast receiver which controls the messages received about the
+     * pairing with the selected bluetooth device.
+     */
     private void registerBroadcastReceiver() {
         if (broadcastReceiverPairBluetoothDevice == null) {
             IntentFilter intentFilter = new IntentFilter();
@@ -76,6 +113,7 @@ public class Pairer implements StartDiscoveringInterface, DiscovererInterface, P
         }
     }
 
+    @Override
     public void pairingStarted() {
         Log.d(LOG_TAG, "pairingStarted (99): ");
 
@@ -88,6 +126,7 @@ public class Pairer implements StartDiscoveringInterface, DiscovererInterface, P
         alertDialogPairingDevice.show();
     }
 
+    @Override
     public void pairingFinished(boolean devicePaired) {
         Log.d(LOG_TAG, "pairingFinished (111): ");
         alertDialogPairingDevice.dismiss();
@@ -101,6 +140,10 @@ public class Pairer implements StartDiscoveringInterface, DiscovererInterface, P
         pairerInterface.pairingResult(pairingResult);
     }
 
+    /**
+     * Unregisters the broadcast receiver which controls the messages received about the pairing
+     * with the selected bluetooth device.
+     */
     private void unregisterBroadcastReceiver() {
         if (broadcastReceiverPairBluetoothDevice != null) {
             pairerParameters.getAppCompatActivity().unregisterReceiver(broadcastReceiverPairBluetoothDevice);

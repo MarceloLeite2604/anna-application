@@ -11,7 +11,7 @@ import org.marceloleite.projetoanna.R;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 03/05/2016.
+ * A generic {@link LinearLayout} to show information about the application.
  */
 public class InformationView extends LinearLayout {
 
@@ -27,17 +27,35 @@ public class InformationView extends LinearLayout {
         Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The progress bar shown when the application is waiting for a process to conclude.
+     */
     private ProgressBar progressBar;
+
+    /**
+     * The text view which shows an information to the user.
+     */
     private TextView textView;
 
+    /**
+     * Constructor.
+     *
+     * @param context The context of the application which the linear layout should be created.
+     */
     public InformationView(@NonNull Context context) {
         super(context);
 
         View.inflate(context, R.layout.information, this);
-        textView = (TextView) findViewById(R.id.information_text);
-        progressBar = (ProgressBar) findViewById(R.id.information_progressbar);
+        textView = findViewById(R.id.information_text);
+        progressBar = findViewById(R.id.information_progressbar);
     }
 
+    /**
+     * Shows of hides the progress bar on the view.
+     *
+     * @param show True if the progress bar must be shown. False if it should be hidden.
+     */
+    @SuppressWarnings("unused")
     public void showProgressBar(boolean show) {
         int value = View.GONE;
         if (show) {
@@ -46,6 +64,11 @@ public class InformationView extends LinearLayout {
         progressBar.setVisibility(value);
     }
 
+    /**
+     * Defines the information to be shown to the user.
+     *
+     * @param text The information to be shown to the user.
+     */
     public void setInformationText(String text) {
         textView.setText(text);
     }

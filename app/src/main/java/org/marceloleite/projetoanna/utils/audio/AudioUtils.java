@@ -16,7 +16,7 @@ public abstract class AudioUtils {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(AudioUtils.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -52,7 +52,7 @@ public abstract class AudioUtils {
      * @return The audio duration of an raw audio with the specified size.
      */
     public static long calculateAudioTime(long rawAudioSampleSize) {
-        Log.d(AudioUtils.class, LOG_TAG, "calculateAudioTime (55): ");
+        Log.d(LOG_TAG, "calculateAudioTime (55): ");
         return (long) (1000000f * ((float) rawAudioSampleSize / (float) (CHANNELS * SAMPLE_RATE * SAMPLE_FORMAT)));
     }
 
@@ -63,7 +63,7 @@ public abstract class AudioUtils {
      * @return The size of the audio sample which represents the audio duration.
      */
     public static long calculateSizeOfAudioSample(long audioDuration) {
-        Log.d(AudioUtils.class, LOG_TAG, "calculateSizeOfAudioSample (65): ");
+        Log.d(LOG_TAG, "calculateSizeOfAudioSample (65): ");
         long samplesOnTime = Math.round((float) SAMPLE_RATE * (float) audioDuration / 1000000f);
         return samplesOnTime * CHANNELS * SAMPLE_FORMAT;
     }

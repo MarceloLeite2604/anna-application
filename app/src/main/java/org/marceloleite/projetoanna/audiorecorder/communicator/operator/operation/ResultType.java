@@ -1,21 +1,35 @@
 package org.marceloleite.projetoanna.audiorecorder.communicator.operator.operation;
 
 /**
- * Created by Marcelo Leite on 24/04/2017.
+ * The types of result that an audio recorder operation can return.
  */
-
 public enum ResultType {
-    OBJECT_RETURNED("OBJECT_RETURNED"),
-    EXCEPTION_THROWN("EXCEPTION_THROWN");
+    /**
+     * Indicates that the operation returned an object.
+     */
+    OBJECT_RETURNED("Object returned"),
 
-    String title;
+    /**
+     * Indicates that the operation threw an exception.
+     */
+    EXCEPTION_THROWN("Exception thrown");
 
-    ResultType(String title) {
-        this.title = title;
+    /**
+     * The description of the result type.
+     */
+    final String description;
+
+    /**
+     * Constructor.
+     *
+     * @param description The description of the reuslt type.
+     */
+    ResultType(String description) {
+        this.description = description;
     }
 
     @Override
     public String toString() {
-        return title;
+        return description;
     }
 }

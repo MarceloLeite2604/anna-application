@@ -72,7 +72,6 @@ public abstract class FileUtils {
     }
 
     /**
-<<<<<<< HEAD
      * Creates a new file.
      *
      * @param context  The context which the file will be created.
@@ -207,7 +206,7 @@ public abstract class FileUtils {
     }
 
     /**
-     * Checks if external stora is writable.
+     * Checks if external storage is writable.
      *
      * @return True if external storage is writable. False otherwise.
      */

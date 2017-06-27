@@ -10,7 +10,7 @@ class BluetoothDeviceViewHolder {
     /**
      * The view which contains the bluetooth device information.
      */
-    private View bluetoothDeviceView;
+    private final View bluetoothDeviceView;
 
     /**
      * Constructor.

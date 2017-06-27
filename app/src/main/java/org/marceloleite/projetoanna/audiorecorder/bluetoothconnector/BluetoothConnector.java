@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.AsyncTaskConnectWithAudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.ConnectWithAudioRecorderInterface;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.ConnectWithAudioRecorderParameters;
@@ -67,18 +68,12 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
     private BluetoothDevice bluetoothDeviceAudioRecorder;
 
     /**
-     * The bluetooth socket which represents the connection between this application and the audio recorder.
-     */
-    private BluetoothSocket bluetoothSocket;
-
-    /**
      * Object constructor.
      *
      * @param bluetoothConnectorInterface The objects which contains the bluetooth connection attempt parameters and the method to be executed after its conclusion.
      */
     public BluetoothConnector(BluetoothConnectorInterface bluetoothConnectorInterface) throws IOException {
         this.bluetoothDeviceAudioRecorder = null;
-        this.bluetoothSocket = null;
         this.bluetoothConnectorInterface = bluetoothConnectorInterface;
         this.bluetoothConnectorParameters = bluetoothConnectorInterface.getBluetoothConnectionParameters();
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -94,15 +89,6 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
      */
     public BluetoothDevice getBluetoothDeviceAudioRecorder() {
         return bluetoothDeviceAudioRecorder;
-    }
-
-    /**
-     * Returns the bluetooth socket which represents the connection between the application and the audio recorder.
-     *
-     * @return The bluetooth socket which represents the connection between the application and the audio recorder.
-     */
-    public BluetoothSocket getBluetoothSocket() {
-        return bluetoothSocket;
     }
 
     /**
@@ -240,7 +226,9 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
                     device = bluetoothDeviceAudioRecorder.getAddress();
                 }
                 Toast.makeText(bluetoothConnectorParameters.getAppCompatActivity(), "Connected with audio recorder \"" + device + "\".", Toast.LENGTH_LONG).show();
-                bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.SUCCESS, bluetoothSocket);
+                BluetoothSocket bluetoothSocket = connectWithAudioRecorderResult.getBluetoothSocket();
+                AudioRecorder audioRecorder = new AudioRecorder(bluetoothDeviceAudioRecorder, bluetoothSocket, bluetoothConnectorParameters.getAppCompatActivity(), bluetoothConnectorParameters.getAudioRecorderInterface());
+                bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.SUCCESS, audioRecorder);
                 break;
             case BluetoothConnectorReturnCodes.CONNECTION_FAILED:
                 device = bluetoothDeviceAudioRecorder.getName();
@@ -251,7 +239,7 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
                 bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.CONNECTION_FAILED, null);
                 break;
             default:
-                throw new RuntimeException("Unkonwn code returned from audio recorder connection attempt.");
+                throw new RuntimeException("Unknown code returned from audio recorder connection attempt.");
         }
         finishBluetoothConnectionProcess(bluetoothConnectorResult);
     }

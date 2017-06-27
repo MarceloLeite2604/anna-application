@@ -11,7 +11,7 @@ public class Log {
     /**
      * The list of classes which can register its messages on log.
      */
-    private static List<String> logTagList = new ArrayList<>();
+    private static final List<String> LOG_TAG_LIST = new ArrayList<>();
 
     /**
      * Object constructor.
@@ -26,7 +26,7 @@ public class Log {
      */
     public static void addClassToLog(String tag) {
         if (!isLogTagEnabled(tag)) {
-            logTagList.add(tag);
+            LOG_TAG_LIST.add(tag);
         }
     }
 
@@ -38,7 +38,7 @@ public class Log {
     @SuppressWarnings("unused")
     public static void removeClassFromLog(String tag) {
         if (isLogTagEnabled(tag)) {
-            logTagList.remove(tag);
+            LOG_TAG_LIST.remove(tag);
         }
     }
 
@@ -49,7 +49,7 @@ public class Log {
      * @return True if log tag is enabled to print its messages on log. False otherwise.
      */
     private static boolean isLogTagEnabled(String logTag) {
-        int classPosition = logTagList.indexOf(logTag);
+        int classPosition = LOG_TAG_LIST.indexOf(logTag);
         return (classPosition != -1);
     }
 

@@ -3,24 +3,45 @@ package org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.selectdevi
 import android.bluetooth.BluetoothDevice;
 
 /**
- * Created by marcelo on 26/06/17.
+ * The result of the bluetooth device selection.
  */
-
 public class SelectBluetoothDeviceResult {
 
-    private int returnCode;
+    /**
+     * The code returned from the bluetooth device selection.
+     */
+    private final int returnCode;
 
-    private BluetoothDevice bluetoothDevice;
+    /**
+     * The bluetooth device selected.
+     */
+    private final BluetoothDevice bluetoothDevice;
 
-    public SelectBluetoothDeviceResult(int returnCode, BluetoothDevice bluetoothDevice) {
+    /**
+     * Constructor.
+     *
+     * @param returnCode      The code returned from the bluetooth device selection.
+     * @param bluetoothDevice The bluetooth device selected.
+     */
+    SelectBluetoothDeviceResult(int returnCode, BluetoothDevice bluetoothDevice) {
         this.returnCode = returnCode;
         this.bluetoothDevice = bluetoothDevice;
     }
 
+    /**
+     * Returns the code returned from the bluetooth device selection.
+     *
+     * @return The code returned from the bluetooth device selection.
+     */
     public int getReturnCode() {
         return returnCode;
     }
 
+    /**
+     * Retursn the bluetooth device selected.
+     *
+     * @return The bluetooth device selected.
+     */
     public BluetoothDevice getBluetoothDevice() {
         return bluetoothDevice;
     }

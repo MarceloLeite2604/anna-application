@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/information"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -13,17 +14,18 @@
 
         <TextView
             android:id="@+id/information_text"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginBottom="0dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="0dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="0dp"
             android:layout_marginTop="0dp"
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:padding="10dp"
             android:text="Information"
-            android:textSize="18dp" />
+            android:textSize="18sp"
+            tools:ignore="HardcodedText" />
 
         <ProgressBar
             android:id="@+id/information_progressbar"
@@ -43,5 +45,6 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_margin="0dp"
-        android:src="@drawable/divisor" />
+        android:src="@drawable/divisor"
+        tools:ignore="ContentDescription" />
 </LinearLayout>

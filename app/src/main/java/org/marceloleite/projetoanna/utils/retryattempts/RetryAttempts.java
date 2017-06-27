@@ -19,7 +19,7 @@ public class RetryAttempts {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(RetryAttempts.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
     /**
@@ -106,7 +106,7 @@ public class RetryAttempts {
             try {
                 Thread.sleep(waitTime);
             } catch (InterruptedException interruptedException) {
-                Log.e(RetryAttempts.class, LOG_TAG, "wait (84): " + interruptedException);
+                Log.e(LOG_TAG, "wait (84): " + interruptedException);
             }
         } else {
             return RetryAttemptsReturnCodes.MAX_RETRY_ATTEMPTS_REACHED;

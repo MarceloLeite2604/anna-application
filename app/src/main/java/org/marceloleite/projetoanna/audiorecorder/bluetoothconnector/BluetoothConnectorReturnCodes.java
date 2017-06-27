@@ -10,7 +10,7 @@ public class BluetoothConnectorReturnCodes extends GenericReturnCodes {
     /**
      * Indicates that used has denied the bluetooth adapter activation.
      */
-    static final int BLUETOOTH_ACTIVATION_DENIED = 51;
+    public static final int BLUETOOTH_ACTIVATION_DENIED = 51;
 
     /**
      * Indicates that the bluetooth device discovering was cancelled.

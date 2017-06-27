@@ -8,9 +8,8 @@ import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 
 /**
- * Created by marcelo on 23/05/17.
+ * Writes audio data pieces on an output stream.
  */
-
 public class ByteBufferWriteOutputStream extends ByteBufferWriter {
 
     /**
@@ -22,23 +21,48 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
      * Enables messages of this class to be shown on log.
      */
     static {
-        Log.addClassToLog(ByteBufferWriteOutputStream.class);
+        Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The output stream which the data will the written on.
+     */
     private OutputStream outputStream;
 
+    /**
+     * The number of bytes to ignore before start writing the content on file.
+     */
     private long bytesToIgnore;
 
+    /**
+     * The number of bytes to be written on output stream.
+     */
     private long bytesToWrite;
 
+    /**
+     * Constructor.
+     *
+     * @param outputStream  The output stream which the data will the written on.
+     * @param bytesToIgnore The number of bytes to ignore before start writing the content on file.
+     * @param bytesToWrite  The number of bytes to be written on output stream.
+     */
     public ByteBufferWriteOutputStream(OutputStream outputStream, long bytesToIgnore, long bytesToWrite) {
         super();
         this.outputStream = outputStream;
         this.bytesToIgnore = bytesToIgnore;
         this.bytesToWrite = bytesToWrite;
-        Log.d(ByteBufferWriteOutputStream.class, LOG_TAG, "ByteBufferWriteOutputStream (39): Bytes do ignore: " + bytesToIgnore + ", bytes to write: " + bytesToWrite);
+        Log.d(LOG_TAG, "ByteBufferWriteOutputStream (39): Bytes do ignore: " + bytesToIgnore + ", bytes to write: " + bytesToWrite);
     }
 
+    /**
+     * Constructor.
+     *
+     * @param outputStream      The output stream which the data will the written on.
+     * @param maximumItemsOnMap The maximum quantity of audio chunks to receive before starts writing them on output stream.
+     * @param bytesToIgnore     The number of bytes to ignore before start writing the content on file.
+     * @param bytesToWrite      The number of bytes to be written on output stream.
+     */
+    @SuppressWarnings("unused")
     public ByteBufferWriteOutputStream(OutputStream outputStream, int maximumItemsOnMap, long bytesToIgnore, long bytesToWrite) {
         super(maximumItemsOnMap);
         this.bytesToIgnore = bytesToIgnore;
@@ -67,6 +91,11 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
         }
     }
 
+    /**
+     * Writes the data on output buffer.
+     *
+     * @param byteBuffer The data to be written on output buffer.
+     */
     private void writeOnOutput(ByteBuffer byteBuffer) {
 
         int bytesToRead;
@@ -92,8 +121,9 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
 
             try {
                 outputStream.write(buffer);
-            } catch (IOException e) {
-                Log.e(ByteBufferWriteOutputStream.class, LOG_TAG, "writeOnOutput (96): Error while writing content on output stream.", e);
+            } catch (IOException ioException) {
+                Log.e(LOG_TAG, "writeOnOutput (96): Error while writing content on output stream.", ioException);
+                throw new RuntimeException("Error while writing content on output stream.", ioException);
             }
 
             bytesToIgnore -= remainingBytesIgnored;
@@ -108,8 +138,9 @@ public class ByteBufferWriteOutputStream extends ByteBufferWriter {
     protected void postConcludeWriting() {
         try {
             outputStream.close();
-        } catch (IOException e) {
-            Log.e(ByteBufferWriteOutputStream.class, LOG_TAG, "postConcludeWriting (112): Error while closing output stream.", e);
+        } catch (IOException ioException) {
+            Log.e(LOG_TAG, "postConcludeWriting (112): Error while closing output stream.", ioException);
+            throw new RuntimeException("Error while closing output stream.", ioException);
         }
     }
 }

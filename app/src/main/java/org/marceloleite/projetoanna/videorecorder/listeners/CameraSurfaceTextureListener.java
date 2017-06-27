@@ -7,13 +7,21 @@ import android.view.TextureView;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 /**
- * Created by Marcelo Leite on 03/05/2017.
+ * A {@link TextureView.SurfaceTextureListener} object to receive notification about changes on the
+ * surface associated with a texture view and request a camera to be opened.
  */
-
 public class CameraSurfaceTextureListener implements TextureView.SurfaceTextureListener {
 
-    private VideoRecorder videoRecorder;
+    /**
+     * The object which controls the camera opening.
+     */
+    private final VideoRecorder videoRecorder;
 
+    /**
+     * Constructor.
+     *
+     * @param videoRecorder The object which controls the camera opening.
+     */
     public CameraSurfaceTextureListener(VideoRecorder videoRecorder) {
         this.videoRecorder = videoRecorder;
     }
@@ -26,7 +34,6 @@ public class CameraSurfaceTextureListener implements TextureView.SurfaceTextureL
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
-
     }
 
     @Override
@@ -36,6 +43,5 @@ public class CameraSurfaceTextureListener implements TextureView.SurfaceTextureL
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
-
     }
 }

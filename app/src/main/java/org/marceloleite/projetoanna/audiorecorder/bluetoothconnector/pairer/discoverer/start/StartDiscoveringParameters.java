@@ -3,17 +3,29 @@ package org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.pairer.dis
 import android.content.Context;
 
 /**
- * Created by marcelo on 26/06/17.
+ * The parameters required to construct a {@link AlertDialogStartDiscovering} object.
  */
-
 public class StartDiscoveringParameters {
 
-    private Context context;
+    /**
+     * The context of the application in execution.
+     */
+    private final Context context;
 
+    /**
+     * Constructor.
+     *
+     * @param context The context of the application in execution.
+     */
     public StartDiscoveringParameters(Context context) {
         this.context = context;
     }
 
+    /**
+     * Returns the context of the application in execution.
+     *
+     * @return The context of the application in execution.
+     */
     public Context getContext() {
         return context;
     }

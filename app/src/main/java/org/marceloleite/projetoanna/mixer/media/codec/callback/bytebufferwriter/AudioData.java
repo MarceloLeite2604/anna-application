@@ -1,30 +1,50 @@
 package org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter;
 
 import android.media.MediaCodec;
-import android.support.annotation.NonNull;
 
 import java.nio.ByteBuffer;
 
 /**
- * Created by marcelo on 23/05/17.
+ * A piece of audio data and its information.
  */
-
 public class AudioData {
 
-    private ByteBuffer byteBuffer;
+    /**
+     * The audio data.
+     */
+    private final ByteBuffer byteBuffer;
 
-    private MediaCodec.BufferInfo bufferInfo;
+    /**
+     * The information about the audio data.
+     */
+    private final MediaCodec.BufferInfo bufferInfo;
 
+    /**
+     * Constructor.
+     *
+     * @param byteBuffer The audio data.
+     * @param bufferInfo The information about the audio data.
+     */
     public AudioData(ByteBuffer byteBuffer, MediaCodec.BufferInfo bufferInfo) {
         this.byteBuffer = byteBuffer;
         this.bufferInfo = bufferInfo;
     }
 
-    public ByteBuffer getByteBuffer() {
+    /**
+     * Returns the audio data.
+     *
+     * @return the audio data.
+     */
+    ByteBuffer getByteBuffer() {
         return byteBuffer;
     }
 
-    public MediaCodec.BufferInfo getBufferInfo() {
+    /**
+     * Returns the information about the audio data.
+     *
+     * @return The information about the audio data.
+     */
+    MediaCodec.BufferInfo getBufferInfo() {
         return bufferInfo;
     }
 }

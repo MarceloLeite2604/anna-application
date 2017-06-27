@@ -8,7 +8,8 @@ import android.content.Intent;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 27/04/2016.
+ * A {@link android.content.BroadcastReceiver} to control the messages from Android when a bluetooth
+ * device is found through discovering process.
  */
 public class BroadcastReceiverDiscoverBluetoothDevices extends android.content.BroadcastReceiver {
 
@@ -24,8 +25,16 @@ public class BroadcastReceiverDiscoverBluetoothDevices extends android.content.B
         Log.addClassToLog(LOG_TAG);
     }
 
+    /**
+     * The object which contains the methods to be executed when a bluetooth device is discovered.
+     */
     private DiscoverBluetoothDevicesInterface discoverBluetoothDevicesInterface;
 
+    /**
+     * Constructor.
+     *
+     * @param discoverBluetoothDevicesInterface The object which contains the methods to be executed when a bluetooth device is discovered.
+     */
     public BroadcastReceiverDiscoverBluetoothDevices(DiscoverBluetoothDevicesInterface discoverBluetoothDevicesInterface) {
         this.discoverBluetoothDevicesInterface = discoverBluetoothDevicesInterface;
     }
@@ -43,18 +52,6 @@ public class BroadcastReceiverDiscoverBluetoothDevices extends android.content.B
             BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Log.d(LOG_TAG, "onReceive (44): Device \"" + bluetoothDevice.getName() + "\" found.");
             discoverBluetoothDevicesInterface.deviceFound(bluetoothDevice);
-
-            /* TODO: The actions below should be checked on a broadcast receiver specific for pairing. */
-        } /* else if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(action)) {
-            int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR);
-            int previousState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR);
-            if (previousState == BluetoothDevice.BOND_NONE && state == BluetoothDevice.BOND_BONDING) {
-                Log.d(LOG_TAG, "onReceive (50): Pairing started.");
-                pairer.pairingStarted();
-            } else if (previousState == BluetoothDevice.BOND_BONDING) {
-                Log.d(LOG_TAG, "onReceive (53): Pairing finished.");
-                pairer.pairingFinished(state == BluetoothDevice.BOND_BONDED);
-            }
-        } */
+        }
     }
 }

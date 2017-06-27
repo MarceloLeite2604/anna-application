@@ -100,7 +100,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
         Throwable throwable = null;
 
         if (operation != null) {
-            Log.d(LOG_TAG, "executeOperation (90): Executing command \"" + operation.getCommand() + "\".");
+            Log.d(LOG_TAG, "executeCommand (90): Executing command \"" + operation.getCommand() + "\".");
             switch (operation.getCommand()) {
                 case START_AUDIO_RECORD:
                     commandResult = commander.startRecord();
@@ -125,7 +125,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
                     /* TODO: Finish execution. */
                     break;
                 default:
-                    Log.e(LOG_TAG, "executeOperation (124): Unknown operation \"" + operation.getCommand() + "\".");
+                    Log.e(LOG_TAG, "executeCommand (124): Unknown operation \"" + operation.getCommand() + "\".");
                     throw new RuntimeException("Unknown operation \"" + operation.getCommand() + "\".");
             }
 
@@ -150,7 +150,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
             Message commandResultMessage = operatorThreadParameters.getOperationResultHandler().obtainMessage();
             commandResultMessage.what = OperationResultHandler.RECEIVE_COMMAND_RESULT;
             commandResultMessage.obj = operation;
-            Log.d(LOG_TAG, "executeOperation (149): Sending the result of command " + operation.getCommand());
+            Log.d(LOG_TAG, "executeCommand (149): Sending the result of command " + operation.getCommand());
             operatorThreadParameters.getOperationResultHandler().sendMessage(commandResultMessage);
 
         } else
@@ -163,7 +163,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
                     if (commander.checkConnection()) {
                         this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
                     } else {
-                        Log.d(LOG_TAG, "executeOperation (164): Lost connection with audio recorder.");
+                        Log.d(LOG_TAG, "executeCommand (164): Lost connection with audio recorder.");
                         Message commandResultMessage = operatorThreadParameters.getOperationResultHandler().obtainMessage();
                         commandResultMessage.what = OperationResultHandler.CONNECTION_LOST;
                         commandResultMessage.obj = null;
@@ -186,7 +186,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
 
     @Override
     public void finishExecution() {
-        Log.d(LOG_TAG, "finishExecution (184): Communicator thread finished.");
+        Log.d(LOG_TAG, "finishCommunication (184): Communicator thread finished.");
         operationExecutorHandler.removeCallbacksAndMessages(null);
         this.commander = null;
         this.noOperationRetryAttempts = null;

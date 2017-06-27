@@ -10,17 +10,17 @@ import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operatio
  */
 public class OperatorThreadParameters {
 
-    private OperationResultHandler operationResultHandler;
+    private final OperationResultHandler operationResultHandler;
 
     /**
      * The socket which represents the bluetooth communication with the audio recorder.
      */
-    private BluetoothSocket bluetoothSocket;
+    private final BluetoothSocket bluetoothSocket;
 
     /**
      * The context of the application which established the connection with the audio recorder.
      */
-    private Context context;
+    private final Context context;
 
     /**
      * Constructor.

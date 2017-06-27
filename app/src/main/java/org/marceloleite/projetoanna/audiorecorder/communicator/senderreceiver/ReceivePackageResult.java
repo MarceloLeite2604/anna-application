@@ -11,12 +11,12 @@ public class ReceivePackageResult {
     /**
      * The code returned from {@link SenderReceiver#receivePackage()} method.
      */
-    private int returnCode;
+    private final int returnCode;
 
     /**
      * The data package received.
      */
-    private DataPackage dataPackage;
+    private final DataPackage dataPackage;
 
     /**
      * Object constructor.

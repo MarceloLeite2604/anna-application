@@ -63,12 +63,12 @@ public enum PackageType {
     /**
      * The code which identifies the package type.
      */
-    private int code;
+    private final int code;
 
     /**
      * The title of the package type.
      */
-    private String title;
+    private final String title;
 
     /**
      * Creates a new package type

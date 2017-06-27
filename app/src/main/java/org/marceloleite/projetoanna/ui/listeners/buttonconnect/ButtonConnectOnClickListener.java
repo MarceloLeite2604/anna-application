@@ -6,9 +6,8 @@ import android.widget.Button;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
- * Created by Marcelo Leite on 17/03/2017.
+ * A {@link android.view.View.OnClickListener} for the button which controls the connection with an audio recorder.
  */
-
 public class ButtonConnectOnClickListener implements View.OnClickListener {
 
     /**
@@ -23,8 +22,16 @@ public class ButtonConnectOnClickListener implements View.OnClickListener {
         Log.addClassToLog(LOG_TAG);
     }
 
-    ButtonConnectInterface buttonConnectInterface;
+    /**
+     * The object which contains the methods used by this class to control the connection with an audio recorder.
+     */
+    private ButtonConnectInterface buttonConnectInterface;
 
+    /**
+     * Constructor.
+     *
+     * @param buttonConnectInterface The object which contains the methods used by this class to control the connection with an audio recorder.
+     */
     public ButtonConnectOnClickListener(ButtonConnectInterface buttonConnectInterface) {
         this.buttonConnectInterface = buttonConnectInterface;
     }

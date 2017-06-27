@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -62,7 +61,7 @@ public class AlertDialogSelectBluetoothDevice extends AlertDialog implements Ada
         SelectBluetoothDeviceParameters selectBluetoothDeviceParameters = selectBluetoothDeviceInterface.getSelectBluetoothDeviceParameters();
         View convertView = View.inflate(selectBluetoothDeviceParameters.getContext(), R.layout.bluetooth_devices_list, null);
         setView(convertView);
-        ListView bluetoothDevicesListView = (ListView) convertView.findViewById(R.id.list_view_bluetooth_devices);
+        ListView bluetoothDevicesListView = convertView.findViewById(R.id.list_view_bluetooth_devices);
 
         bluetoothDeviceArrayList = new ArrayList<>();
         for (BluetoothDevice bluetoothDevice : BluetoothAdapter.getDefaultAdapter().getBondedDevices()) {
