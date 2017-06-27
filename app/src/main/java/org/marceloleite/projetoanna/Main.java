@@ -118,6 +118,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(LOG_TAG, "onActivityResult (121): ");
         if (requestCode == BluetoothConnector.ENABLE_BLUETOOTH_REQUEST_CODE) {
             bluetoothConnector.requestBluetoothAdapterActivationResult(resultCode);
         }
@@ -385,6 +386,12 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
                 buttonConnect.setText(R.string.button_connect_first_text);
             }
             buttonConnect.setEnabled(true);
+        } else {
+            if (bluetoothConnector.isConnecting()) {
+                buttonConnect.setEnabled(false);
+            } else {
+                buttonConnect.setEnabled(true);
+            }
         }
     }
 

@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.AsyncTaskConnectWithAudioRecorder;
@@ -68,6 +67,11 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
     private BluetoothDevice bluetoothDeviceAudioRecorder;
 
     /**
+     * Indicates it is trying to connect with an audio recorder.
+     */
+    private boolean isConnecting;
+
+    /**
      * Object constructor.
      *
      * @param bluetoothConnectorInterface The objects which contains the bluetooth connection attempt parameters and the method to be executed after its conclusion.
@@ -77,15 +81,21 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
         this.bluetoothConnectorInterface = bluetoothConnectorInterface;
         this.bluetoothConnectorParameters = bluetoothConnectorInterface.getBluetoothConnectionParameters();
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        this.isConnecting = false;
         if (bluetoothAdapter == null) {
             throw new IOException("This device does not have a bluetooth adapter.");
         }
+    }
+
+    public boolean isConnecting() {
+        return isConnecting;
     }
 
     /**
      * Starts the connection process with the audio recorder.
      */
     public void startConnectionProcess() {
+        isConnecting = true;
         if (isBluetoothAdapterActivated()) {
             checkDeviceToConnect();
         } else {
@@ -147,7 +157,7 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
         if (pairedBluetoothDevices.size() == 0) {
             new Pairer(this).startPairingProcess();
         } else {
-            new AlertDialogSelectBluetoothDevice(this);
+            new AlertDialogSelectBluetoothDevice(this).show();
         }
     }
 
@@ -166,7 +176,6 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
                 if (device == null || device.isEmpty()) {
                     device = bluetoothDevice.getAddress();
                 }
-                Toast.makeText(bluetoothConnectorParameters.getAppCompatActivity(), "Failed to pair with device \"" + device + "\".", Toast.LENGTH_LONG).show();
                 bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.PAIRING_FAILED, null);
                 finishBluetoothConnectionProcess(bluetoothConnectorResult);
                 break;
@@ -211,12 +220,6 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
         String device;
         switch (connectWithAudioRecorderResult.getReturnCode()) {
             case BluetoothConnectorReturnCodes.SUCCESS:
-                /* TODO: Create a new AudioRecord object and return it. */
-                device = bluetoothDeviceAudioRecorder.getName();
-                if (device == null || device.isEmpty()) {
-                    device = bluetoothDeviceAudioRecorder.getAddress();
-                }
-                Toast.makeText(bluetoothConnectorParameters.getAppCompatActivity(), "Connected with audio recorder \"" + device + "\".", Toast.LENGTH_LONG).show();
                 BluetoothSocket bluetoothSocket = connectWithAudioRecorderResult.getBluetoothSocket();
                 AudioRecorder audioRecorder = new AudioRecorder(bluetoothDeviceAudioRecorder, bluetoothSocket, bluetoothConnectorParameters.getAppCompatActivity(), bluetoothConnectorParameters.getAudioRecorderInterface());
                 bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.SUCCESS, audioRecorder);
@@ -226,7 +229,6 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
                 if (device == null || device.isEmpty()) {
                     device = bluetoothDeviceAudioRecorder.getAddress();
                 }
-                Toast.makeText(bluetoothConnectorParameters.getAppCompatActivity(), "Failed to connect with device \"" + device + "\".", Toast.LENGTH_LONG).show();
                 bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.CONNECTION_FAILED, null);
                 break;
             default:
@@ -236,6 +238,7 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
     }
 
     private void finishBluetoothConnectionProcess(BluetoothConnectorResult bluetoothConnectorResult) {
+        isConnecting = false;
         bluetoothConnectorInterface.bluetoothConnectionResult(bluetoothConnectorResult);
     }
 

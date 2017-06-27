@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--suppress CheckTagEmptyBody -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout_main"
     android:layout_width="match_parent"
@@ -11,32 +11,37 @@
     <TextureView
         android:id="@+id/texture_view_camera_preview"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.85" />
+        android:layout_height="match_parent" />
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.15"
+        android:layout_height="70dp"
+        android:layout_alignBottom="@+id/texture_view_camera_preview"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/button_connect"
             style="?android:attr/buttonBarButtonStyle"
+            android:alpha="0.8"
+            android:background="#999"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            android:layout_margin="5dp"
             android:text="@string/button_connect_first_text"
             tools:ignore="NestedWeights" />
 
         <Button
             android:id="@+id/button_record"
             style="?android:attr/buttonBarButtonStyle"
+            android:background="#999"
+            android:alpha="0.8"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
+            android:layout_margin="5dp"
             android:enabled="false"
             android:text="@string/button_record_first_text" />
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>
