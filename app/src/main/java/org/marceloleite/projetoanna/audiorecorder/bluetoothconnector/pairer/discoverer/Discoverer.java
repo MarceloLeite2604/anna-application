@@ -22,7 +22,7 @@ public class Discoverer implements DiscoverBluetoothDevicesInterface, SearchingD
 
     private final DiscovererParameters discovererParameters;
 
-    private final BroadcastReceiverDiscoverBluetoothDevices broadcastReceiverDiscoverBluetoothDevices;
+    private BroadcastReceiverDiscoverBluetoothDevices broadcastReceiverDiscoverBluetoothDevices;
 
     public Discoverer(DiscovererInterface discovererInterface) {
         this.discovererInterface = discovererInterface;

@@ -8,11 +8,6 @@ import android.bluetooth.BluetoothDevice;
 public interface DiscoverBluetoothDevicesInterface {
 
     /**
-     * Starts the bluetooth device discovering process.
-     */
-    void startDeviceDiscover();
-
-    /**
      * Method executed after the bluetooth device discovering starts.
      */
     void discoverDevicesStarted();

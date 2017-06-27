@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Projeto Anna</string>
+    <string name="app_name">Anna</string>
     <string name="button_connect_first_text">Connect</string>
     <string name="button_connect_second_text">Disconnect</string>
     <string name="button_record_first_text">Start Record</string>

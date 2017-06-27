@@ -60,8 +60,14 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
      */
     private Button buttonRecord;
 
+    /**
+     * The texture view which shows the camera preview.
+     */
     private TextureView textureView;
 
+    /**
+     * Controls the connection with the audio recorder.
+     */
     private BluetoothConnector bluetoothConnector;
 
     /**
@@ -69,6 +75,9 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
      */
     private AudioRecorder audioRecorder;
 
+    /**
+     * The video recorder controller.
+     */
     private VideoRecorder videoRecorder;
 
     @Override
@@ -181,10 +190,8 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         super.onResume();
         Log.d(LOG_TAG, "onResume (172): ");
 
-        if (textureView != null) {
-            Size textureViewSize = new Size(textureView.getWidth(), textureView.getHeight());
-            videoRecorder.resume(textureViewSize);
-        }
+        Size textureViewSize = new Size(textureView.getWidth(), textureView.getHeight());
+        videoRecorder.resume(textureViewSize);
     }
 
     @Override

@@ -83,15 +83,6 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
     }
 
     /**
-     * Returns the bluetooth device selected.
-     *
-     * @return The bluetooth device selected.
-     */
-    public BluetoothDevice getBluetoothDeviceAudioRecorder() {
-        return bluetoothDeviceAudioRecorder;
-    }
-
-    /**
      * Starts the connection process with the audio recorder.
      */
     public void startConnectionProcess() {

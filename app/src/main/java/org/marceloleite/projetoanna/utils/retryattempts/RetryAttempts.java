@@ -83,7 +83,7 @@ public class RetryAttempts {
      *
      * @return True if the number of attempts was increased. False if it has reached its limit.
      */
-    private boolean increateAttempts() {
+    private boolean increaseAttempts() {
         if (this.totalAttempts < this.maximumAttempts) {
             totalAttempts++;
             return true;
@@ -99,7 +99,7 @@ public class RetryAttempts {
      * @return {@link RetryAttemptsReturnCodes#MAX_RETRY_ATTEMPTS_REACHED} if the maximum numbers of retry attempts was reached, {@link RetryAttemptsReturnCodes#SUCCESS} otherwise.
      */
     public int waitForNextAttempt() {
-        if (increateAttempts()) {
+        if (increaseAttempts()) {
             int waitTime = minimumWaitTime;
             waitTime += totalAttempts * waitTimeStep;
 

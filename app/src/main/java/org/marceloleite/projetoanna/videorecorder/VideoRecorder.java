@@ -31,6 +31,7 @@ import org.marceloleite.projetoanna.videorecorder.callbacks.CameraCaptureSession
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraCaptureSessionStateInterface;
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraDeviceStateCallback;
 import org.marceloleite.projetoanna.videorecorder.callbacks.CameraDeviceStateInterface;
+import org.marceloleite.projetoanna.videorecorder.listeners.CameraSurfaceTextureInterface;
 import org.marceloleite.projetoanna.videorecorder.listeners.CameraSurfaceTextureListener;
 
 import java.io.File;
@@ -42,7 +43,7 @@ import java.util.List;
 /**
  * Controls the video recording.
  */
-public class VideoRecorder implements CameraCaptureSessionStateInterface, CameraDeviceStateInterface {
+public class VideoRecorder implements CameraCaptureSessionStateInterface, CameraDeviceStateInterface, CameraSurfaceTextureInterface {
 
     /**
      * A tag to identify this class' messages on log.
@@ -82,42 +83,48 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
     private static final int FRAME_RATE = 30;
 
     /**
-     * Value returned by teh sensor orientation when the default position is being used.
+     * The default value for the rotation angle of the camera image.
      */
-    private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
+    private static final int DEFAULT_CAMERA_IMAGE_ROTATION_ANGLE = 90;
 
     /**
-     * Value returned by teh sensor orientation when the inverted position is being used.
+     * The inverted value for the rotation angle of the camera image.
      */
-    private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
+    private static final int INVERTED_CAMERA_IMAGE_ROTATION_ANGLE = 270;
 
     /**
-     * Array of values to remap the default orientation informed by the surface.
+     * Array of values to map the angle the image should be rotated to be shown in its correct
+     * position when the camera is in the default rotation angle.
      */
-    private static final SparseIntArray DEFAULT_ORIENTATIONS = new SparseIntArray();
+    private static final SparseIntArray MEDIA_ORIENTATION_FOR_DEFAULT_CAMERA_POSITION = new SparseIntArray();
 
     /**
      * The ID of the camera selected to record videos.
      */
     private String selectedCameraId;
 
+    /* Defines the orientation of the recorded media based on screen rotation when the camera is in
+    its default position. */
     static {
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_90, 0);
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_180, 270);
-        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_270, 180);
+        MEDIA_ORIENTATION_FOR_DEFAULT_CAMERA_POSITION.append(Surface.ROTATION_0, 90);
+        MEDIA_ORIENTATION_FOR_DEFAULT_CAMERA_POSITION.append(Surface.ROTATION_90, 0);
+        MEDIA_ORIENTATION_FOR_DEFAULT_CAMERA_POSITION.append(Surface.ROTATION_180, 270);
+        MEDIA_ORIENTATION_FOR_DEFAULT_CAMERA_POSITION.append(Surface.ROTATION_270, 180);
     }
 
     /**
-     * Array of values to remap the inverted orientation informed by the surface.
+     * Array of values to map the angle the image should be rotated to be shown in its correct
+     * position when the camera is in the inverted rotation angle.
      */
-    private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
+    private static final SparseIntArray MEDIA_ORIENTATION_FOR_INVERTED_CAMERA_POSITION = new SparseIntArray();
 
+    /* Defines the orientation of the recorded media based on screen rotation when the camera is in
+    its inverted position. */
     static {
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_0, 270);
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_90, 180);
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
-        INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
+        MEDIA_ORIENTATION_FOR_INVERTED_CAMERA_POSITION.append(Surface.ROTATION_0, 270);
+        MEDIA_ORIENTATION_FOR_INVERTED_CAMERA_POSITION.append(Surface.ROTATION_90, 180);
+        MEDIA_ORIENTATION_FOR_INVERTED_CAMERA_POSITION.append(Surface.ROTATION_180, 90);
+        MEDIA_ORIENTATION_FOR_INVERTED_CAMERA_POSITION.append(Surface.ROTATION_270, 0);
     }
 
     /**
@@ -162,14 +169,14 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
     private CameraCaptureSession cameraCaptureSession;
 
     /**
-     * A handler to control the camera capture session.
+     * A captureSessionHandler to control the camera capture session.
      */
-    private Handler handler;
+    private Handler captureSessionHandler;
 
     /**
      * A thread to control the endless request of image capture from the camera.
      */
-    private HandlerThread backgroundThread;
+    private HandlerThread captureSessionHandlerThread;
 
     //private CameraSurfaceTextureListener textureListener;
 
@@ -228,7 +235,7 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
     public void setCameraCaptureSession(CameraCaptureSession cameraCaptureSession) {
         if (cameraDevice != null) {
             this.cameraCaptureSession = cameraCaptureSession;
-            updatePreview();
+            requestImageCaptureForCamera();
         }
     }
 
@@ -241,16 +248,13 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         return videoFile;
     }
 
-    public void openCamera(Size previewSize) {
+    @Override
+    public void openCamera(Size surfacePreviewSize) {
         mediaRecorder = new MediaRecorder();
 
-        try {
-            selectedCameraId = selectCamera();
-            selectVideoAndPreviewSize(selectedCameraId, previewSize);
-            openSelectedCamera(selectedCameraId);
-        } catch (CameraAccessException cameraAccessException) {
-            cameraAccessException.printStackTrace();
-        }
+        selectedCameraId = selectCamera();
+        definedVideoAndPreviewSize(selectedCameraId, surfacePreviewSize);
+        openSelectedCamera(selectedCameraId);
     }
 
     /**
@@ -302,48 +306,70 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
     }
 
     /**
-     * TODO: Conclude.
+     * Defines the size of the video and its preview.
      *
-     * @param selectedCameraId
-     * @param previewSize
-     * @throws CameraAccessException
+     * @param selectedCameraId The ID of the camera selected.
+     * @param previewSize      The size of the view which the video preview is displayed.
      */
-    private void selectVideoAndPreviewSize(String selectedCameraId, Size previewSize) throws CameraAccessException {
+    private void definedVideoAndPreviewSize(String selectedCameraId, Size previewSize) {
         CameraManager cameraManager = getCameraManager();
-        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(selectedCameraId);
+        CameraCharacteristics cameraCharacteristics;
+
+        try {
+            cameraCharacteristics = cameraManager.getCameraCharacteristics(selectedCameraId);
+        } catch (CameraAccessException cameraAccessException) {
+            throw new RuntimeException("Exception thrown while getting the characteristics of the camera ID \"" + selectedCameraId + "\".");
+        }
+
         StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
         if (streamConfigurationMap != null) {
             Size[] outputSizes = streamConfigurationMap.getOutputSizes(MediaRecorder.class);
             this.videoSize = chooseSize(outputSizes);
-            Log.d(LOG_TAG, "selectVideoAndPreviewSize (215): Video size: " + videoSize);
+            Log.d(LOG_TAG, "definedVideoAndPreviewSize (215): Video size: " + videoSize);
             this.previewSize = chooseMinorSizeBiggerThan(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), previewSize, getSizeRatio(videoSize));
-            Log.d(LOG_TAG, "selectVideoAndPreviewSize (217): Preview size: " + previewSize);
+            Log.d(LOG_TAG, "definedVideoAndPreviewSize (217): Preview size: " + previewSize);
         } else {
-            /* TODO: What should be done? */
+            throw new RuntimeException("Could not get the stream configuration map of the camera ID \"" + selectedCameraId + "\".");
         }
     }
 
-    private int getSensorOrientation() {
+    /**
+     * Retrieves the angle which the camera image should be rotated to be shown in its correct position.
+     *
+     * @return The angle which the camera image should be rotated to be shown in its correct position.
+     */
+    private int retrieveCameraImageRotationAngle() {
         CameraManager cameraManager = getCameraManager();
-        Integer sensorOrientation;
+        Integer cameraImageRotationAngle;
 
         try {
             CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(selectedCameraId);
-            sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-            if (sensorOrientation == null) {
-                sensorOrientation = SENSOR_ORIENTATION_DEFAULT_DEGREES;
+            cameraImageRotationAngle = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            if (cameraImageRotationAngle == null) {
+                cameraImageRotationAngle = DEFAULT_CAMERA_IMAGE_ROTATION_ANGLE;
             }
         } catch (CameraAccessException exception) {
             exception.printStackTrace();
-            sensorOrientation = SENSOR_ORIENTATION_DEFAULT_DEGREES;
+            cameraImageRotationAngle = DEFAULT_CAMERA_IMAGE_ROTATION_ANGLE;
         }
-        return sensorOrientation;
+        return cameraImageRotationAngle;
     }
 
+    /**
+     * Retrieves the camera manager.
+     *
+     * @return The camera manager.
+     */
     private CameraManager getCameraManager() {
         return (CameraManager) videoRecorderParameters.getAppCompatActivity().getSystemService(Context.CAMERA_SERVICE);
     }
 
+    /**
+     * Choose a size according with the aspect ratios preferred by the application and the
+     *
+     * @param size The sizes available to select.
+     * @return The size chosen.
+     */
     private Size chooseSize(Size[] size) {
         Size selectedVideoSize = null;
         boolean videoSizeSelected = false;
@@ -369,6 +395,13 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         return selectedVideoSize;
     }
 
+    /**
+     * Selects the sizes which contains the aspect ratio informed.
+     *
+     * @param sizes       The sizes to be analyzed.
+     * @param aspectRatio The aspect ratio searched.
+     * @return A list with the sizes with the aspect ratio informed.
+     */
     private List<Size> selectSizesWithAspectRatio(Size[] sizes, double aspectRatio) {
         List<Size> sizesSelected = new ArrayList<>();
         double sizeAspectRatio;
@@ -382,6 +415,13 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         return sizesSelected;
     }
 
+    /**
+     * Selects the sizes which contains the width specified.
+     *
+     * @param sizeList The list of sizes to be analyzed.
+     * @param widths   The width to be searched.
+     * @return A list of sizes with the width informed.
+     */
     private Size selectSizeWithWidth(List<Size> sizeList, int[] widths) {
         Size sizeSelected = null;
         int widthsCounter = 0;
@@ -408,62 +448,89 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         return sizeSelected;
     }
 
-    private void openSelectedCamera(String selectedCameraId) throws CameraAccessException {
+    /**
+     * Opens the camera selected.
+     *
+     * @param selectedCameraId The ID of the camera selected.
+     */
+    private void openSelectedCamera(String selectedCameraId) {
         CameraManager cameraManager = getCameraManager();
         AppCompatActivity appCompatActivity = videoRecorderParameters.getAppCompatActivity();
         if (ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(appCompatActivity, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(appCompatActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_CAMERA_PERMISSION);
             return;
         }
-        cameraManager.openCamera(selectedCameraId, stateCallback, null);
+        try {
+            cameraManager.openCamera(selectedCameraId, stateCallback, null);
+        } catch (CameraAccessException cameraAccessException) {
+            throw new RuntimeException("Exception raised when requesting to open the camera ID \"" + selectedCameraId + "\".", cameraAccessException);
+        }
     }
 
-    private void updatePreview() {
-        if (cameraDevice == null) {
-            Log.e(LOG_TAG, "updatePreview (316): The device does not have a camera.");
-        }
-
+    /**
+     * Requests the start of the image capture for the selected camera.
+     */
+    private void requestImageCaptureForCamera() {
         captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
         try {
-            cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, handler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
+            cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(), null, captureSessionHandler);
+        } catch (CameraAccessException cameraAccessException) {
+            throw new RuntimeException("Exception thrown while requesting the start of the image capture for the selected camera.", cameraAccessException);
         }
     }
 
-    private void startBackgroundThread() {
-        backgroundThread = new HandlerThread("Camera Background");
-        backgroundThread.start();
-        handler = new Handler(backgroundThread.getLooper());
+    /**
+     * Creates and starts the {@link HandlerThread} associated with the {@link Handler} which controls the video capture session.
+     */
+    private void startCaptureSessionHandlerThread() {
+        captureSessionHandlerThread = new HandlerThread("Video capture session");
+        captureSessionHandlerThread.start();
+        captureSessionHandler = new Handler(captureSessionHandlerThread.getLooper());
     }
 
-    private void stopBackgroundThread() {
-        backgroundThread.quitSafely();
+    /**
+     * Stops the {@link HandlerThread} associated with the {@link Handler} which controls the video capture session.
+     */
+    private void stopCaptureSessionHandlerThread() {
+        captureSessionHandlerThread.quitSafely();
+
         try {
-            backgroundThread.join();
-            backgroundThread = null;
-            handler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            captureSessionHandlerThread.join();
+        } catch (InterruptedException interruptedException) {
+            throw new RuntimeException("Exception thrown while waiting for the capture session handler thread to stop.", interruptedException);
         }
+
+        captureSessionHandlerThread = null;
+        captureSessionHandler = null;
     }
 
-    public void resume(Size size) {
+    /**
+     * Executed after the application resume its execution.
+     *
+     * @param previewSize The new size of the view which shows the camera preview.
+     */
+    public void resume(Size previewSize) {
         Log.d(LOG_TAG, "resume (345): ");
-        startBackgroundThread();
+        startCaptureSessionHandlerThread();
         if (videoRecorderParameters.getTextureView().isAvailable()) {
-            openCamera(size);
+            openCamera(previewSize);
         } else {
             videoRecorderParameters.getTextureView().setSurfaceTextureListener(new CameraSurfaceTextureListener(this));
         }
     }
 
+    /**
+     * Executed before the application is paused.
+     */
     public void pause() {
         Log.d(LOG_TAG, "pause (355): ");
         closeCamera();
-        stopBackgroundThread();
+        stopCaptureSessionHandlerThread();
     }
 
+    /**
+     * Closes the preview session.
+     */
     private void closePreviewSession() {
         if (cameraCaptureSession != null) {
             cameraCaptureSession.close();
@@ -471,6 +538,9 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         }
     }
 
+    /**
+     * Closes the camera and release the media recorder.
+     */
     private void closeCamera() {
         if (cameraDevice != null) {
             cameraDevice.close();
@@ -482,6 +552,14 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         }
     }
 
+    /**
+     * From a list os sizes, select the minor size bigger than the specified size and with the aspect ratio specified.
+     *
+     * @param sizes       List of sizes to be analyzed.
+     * @param minimumSize The minimum requirements for a size to be an options. If the size analyzed has a minor width or height than this, it won't be an eligible size.
+     * @param aspectRatio The aspect ratio which the size must have to be eligible.
+     * @return Once all the eligible sizes were gathered, this method returns the on which has the minor area.
+     */
     private static Size chooseMinorSizeBiggerThan(Size[] sizes, Size minimumSize, double aspectRatio) {
         Size selectedSize;
         List<Size> selectedSizes = new ArrayList<>();
@@ -504,6 +582,9 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         return selectedSize;
     }
 
+    /**
+     * Start video recording.
+     */
     public void startRecord() {
 
         videoStartDelayChronometer = new Chronometer();
@@ -512,35 +593,42 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         Log.d(LOG_TAG, "startRecord (405): Start record.");
 
         if (cameraDevice == null) {
-            Log.d(LOG_TAG, "startRecord (408): Camera device is null.");
+            Log.e(LOG_TAG, "startRecord (408): Camera device is null.");
+            throw new RuntimeException("Cannot start video recording. No camera device selected.");
         }
 
         if (!videoRecorderParameters.getTextureView().isAvailable()) {
-            Log.d(LOG_TAG, "startRecord (412): Texture view is not available.");
+            Log.e(LOG_TAG, "startRecord (412): Texture view is not available.");
+            throw new RuntimeException("Cannot start video recording. There is not view to show the camera preview.");
         }
 
         if (previewSize == null) {
             Log.d(LOG_TAG, "startRecord (416): Preview size is not defined.");
+            throw new RuntimeException("Cannot start video recording. The preview size is not defined..");
         }
 
+
+        closePreviewSession();
+        configureMediaRecorder();
+        Surface previewSurface = createSurface();
+
         try {
-            closePreviewSession();
-            setUpMediaRecorder();
-            Surface previewSurface = createSurface();
-
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-            List<Surface> surfaces = new ArrayList<>();
-            Surface mediaRecorderSurface = mediaRecorder.getSurface();
-            surfaces.add(previewSurface);
-            surfaces.add(mediaRecorderSurface);
-            captureRequestBuilder.addTarget(previewSurface);
-            captureRequestBuilder.addTarget(mediaRecorderSurface);
+        } catch (CameraAccessException cameraAccessException) {
+            throw new RuntimeException("Exception thrown while creating the capture request for the camera device.", cameraAccessException);
+        }
+        List<Surface> surfaces = new ArrayList<>();
+        Surface mediaRecorderSurface = mediaRecorder.getSurface();
+        surfaces.add(previewSurface);
+        surfaces.add(mediaRecorderSurface);
+        captureRequestBuilder.addTarget(previewSurface);
+        captureRequestBuilder.addTarget(mediaRecorderSurface);
 
-            CameraCaptureSessionStateCallback cameraCaptureSessionStateCallback = new CameraCaptureSessionStateCallback(this, true);
-            cameraDevice.createCaptureSession(surfaces, cameraCaptureSessionStateCallback, handler);
-        } catch (CameraAccessException | IOException exception) {
-            Log.d(LOG_TAG, "startRecord (435): " + exception.getMessage());
-            exception.printStackTrace();
+        CameraCaptureSessionStateCallback cameraCaptureSessionStateCallback = new CameraCaptureSessionStateCallback(this, true);
+        try {
+            cameraDevice.createCaptureSession(surfaces, cameraCaptureSessionStateCallback, captureSessionHandler);
+        } catch (CameraAccessException cameraAccessException) {
+            throw new RuntimeException("Exception thrown while creating the capture session for the camera device.", cameraAccessException);
         }
 
         Log.d(LOG_TAG, "startRecord (439): Finished starting record.");
@@ -560,6 +648,9 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         });
     }
 
+    /**
+     * Stop video recording.
+     */
     public void stopRecord() {
         Log.d(LOG_TAG, "stopRecord (456): ");
         recording = false;
@@ -569,6 +660,9 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         videoRecorderInterface.stopVideoRecordingResult(GenericReturnCodes.SUCCESS);
     }
 
+    /**
+     * Creates the camera preview.
+     */
     private void createCameraPreview() {
         try {
             Surface surface = createSurface();
@@ -582,6 +676,11 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         }
     }
 
+    /**
+     * Creates the surface based on the surface texture of the view which the camera preview will be shown.
+     *
+     * @return The surface created.
+     */
     private Surface createSurface() {
         SurfaceTexture surfaceTexture = videoRecorderParameters.getTextureView().getSurfaceTexture();
         surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
@@ -589,10 +688,13 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
     }
 
 
-    private void setUpMediaRecorder() throws IOException {
+    /**
+     * Configures the media recorder.
+     */
+    private void configureMediaRecorder() {
 
         videoFile = FileUtils.createFile(videoRecorderParameters.getAppCompatActivity(), FileType.MOVIE_FILE);
-        int orientationHint = setMediaRecorderOrientation();
+        int orientationHint = getMediaRecorderOrientation();
 
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
@@ -604,25 +706,48 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         mediaRecorder.setOrientationHint(orientationHint);
-        mediaRecorder.prepare();
+        try {
+            mediaRecorder.prepare();
+        } catch (IOException ioException) {
+            throw new RuntimeException("Exception thrown while preparing the media recorder for video capture.", ioException);
+        }
     }
 
-    private int setMediaRecorderOrientation() {
-        int orientationHint = 0;
+    /**
+     * Retrieves the image orientation that should be defined for the media recorded based on the screen rotation and the camera rotation angle.
+     *
+     * @return The image orientation that should be defined for the media recorded based on the screen rotation and the camera rotation angle.
+     */
+    private int getMediaRecorderOrientation() {
+        int mediaRecorderOrientation = 0;
 
-        int rotation = videoRecorderParameters.getAppCompatActivity().getWindowManager().getDefaultDisplay().getRotation();
-        int sensorOrientation = getSensorOrientation();
-        switch (sensorOrientation) {
-            case SENSOR_ORIENTATION_DEFAULT_DEGREES:
-                orientationHint = DEFAULT_ORIENTATIONS.get(rotation);
+        /* Retrieves the rotation of the screen. */
+        int screenRotation = videoRecorderParameters.getAppCompatActivity().getWindowManager().getDefaultDisplay().getRotation();
+
+        /* Retrieves the rotation angle for the camera image. */
+        int cameraImageRotationAngle = retrieveCameraImageRotationAngle();
+
+        switch (cameraImageRotationAngle) {
+
+            /* If the camera is in its default rotation. */
+            case DEFAULT_CAMERA_IMAGE_ROTATION_ANGLE:
+                /* The media orientation should be acquired from the default position vector. */
+                mediaRecorderOrientation = MEDIA_ORIENTATION_FOR_DEFAULT_CAMERA_POSITION.get(screenRotation);
                 break;
-            case SENSOR_ORIENTATION_INVERSE_DEGREES:
-                orientationHint = INVERSE_ORIENTATIONS.get(rotation);
+            /* If the camera is in its inverted rotation. */
+            case INVERTED_CAMERA_IMAGE_ROTATION_ANGLE:
+                /* The media orientation should be acquired from the inverted position vector. */
+                mediaRecorderOrientation = MEDIA_ORIENTATION_FOR_INVERTED_CAMERA_POSITION.get(screenRotation);
                 break;
         }
-        return orientationHint;
+        return mediaRecorderOrientation;
     }
 
+    /**
+     * Returns the delay time calculated between the request to start the video capture and the actual image capture (in milliseconds).
+     *
+     * @return The delay time calculated between the request to start the video capture and the actual image capture (in milliseconds).
+     */
     public long getStartRecordingDelay() {
         return videoStartDelayChronometer.getDifference() / 1000L;
     }

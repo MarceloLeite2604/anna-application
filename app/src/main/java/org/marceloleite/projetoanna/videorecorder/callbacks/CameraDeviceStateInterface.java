@@ -3,9 +3,8 @@ package org.marceloleite.projetoanna.videorecorder.callbacks;
 import android.hardware.camera2.CameraDevice;
 
 /**
- * Created by marcelo on 27/06/17.
+ * Specifies the methods required for the {@link CameraDeviceStateCallback} to inform its results.
  */
-
 public interface CameraDeviceStateInterface {
 
     /**

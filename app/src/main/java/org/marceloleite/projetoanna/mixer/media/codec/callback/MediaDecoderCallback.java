@@ -81,6 +81,7 @@ public class MediaDecoderCallback extends MediaCodecCallback {
 
             if (bufferInfo.size > 0) {
                 bufferInfo.presentationTimeUs = mediaExtractor.getSampleTime();
+                //noinspection WrongConstant
                 bufferInfo.flags = mediaExtractor.getSampleFlags();
                 mediaExtractor.advance();
             } else {

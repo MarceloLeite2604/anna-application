@@ -4,7 +4,6 @@ import android.hardware.camera2.CameraDevice;
 import android.support.annotation.NonNull;
 
 import org.marceloleite.projetoanna.utils.Log;
-import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 /**
  * A {@link CameraDevice.StateCallback} object to receive updates about the state of a camera device

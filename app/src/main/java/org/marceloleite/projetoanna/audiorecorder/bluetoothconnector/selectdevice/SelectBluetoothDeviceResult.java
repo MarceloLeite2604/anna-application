@@ -38,7 +38,7 @@ public class SelectBluetoothDeviceResult {
     }
 
     /**
-     * Retursn the bluetooth device selected.
+     * Returns the bluetooth device selected.
      *
      * @return The bluetooth device selected.
      */

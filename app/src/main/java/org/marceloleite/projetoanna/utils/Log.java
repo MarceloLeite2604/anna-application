@@ -149,6 +149,7 @@ public class Log {
      * @param message   The message to be registered.
      * @param throwable The throwable to be printed on log message.
      */
+    @SuppressWarnings("unused")
     public static void d(String tag, String message, Throwable throwable) {
         if (isLogTagEnabled(tag)) {
             android.util.Log.d(tag, message, throwable);

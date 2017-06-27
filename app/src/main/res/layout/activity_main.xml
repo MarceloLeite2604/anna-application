@@ -1,38 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--suppress CheckTagEmptyBody -->
+<?xml version="1.0" encoding="utf-8"?><!--suppress CheckTagEmptyBody -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="1"
     android:orientation="vertical"
     tools:mainActivity="org.marceloleite.projetoanna.Main">
 
     <TextureView
         android:id="@+id/texture_view_camera_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.2"></TextureView>
+        android:layout_height="0dp"
+        android:layout_weight="0.85" />
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0.8"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/button_connect"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            android:text="@string/button_connect_first_text" />
+            android:text="@string/button_connect_first_text"
+            tools:ignore="NestedWeights" />
 
         <Button
             android:id="@+id/button_record"
             style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
             android:enabled="false"

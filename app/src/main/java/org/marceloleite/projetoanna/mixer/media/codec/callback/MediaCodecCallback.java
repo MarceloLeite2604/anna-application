@@ -15,7 +15,7 @@ public abstract class MediaCodecCallback extends MediaCodec.Callback {
      * @param byteBuffer The {@link ByteBuffer} object to be copied.
      * @return The copy of the {@link ByteBuffer} object.
      */
-    public static ByteBuffer copyByteBuffer(ByteBuffer byteBuffer) {
+    static ByteBuffer copyByteBuffer(ByteBuffer byteBuffer) {
         ByteBuffer copyByteBuffer = ByteBuffer.allocate(byteBuffer.capacity());
         byteBuffer.rewind();
         copyByteBuffer.put(byteBuffer);

@@ -22,7 +22,7 @@ public enum ResultType {
     /**
      * Constructor.
      *
-     * @param description The description of the reuslt type.
+     * @param description The description of the result type.
      */
     ResultType(String description) {
         this.description = description;

@@ -4,7 +4,6 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.support.annotation.NonNull;
 
 import org.marceloleite.projetoanna.utils.Log;
-import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 
 /**
  * A {@link CameraCaptureSession.StateCallback} object to receive information about changes of the

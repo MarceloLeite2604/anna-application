@@ -220,6 +220,7 @@ abstract class Mixer {
                 bufferInfo.size = 0;
             } else {
                 bufferInfo.presentationTimeUs = videoFileMediaExtractor.getSampleTime();
+                //noinspection WrongConstant
                 bufferInfo.flags = videoFileMediaExtractor.getSampleFlags();
                 mediaMuxer.writeSampleData(mediaMuxerWrapper.getVideoTrackIndex(), byteBuffer, bufferInfo);
                 videoFileMediaExtractor.advance();

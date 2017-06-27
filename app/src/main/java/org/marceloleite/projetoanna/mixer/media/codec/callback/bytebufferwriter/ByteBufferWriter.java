@@ -67,7 +67,7 @@ public abstract class ByteBufferWriter {
     /**
      * The method executed once all the audio data was written on the output specified.
      */
-    protected void postConcludeWriting() {
+    void postConcludeWriting() {
     }
 
     /**

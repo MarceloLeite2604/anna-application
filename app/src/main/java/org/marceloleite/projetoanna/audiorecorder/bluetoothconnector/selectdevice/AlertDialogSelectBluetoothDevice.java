@@ -68,7 +68,7 @@ public class AlertDialogSelectBluetoothDevice extends AlertDialog implements Ada
             bluetoothDeviceArrayList.add(bluetoothDevice);
         }
 
-        bluetoothDevicesListView.setAdapter(new BluetoothDeviceAdapter(selectBluetoothDeviceParameters.getContext(), R.layout.bluetooth_device_row, bluetoothDeviceArrayList));
+        bluetoothDevicesListView.setAdapter(new BluetoothDeviceAdapter(selectBluetoothDeviceParameters.getContext(), bluetoothDeviceArrayList));
         bluetoothDevicesListView.setOnItemClickListener(this);
         setOnDismissListener(this);
     }
