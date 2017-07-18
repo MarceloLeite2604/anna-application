@@ -13,6 +13,7 @@ import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReport;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -23,7 +24,7 @@ import java.io.IOException;
 /**
  * Receives a file from audio recorder.
  */
-public class FileReceiver {
+class FileReceiver {
 
     /**
      * A tag to identify this class' messages on log.
@@ -52,6 +53,8 @@ public class FileReceiver {
      */
     private Context context;
 
+    private volatile double percentageConcluded;
+
     /**
      * Constructor.
      *
@@ -61,6 +64,11 @@ public class FileReceiver {
         this.context = context;
         this.senderReceiver = senderReceiver;
         this.fileSize = 0;
+        this.percentageConcluded = 0;
+    }
+
+    public double getPercentageConcluded() {
+        return percentageConcluded;
     }
 
     /**
@@ -136,7 +144,8 @@ public class FileReceiver {
      * Creates an empty file to receive the file content sent from audio recorder.
      */
     private File createFile() {
-        return FileUtils.createFile(context, FileType.AUDIO_MP3_FILE);
+        //return FileUtils.createFile(context, FileType.AUDIO_MP3_FILE);
+        return FileUtils.createTemporaryFile(context, FileType.AUDIO_MP3_FILE);
     }
 
     /**
@@ -189,6 +198,8 @@ public class FileReceiver {
                         }
 
                         totalBytesReceived += fileChunkContent.getFileChunk().length;
+                        Log.d(LOG_TAG, "receiveFileContent (201): Bytes received: " + totalBytesReceived + ". File size: " + this.fileSize);
+                        percentageConcluded = (double) totalBytesReceived / (double) (this.fileSize);
 
                         if (totalBytesReceived >= this.fileSize) {
                             doneReceiveFileContent = true;
@@ -206,6 +217,8 @@ public class FileReceiver {
                 return new ReceiveFileResult(GenericReturnCodes.GENERIC_ERROR, null);
             }
         }
+
+
 
         try {
             bufferedOutputStream.close();

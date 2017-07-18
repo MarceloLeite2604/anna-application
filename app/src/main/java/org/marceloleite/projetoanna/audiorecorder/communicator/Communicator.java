@@ -64,6 +64,7 @@ public class Communicator implements OperationResultInterface {
     public Communicator(CommunicatorInterface communicatorInterface) {
         this.communicatorInterface = communicatorInterface;
         this.communicatorParameters = communicatorInterface.getCommunicatorParameters();
+        this.audioRecorderBluetoothSocket = communicatorParameters.getBluetoothSocket();
         this.operationResultHandler = new OperationResultHandler(this);
     }
 
@@ -72,7 +73,7 @@ public class Communicator implements OperationResultInterface {
      */
     public void startExecution() {
         if (operatorThread == null) {
-            OperatorThreadParameters operatorThreadParameters = new OperatorThreadParameters(communicatorParameters.getBluetoothSocket(), operationResultHandler, communicatorParameters.getContext());
+            OperatorThreadParameters operatorThreadParameters = new OperatorThreadParameters(communicatorParameters.getBluetoothSocket(), operationResultHandler, communicatorParameters.getAppCompatActivity());
             this.operatorThread = new OperatorThread(operatorThreadParameters);
         }
 
@@ -142,7 +143,7 @@ public class Communicator implements OperationResultInterface {
      * @return True if bluetooth device is connected. False otherwise.
      */
     public boolean isConnected() {
-        return (audioRecorderBluetoothSocket.isConnected());
+        return (audioRecorderBluetoothSocket != null && audioRecorderBluetoothSocket.isConnected());
     }
 
     /**

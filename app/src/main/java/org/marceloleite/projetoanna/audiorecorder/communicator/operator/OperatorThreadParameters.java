@@ -2,6 +2,7 @@ package org.marceloleite.projetoanna.audiorecorder.communicator.operator;
 
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operation.result.OperationResultHandler;
 
@@ -18,20 +19,20 @@ public class OperatorThreadParameters {
     private final BluetoothSocket bluetoothSocket;
 
     /**
-     * The context of the application which established the connection with the audio recorder.
+     * The application which established the connection with the audio recorder.
      */
-    private final Context context;
+    private final AppCompatActivity appCompatActivity;
 
     /**
      * Constructor.
      *
-     * @param bluetoothSocket The socket which represents the bluetooth communication with the audio recorder.
-     * @param context         The context of the application which established the connection with the audio recorder.
+     * @param bluetoothSocket   The socket which represents the bluetooth communication with the audio recorder.
+     * @param appCompatActivity The appCompatActivity of the application which established the connection with the audio recorder.
      */
-    public OperatorThreadParameters(BluetoothSocket bluetoothSocket, OperationResultHandler operationResultHandler, Context context) {
+    public OperatorThreadParameters(BluetoothSocket bluetoothSocket, OperationResultHandler operationResultHandler, AppCompatActivity appCompatActivity) {
         this.bluetoothSocket = bluetoothSocket;
         this.operationResultHandler = operationResultHandler;
-        this.context = context;
+        this.appCompatActivity = appCompatActivity;
     }
 
     /**
@@ -44,12 +45,12 @@ public class OperatorThreadParameters {
     }
 
     /**
-     * Returns the context of the application which established the connection with the audio recorder.
+     * Returns the appCompatActivity of the application which established the connection with the audio recorder.
      *
-     * @return The context of the application which established the connection with the audio recorder.
+     * @return The appCompatActivity of the application which established the connection with the audio recorder.
      */
-    public Context getContext() {
-        return context;
+    public AppCompatActivity getAppCompatActivity() {
+        return appCompatActivity;
     }
 
     public OperationResultHandler getOperationResultHandler() {

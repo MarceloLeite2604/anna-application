@@ -693,7 +693,7 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
      */
     private void configureMediaRecorder() {
 
-        videoFile = FileUtils.createFile(videoRecorderParameters.getAppCompatActivity(), FileType.MOVIE_FILE);
+        videoFile = FileUtils.createTemporaryFile(videoRecorderParameters.getAppCompatActivity(), FileType.MOVIE_FILE);
         int orientationHint = getMediaRecorderOrientation();
 
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);

@@ -3,6 +3,7 @@ package org.marceloleite.projetoanna.audiorecorder;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import org.marceloleite.projetoanna.audiorecorder.communicator.Communicator;
@@ -39,7 +40,7 @@ public class AudioRecorder implements CommunicatorInterface {
 
     private BluetoothSocket bluetoothSocket;
 
-    private Context context;
+    private AppCompatActivity appCompatActivity;
 
     /**
      * Controls the bluetooth communication.
@@ -60,11 +61,11 @@ public class AudioRecorder implements CommunicatorInterface {
      *
      * @param audioRecorderInterface The activity which request the Audio Record Instantiation.
      */
-    public AudioRecorder(BluetoothDevice bluetoothDevice, BluetoothSocket bluetoothSocket, Context context, AudioRecorderInterface audioRecorderInterface) {
+    public AudioRecorder(BluetoothDevice bluetoothDevice, BluetoothSocket bluetoothSocket, AppCompatActivity appCompatActivity, AudioRecorderInterface audioRecorderInterface) {
         this.audioRecorderInterface = audioRecorderInterface;
         this.bluetoothDevice = bluetoothDevice;
         this.bluetoothSocket = bluetoothSocket;
-        this.context = context;
+        this.appCompatActivity = appCompatActivity;
         this.communicator = new Communicator(this);
         this.communicator.startExecution();
         this.recording = false;
@@ -118,7 +119,7 @@ public class AudioRecorder implements CommunicatorInterface {
 
     @Override
     public CommunicatorParameters getCommunicatorParameters() {
-        return new CommunicatorParameters(bluetoothSocket, context);
+        return new CommunicatorParameters(bluetoothSocket, appCompatActivity);
     }
 
     @Override
@@ -214,7 +215,7 @@ public class AudioRecorder implements CommunicatorInterface {
                 Throwable throwable = operation.getThrowable();
                 Log.e(LOG_TAG, "checkStopAudioRecordCommandResult (258): Stop audio operation returned an exception.");
                 throwable.printStackTrace();
-                Toast.makeText(context, "Could not stop audio record.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(appCompatActivity, "Could not stop audio record.", Toast.LENGTH_SHORT).show();
                 recording = true;
                 break;
         }
@@ -265,7 +266,7 @@ public class AudioRecorder implements CommunicatorInterface {
                 Log.e(LOG_TAG, "checkRequestLatestAudioFileResult (309): Request latest audio file returned an exception.");
                 throwable.printStackTrace();
                 result = GenericReturnCodes.GENERIC_ERROR;
-                Toast.makeText(context, "Error while disconnecting from " + getAudioRecorderDeviceName() + ".", Toast.LENGTH_LONG).show();
+                Toast.makeText(appCompatActivity, "Error while disconnecting from " + getAudioRecorderDeviceName() + ".", Toast.LENGTH_LONG).show();
                 break;
         }
 

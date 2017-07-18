@@ -128,7 +128,7 @@ public abstract class FileUtils {
     }
 
     /**
-     * Copies a files.
+     * Copies a file on the same directory.
      *
      * @param file File to be copied.
      * @return The copy file.
@@ -143,6 +143,16 @@ public abstract class FileUtils {
         copyFileContent(file, copyFile);
 
         return copyFile;
+    }
+
+    /**
+     * Copies a file.
+     *
+     * @param sourceFile      The source file to be copied.
+     * @param destinationFile The destination file where the source will be copied.
+     */
+    public static void copyFile(File sourceFile, File destinationFile) {
+        copyFileContent(sourceFile, destinationFile);
     }
 
     /**

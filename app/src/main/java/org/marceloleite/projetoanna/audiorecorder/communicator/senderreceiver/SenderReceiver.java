@@ -38,7 +38,7 @@ public class SenderReceiver {
     /**
      * Maximum retry attempts to receive a package.
      */
-    private static final int RECEIVE_PACKAGE_MAXIMUM_RETRY_ATTEMPTS = 140;
+    private static final int RECEIVE_PACKAGE_MAXIMUM_RETRY_ATTEMPTS = 50;
 
     /**
      * Minimum time to wait for a package (in milliseconds).

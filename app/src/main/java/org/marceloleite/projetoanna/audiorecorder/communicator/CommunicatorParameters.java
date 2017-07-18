@@ -2,6 +2,7 @@ package org.marceloleite.projetoanna.audiorecorder.communicator;
 
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 
 /**
  * The parameters required to construct a {@link Communicator} object.
@@ -14,19 +15,19 @@ public class CommunicatorParameters {
     private final BluetoothSocket bluetoothSocket;
 
     /**
-     * The context of the application being executed.
+     * The application being executed.
      */
-    private final Context context;
+    private final AppCompatActivity appCompatActivity;
 
     /**
      * Constructor.
      *
-     * @param bluetoothSocket The socket which represents the bluetooth connection with the audio recorder.
-     * @param context         The context of the application being executed.
+     * @param bluetoothSocket   The socket which represents the bluetooth connection with the audio recorder.
+     * @param appCompatActivity The appCompatActivity of the application being executed.
      */
-    public CommunicatorParameters(BluetoothSocket bluetoothSocket, Context context) {
+    public CommunicatorParameters(BluetoothSocket bluetoothSocket, AppCompatActivity appCompatActivity) {
         this.bluetoothSocket = bluetoothSocket;
-        this.context = context;
+        this.appCompatActivity = appCompatActivity;
     }
 
     /**
@@ -39,11 +40,11 @@ public class CommunicatorParameters {
     }
 
     /**
-     * Returns the context of the application being executed.
+     * Returns the appCompatActivity of the application being executed.
      *
-     * @return The context of the application being executed.
+     * @return The appCompatActivity of the application being executed.
      */
-    Context getContext() {
-        return context;
+    AppCompatActivity getAppCompatActivity() {
+        return appCompatActivity;
     }
 }

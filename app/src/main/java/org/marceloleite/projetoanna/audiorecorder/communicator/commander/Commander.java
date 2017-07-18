@@ -1,19 +1,21 @@
 package org.marceloleite.projetoanna.audiorecorder.communicator.commander;
 
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
+import android.os.AsyncTask;
+import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderReturnCodes;
-import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.ReceiveFileResult;
+import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.AsyncTaskFileReceiver;
+import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.FileReceiverParameters;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.DataPackage;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.content.CommandResultContent;
 import org.marceloleite.projetoanna.audiorecorder.communicator.senderreceiver.ReceivePackageResult;
 import org.marceloleite.projetoanna.audiorecorder.communicator.senderreceiver.SenderReceiver;
-import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.FileReceiver;
 import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.RequestLatestAudioFileResult;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.progressmonitor.AsyncTaskMonitorProgress;
 
 import static org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType.COMMAND_RESULT;
 
@@ -40,18 +42,18 @@ public class Commander {
     private SenderReceiver senderReceiver;
 
     /**
-     * The application context which the received files will be stored.
+     * The application appCompatActivity which the received files will be stored.
      */
-    private Context context;
+    private AppCompatActivity appCompatActivity;
 
     /**
      * Constructor.
      *
-     * @param context         The application context which the received files will be stored.
-     * @param bluetoothSocket The bluetooth socket communication with audio recorder.
+     * @param appCompatActivity The application which the received files will be stored.
+     * @param bluetoothSocket   The bluetooth socket communication with audio recorder.
      */
-    public Commander(Context context, BluetoothSocket bluetoothSocket) {
-        this.context = context;
+    public Commander(AppCompatActivity appCompatActivity, BluetoothSocket bluetoothSocket) {
+        this.appCompatActivity = appCompatActivity;
         this.senderReceiver = new SenderReceiver(bluetoothSocket);
     }
 
@@ -100,14 +102,14 @@ public class Commander {
      * @return The result received from the package.
      */
     private CommandResult sendPackageAndWaitForResult(PackageType packageType) {
-        Log.d(LOG_TAG, "sendPackageAndWaitForResult (68): Sending command \"" + packageType + "\".");
+        Log.d(LOG_TAG, "sendPackageAndWaitForResult (103): Sending command \"" + packageType + "\".");
         DataPackage dataPackage = new DataPackage(packageType, null);
         CommandResult commandResult;
 
         senderReceiver.sendPackage(dataPackage);
 
         ReceivePackageResult receivePackageResult;
-        Log.d(LOG_TAG, "sendPackageAndWaitForResult (80): Waiting for command \"" + packageType + "\" result.");
+        Log.d(LOG_TAG, "sendPackageAndWaitForResult (110): Waiting for command \"" + packageType + "\" result.");
         receivePackageResult = senderReceiver.receivePackage();
 
             /* If the package reception was successfully done. */
@@ -116,7 +118,7 @@ public class Commander {
 
                 /* If a package was received from audio recorder. */
             if (receivedDataPackage != null) {
-                Log.d(LOG_TAG, "sendPackageAndWaitForResult (84): Received a package.");
+                Log.d(LOG_TAG, "sendPackageAndWaitForResult (119): Received a package.");
 
                 switch (receivedDataPackage.getPackageType()) {
                         /* If the package received was a command result. */
@@ -167,13 +169,20 @@ public class Commander {
 
         int requestAudioFilePackageResult = senderReceiver.sendPackage(requestAudioFilePackage);
         if (requestAudioFilePackageResult == AudioRecorderReturnCodes.SUCCESS) {
-            FileReceiver fileReceiver = new FileReceiver(context, senderReceiver);
-            ReceiveFileResult receiveFileResult = fileReceiver.receiveFile();
-            if (receiveFileResult.getReturnCode() == GenericReturnCodes.SUCCESS) {
-                return new RequestLatestAudioFileResult(GenericReturnCodes.SUCCESS, receiveFileResult.getFileReceived());
-            } else {
-                return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+            AsyncTaskFileReceiver asyncTaskFileReceiver = new AsyncTaskFileReceiver();
+            FileReceiverParameters fileReceiverParameters = new FileReceiverParameters(appCompatActivity, senderReceiver);
+            asyncTaskFileReceiver.execute(fileReceiverParameters);
+            AsyncTaskMonitorProgress asyncTaskMonitorProgress = new AsyncTaskMonitorProgress(appCompatActivity);
+            asyncTaskMonitorProgress.execute(asyncTaskFileReceiver);
+            while (asyncTaskFileReceiver.getStatus() != AsyncTask.Status.FINISHED) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Exception while waiting for file monitoring a progress.", e);
+                }
             }
+
+            return asyncTaskFileReceiver.getRequestLatestAudioFileResult();
 
         } else {
             return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);

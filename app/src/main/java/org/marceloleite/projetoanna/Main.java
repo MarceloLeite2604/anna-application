@@ -201,6 +201,11 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         if (videoRecorder != null) {
             videoRecorder.pause();
         }
+        if (audioRecorder != null) {
+            if ( audioRecorder.isConnected() ) {
+                audioRecorder.disconnect();
+            }
+        }
         super.onPause();
     }
 

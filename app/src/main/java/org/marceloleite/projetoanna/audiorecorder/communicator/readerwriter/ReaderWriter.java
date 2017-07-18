@@ -123,6 +123,7 @@ public class ReaderWriter {
                 /* Writes content on bluetooth socket. */
                 bluetoothSocketOutputStream.write(bytes);
                 bluetoothSocketOutputStream.flush();
+
             } catch (IOException ioException) {
                 String exceptionMessage = "Error while writing content on bluetooth socket.";
                 throw new IOException(exceptionMessage, ioException);

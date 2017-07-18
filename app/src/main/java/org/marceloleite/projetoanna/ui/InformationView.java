@@ -72,4 +72,13 @@ public class InformationView extends LinearLayout {
     public void setInformationText(String text) {
         textView.setText(text);
     }
+
+    /**
+     * Updates the progress bar value
+     *
+     * @param value New value of the progress bar.
+     */
+    public void setProgressBarValue(int value) {
+        progressBar.setProgress(value);
+    }
 }

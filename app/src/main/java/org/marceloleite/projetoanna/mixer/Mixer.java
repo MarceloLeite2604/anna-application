@@ -133,10 +133,10 @@ abstract class Mixer {
     private static File createMixedMp4File(Context context, File rawAudioFile, MediaExtractorWrapper videoFileMediaExtractorWrapper) {
 
         /* Creates the mixed video file. */
-        File mixedVideoFile = FileUtils.createFile(context, FileType.MOVIE_FILE);
+        File mixedVideoTemporaryFile = FileUtils.createTemporaryFile(context, FileType.MOVIE_FILE);
 
         /* Creates the media muxer to mix audio and video. */
-        MediaMuxerWrapper mediaMuxerWrapper = new MediaMuxerWrapper(mixedVideoFile);
+        MediaMuxerWrapper mediaMuxerWrapper = new MediaMuxerWrapper(mixedVideoTemporaryFile);
 
         /* Creates the video track on media muxer. */
         mediaMuxerWrapper.addMediaMuxerVideoTrack(videoFileMediaExtractorWrapper);
@@ -162,7 +162,18 @@ abstract class Mixer {
         /* Stops the media muxer. */
         mediaMuxerWrapper.stopMediaMuxer();
 
-        return mixedVideoFile;
+        /* Creates the final movie file. */
+        File movieFile = FileUtils.createFile(context, FileType.MOVIE_FILE);
+
+        /* Copies the successfully mixed file to it output. */
+        FileUtils.copyFile(mixedVideoTemporaryFile, movieFile);
+
+        /* Deletes the temporary file. */
+        if (!mixedVideoTemporaryFile.delete()) {
+            Log.e(LOG_TAG, "createMixedMp4File (168): Could not delete temporary file \"" + mixedVideoTemporaryFile + "\".");
+        }
+
+        return mixedVideoTemporaryFile;
     }
 
     /**
