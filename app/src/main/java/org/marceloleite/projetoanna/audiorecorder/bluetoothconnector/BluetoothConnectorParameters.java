@@ -3,6 +3,7 @@ package org.marceloleite.projetoanna.audiorecorder.bluetoothconnector;
 import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderInterface;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
 
 /**
  * The parameters required to execute the bluetooth connection attempt process.
@@ -16,13 +17,16 @@ public class BluetoothConnectorParameters {
 
     private final AudioRecorderInterface audioRecorderInterface;
 
+    private final ProgressMonitorAlertDialog progressMonitorAlertDialog;
+
     /**
      * Object constructor.
      *
      * @param appCompatActivity The activity which is requesting the bluetooth connection.
      */
-    public BluetoothConnectorParameters(AppCompatActivity appCompatActivity, AudioRecorderInterface audioRecorderInterface) {
+    public BluetoothConnectorParameters(AppCompatActivity appCompatActivity, ProgressMonitorAlertDialog progressMonitorAlertDialog, AudioRecorderInterface audioRecorderInterface) {
         this.appCompatActivity = appCompatActivity;
+        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
         this.audioRecorderInterface = audioRecorderInterface;
     }
 

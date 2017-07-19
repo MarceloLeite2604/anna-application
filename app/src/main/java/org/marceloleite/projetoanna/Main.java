@@ -24,6 +24,7 @@ import org.marceloleite.projetoanna.ui.listeners.buttonrecord.ButtonRecordInterf
 import org.marceloleite.projetoanna.ui.listeners.buttonrecord.ButtonRecordOnClickListener;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorder;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorderInterface;
 import org.marceloleite.projetoanna.videorecorder.VideoRecorderParameters;
@@ -80,13 +81,18 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
      */
     private VideoRecorder videoRecorder;
 
+    /**
+     * The Alert Dialog which displays the progress of a task.
+     */
+    private ProgressMonitorAlertDialog progressMonitorAlertDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         try {
-            bluetoothConnector = new BluetoothConnector(this);
+            bluetoothConnector = new BluetoothConnector(this, progressMonitorAlertDialog, this, this);
         } catch (IOException ioException) {
             Toast.makeText(getApplicationContext(), "This device does not have a bluetooth adapter.", Toast.LENGTH_LONG).show();
             this.finish();
@@ -103,6 +109,8 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         buttonRecord = (Button) findViewById(R.id.button_record);
 
         buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
+
+        progressMonitorAlertDialog = new ProgressMonitorAlertDialog(this, null);
 
         updateInterface();
         // testMix();
@@ -202,7 +210,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
             videoRecorder.pause();
         }
         if (audioRecorder != null) {
-            if ( audioRecorder.isConnected() ) {
+            if (audioRecorder.isConnected()) {
                 audioRecorder.disconnect();
             }
         }
@@ -417,10 +425,4 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
             }
         }
     }
-
-    @Override
-    public BluetoothConnectorParameters getBluetoothConnectionParameters() {
-        return new BluetoothConnectorParameters(this, this);
-    }
-
 }

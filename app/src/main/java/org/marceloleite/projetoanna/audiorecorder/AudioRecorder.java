@@ -13,6 +13,7 @@ import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operatio
 import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operation.Operation;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
 
 import java.io.File;
 
@@ -42,6 +43,8 @@ public class AudioRecorder implements CommunicatorInterface {
 
     private AppCompatActivity appCompatActivity;
 
+    private ProgressMonitorAlertDialog progressMonitorAlertDialog;
+
     /**
      * Controls the bluetooth communication.
      */
@@ -61,10 +64,11 @@ public class AudioRecorder implements CommunicatorInterface {
      *
      * @param audioRecorderInterface The activity which request the Audio Record Instantiation.
      */
-    public AudioRecorder(BluetoothDevice bluetoothDevice, BluetoothSocket bluetoothSocket, AppCompatActivity appCompatActivity, AudioRecorderInterface audioRecorderInterface) {
+    public AudioRecorder(BluetoothDevice bluetoothDevice, BluetoothSocket bluetoothSocket, AppCompatActivity appCompatActivity, ProgressMonitorAlertDialog progressMonitorAlertDialog, AudioRecorderInterface audioRecorderInterface) {
         this.audioRecorderInterface = audioRecorderInterface;
         this.bluetoothDevice = bluetoothDevice;
         this.bluetoothSocket = bluetoothSocket;
+        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
         this.appCompatActivity = appCompatActivity;
         this.communicator = new Communicator(this);
         this.communicator.startExecution();
@@ -119,7 +123,7 @@ public class AudioRecorder implements CommunicatorInterface {
 
     @Override
     public CommunicatorParameters getCommunicatorParameters() {
-        return new CommunicatorParameters(bluetoothSocket, appCompatActivity);
+        return new CommunicatorParameters(bluetoothSocket, appCompatActivity, progressMonitorAlertDialog);
     }
 
     @Override

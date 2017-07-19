@@ -6,10 +6,6 @@ package org.marceloleite.projetoanna.utils.progressmonitor;
 
 public class ProgressReport {
 
-    public static final double MAX_PERCENTAGE_CONCLUDED = 1.0;
-
-    public static final double MIN_PERCENTAGE_CONCLUDED = 0.0;
-
     private String message;
 
     private double percentageConcluded;

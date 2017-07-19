@@ -10,7 +10,7 @@ import org.marceloleite.projetoanna.utils.Log;
  * Created by marcelo on 18/07/17.
  */
 
-class ProgressMonitorAlertDialog extends AlertDialog {
+public class ProgressMonitorAlertDialog extends AlertDialog {
 
     /**
      * A tag to identify this class' messages on log.
@@ -28,7 +28,7 @@ class ProgressMonitorAlertDialog extends AlertDialog {
     private InformationView informationView;
 
 
-    ProgressMonitorAlertDialog(Context context, String title) {
+    public ProgressMonitorAlertDialog(Context context, String title) {
         super(context);
         setTitle(title);
         setCancelable(false);
@@ -37,7 +37,7 @@ class ProgressMonitorAlertDialog extends AlertDialog {
         setView(informationView);
     }
 
-    void updateProgressInformations(ProgressReport progressReport) {
+    public void updateProgressInformations(ProgressReport progressReport) {
         int percentage = (int) progressReport.getPercentageConcluded();
         informationView.setInformationText(progressReport.getMessage());
         informationView.setProgressBarValue(percentage);

@@ -1,21 +1,20 @@
 package org.marceloleite.projetoanna.audiorecorder.communicator.commander;
 
 import android.bluetooth.BluetoothSocket;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderReturnCodes;
 import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.AsyncTaskFileReceiver;
 import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.FileReceiverParameters;
+import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.RequestLatestAudioFileResult;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.DataPackage;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.content.CommandResultContent;
 import org.marceloleite.projetoanna.audiorecorder.communicator.senderreceiver.ReceivePackageResult;
 import org.marceloleite.projetoanna.audiorecorder.communicator.senderreceiver.SenderReceiver;
-import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.RequestLatestAudioFileResult;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
-import org.marceloleite.projetoanna.utils.progressmonitor.AsyncTaskMonitorProgress;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
 
 import static org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType.COMMAND_RESULT;
 
@@ -46,14 +45,17 @@ public class Commander {
      */
     private AppCompatActivity appCompatActivity;
 
+    private ProgressMonitorAlertDialog progressMonitorAlertDialog;
+
     /**
      * Constructor.
      *
      * @param appCompatActivity The application which the received files will be stored.
      * @param bluetoothSocket   The bluetooth socket communication with audio recorder.
      */
-    public Commander(AppCompatActivity appCompatActivity, BluetoothSocket bluetoothSocket) {
+    public Commander(AppCompatActivity appCompatActivity, ProgressMonitorAlertDialog progressMonitorAlertDialog, BluetoothSocket bluetoothSocket) {
         this.appCompatActivity = appCompatActivity;
+        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
         this.senderReceiver = new SenderReceiver(bluetoothSocket);
     }
 
@@ -169,20 +171,23 @@ public class Commander {
 
         int requestAudioFilePackageResult = senderReceiver.sendPackage(requestAudioFilePackage);
         if (requestAudioFilePackageResult == AudioRecorderReturnCodes.SUCCESS) {
+            /*AsyncTaskFileReceiverOld asyncTaskFileReceiverOld = new AsyncTaskFileReceiverOld();*/
+            FileReceiverParameters fileReceiverParameters = new FileReceiverParameters(appCompatActivity, progressMonitorAlertDialog, senderReceiver);
             AsyncTaskFileReceiver asyncTaskFileReceiver = new AsyncTaskFileReceiver();
-            FileReceiverParameters fileReceiverParameters = new FileReceiverParameters(appCompatActivity, senderReceiver);
             asyncTaskFileReceiver.execute(fileReceiverParameters);
-            AsyncTaskMonitorProgress asyncTaskMonitorProgress = new AsyncTaskMonitorProgress(appCompatActivity);
-            asyncTaskMonitorProgress.execute(asyncTaskFileReceiver);
-            while (asyncTaskFileReceiver.getStatus() != AsyncTask.Status.FINISHED) {
+            /*asyncTaskFileReceiverOld.execute(fileReceiverParameters);*/
+            /*AsyncTaskMonitorProgressOld asyncTaskMonitorProgressOld = new AsyncTaskMonitorProgressOld(appCompatActivity);
+            asyncTaskMonitorProgressOld.execute(asyncTaskFileReceiverOld);*/
+            /*while (asyncTaskFileReceiverOld.getStatus() != AsyncTask.Status.FINISHED) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     throw new RuntimeException("Exception while waiting for file monitoring a progress.", e);
                 }
-            }
+            }*/
 
-            return asyncTaskFileReceiver.getRequestLatestAudioFileResult();
+            /*return asyncTaskFileReceiverOld.getRequestLatestAudioFileResult();*/
+            return null;
 
         } else {
             return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);

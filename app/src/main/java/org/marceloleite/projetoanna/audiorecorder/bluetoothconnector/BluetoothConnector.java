@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
+import org.marceloleite.projetoanna.audiorecorder.AudioRecorderInterface;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.AsyncTaskConnectWithAudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.ConnectWithAudioRecorderInterface;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.connector.ConnectWithAudioRecorderParameters;
@@ -20,6 +21,7 @@ import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.selectdevic
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.selectdevice.SelectBluetoothDeviceParameters;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.selectdevice.SelectBluetoothDeviceResult;
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
 
 import java.io.IOException;
 import java.util.Set;
@@ -46,6 +48,11 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
      */
     public static final int ENABLE_BLUETOOTH_REQUEST_CODE = 0x869a;
 
+    private final AppCompatActivity appCompatActivity;
+
+    private final ProgressMonitorAlertDialog progressMonitorAlertDialog;
+    private final AudioRecorderInterface audioRecorderInterface;
+
     /**
      * The objects which contains the bluetooth connection attempt parameters and the method to be executed after its conclusion.
      */
@@ -54,7 +61,7 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
     /**
      * The parameters for bluetooth connection.
      */
-    private BluetoothConnectorParameters bluetoothConnectorParameters;
+    //private BluetoothConnectorParameters bluetoothConnectorParameters;
 
     /**
      * The device's bluetooth adapter.
@@ -76,10 +83,13 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
      *
      * @param bluetoothConnectorInterface The objects which contains the bluetooth connection attempt parameters and the method to be executed after its conclusion.
      */
-    public BluetoothConnector(BluetoothConnectorInterface bluetoothConnectorInterface) throws IOException {
+    public BluetoothConnector(AppCompatActivity appCompatActivity, ProgressMonitorAlertDialog progressMonitorAlertDialog, AudioRecorderInterface audioRecorderInterface, BluetoothConnectorInterface bluetoothConnectorInterface) throws IOException {
         this.bluetoothDeviceAudioRecorder = null;
+        this.appCompatActivity = appCompatActivity;
+        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
+        this.audioRecorderInterface = audioRecorderInterface;
         this.bluetoothConnectorInterface = bluetoothConnectorInterface;
-        this.bluetoothConnectorParameters = bluetoothConnectorInterface.getBluetoothConnectionParameters();
+        //this.bluetoothConnectorParameters = bluetoothConnectorInterface.getBluetoothConnectionParameters();
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         this.isConnecting = false;
         if (bluetoothAdapter == null) {
@@ -117,7 +127,7 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
      */
     private void requestBluetoothAdapterActivation() {
         Intent enableBluetoothIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        bluetoothConnectorParameters.getAppCompatActivity().startActivityForResult(enableBluetoothIntent, BluetoothConnector.ENABLE_BLUETOOTH_REQUEST_CODE);
+        this.appCompatActivity.startActivityForResult(enableBluetoothIntent, BluetoothConnector.ENABLE_BLUETOOTH_REQUEST_CODE);
     }
 
     /**
@@ -221,7 +231,7 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
         switch (connectWithAudioRecorderResult.getReturnCode()) {
             case BluetoothConnectorReturnCodes.SUCCESS:
                 BluetoothSocket bluetoothSocket = connectWithAudioRecorderResult.getBluetoothSocket();
-                AudioRecorder audioRecorder = new AudioRecorder(bluetoothDeviceAudioRecorder, bluetoothSocket, bluetoothConnectorParameters.getAppCompatActivity(), bluetoothConnectorParameters.getAudioRecorderInterface());
+                AudioRecorder audioRecorder = new AudioRecorder(bluetoothDeviceAudioRecorder, bluetoothSocket, appCompatActivity, progressMonitorAlertDialog, audioRecorderInterface);
                 bluetoothConnectorResult = new BluetoothConnectorResult(BluetoothConnectorReturnCodes.SUCCESS, audioRecorder);
                 break;
             case BluetoothConnectorReturnCodes.CONNECTION_FAILED:
@@ -244,17 +254,17 @@ public class BluetoothConnector implements PairerInterface, SelectBluetoothDevic
 
     @Override
     public ConnectWithAudioRecorderParameters getConnectWithAudioRecorderParameters() {
-        return new ConnectWithAudioRecorderParameters(bluetoothDeviceAudioRecorder, bluetoothConnectorParameters.getAppCompatActivity());
+        return new ConnectWithAudioRecorderParameters(bluetoothDeviceAudioRecorder, appCompatActivity);
     }
 
     @Override
     public PairerParameters getPairerParameters() {
-        return new PairerParameters(bluetoothConnectorParameters.getAppCompatActivity());
+        return new PairerParameters(appCompatActivity);
     }
 
     @Override
     public SelectBluetoothDeviceParameters getSelectBluetoothDeviceParameters() {
-        return new SelectBluetoothDeviceParameters(bluetoothConnectorParameters.getAppCompatActivity());
+        return new SelectBluetoothDeviceParameters(appCompatActivity);
     }
 
     /*@Override

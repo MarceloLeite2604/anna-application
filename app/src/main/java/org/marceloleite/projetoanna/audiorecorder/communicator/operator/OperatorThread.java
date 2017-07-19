@@ -84,7 +84,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Looper.prepare();
 
-        this.commander = new Commander(operatorThreadParameters.getAppCompatActivity(), operatorThreadParameters.getBluetoothSocket());
+        this.commander = new Commander(operatorThreadParameters.getAppCompatActivity(), operatorThreadParameters.getProgressMonitorAlertDialog(), operatorThreadParameters.getBluetoothSocket());
         this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
         this.operationExecutorHandler = new OperationExecutorHandler(this);
 

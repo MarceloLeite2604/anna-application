@@ -1,6 +1,5 @@
 package org.marceloleite.projetoanna.utils.progressmonitor;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 
@@ -10,12 +9,12 @@ import org.marceloleite.projetoanna.utils.Log;
  * Created by marcelo on 18/07/17.
  */
 
-public class AsyncTaskMonitorProgress extends AsyncTask<ProgressReporter, ProgressReport, ProgressReporter> {
+public abstract class AsyncTaskMonitorProgressOld extends AsyncTask</*ProgressReporterOld*/Void, ProgressReport, /*ProgressReporterOld*/Void> {
 
     /**
      * A tag to identify this class' messages on log.
      */
-    private static final String LOG_TAG = AsyncTaskMonitorProgress.class.getSimpleName();
+    private static final String LOG_TAG = AsyncTaskMonitorProgressOld.class.getSimpleName();
 
     /*
      * Enables messages of this class to be shown on log.
@@ -39,24 +38,24 @@ public class AsyncTaskMonitorProgress extends AsyncTask<ProgressReporter, Progre
 
     private boolean monitoringConcluded;
 
-    public AsyncTaskMonitorProgress(AppCompatActivity appCompatActivity) {
+    public AsyncTaskMonitorProgressOld(AppCompatActivity appCompatActivity) {
         super();
         progressReportInterval = DEFAULT_PROGRESS_REPORT_INTERVAL;
         this.appCompatActivity = appCompatActivity;
         this.monitoringConcluded = false;
     }
 
-    public AsyncTaskMonitorProgress(AppCompatActivity appCompatActivity, int progressReportInterval) {
+    public AsyncTaskMonitorProgressOld(AppCompatActivity appCompatActivity, int progressReportInterval) {
         super();
         this.progressReportInterval = progressReportInterval;
         this.appCompatActivity = appCompatActivity;
         this.monitoringConcluded = false;
     }
 
-    @Override
-    protected ProgressReporter doInBackground(ProgressReporter... progressReporters) {
+    /*@Override
+    protected ProgressReporterOld doInBackground(ProgressReporterOld... progressReporterOlds) {
         Log.d(LOG_TAG, "doInBackground (57): Starting progress monitor task.");
-        ProgressReporter progressReporter = progressReporters[0];
+        ProgressReporterOld progressReporterOld = progressReporterOlds[0];
 
         createProgressMonitorAlertDialog();
         Log.d(LOG_TAG, "doInBackground (62): Showing dialog.");
@@ -67,20 +66,20 @@ public class AsyncTaskMonitorProgress extends AsyncTask<ProgressReporter, Progre
             } catch (InterruptedException e) {
                 throw new RuntimeException("Exception while waiting for file monitoring a progress.", e);
             }
-            publishProgress(progressReporter.reportProgress());
+            publishProgress(progressReporterOld.reportProgress());
         }
 
         progressMonitorAlertDialog.dismiss();
 
         Log.d(LOG_TAG, "doInBackground (72): Progress monitor task concluded.");
-        return progressReporter;
-    }
+        return progressReporterOld;
+    }*/
 
     @Override
     protected void onProgressUpdate(ProgressReport... progressReports) {
         ProgressReport progressReport = progressReports[0];
-        Log.d(LOG_TAG, "onProgressUpdate (78): Updating progress informations.");
-        monitoringConcluded = (progressReport.getPercentageConcluded() == ProgressReport.MAX_PERCENTAGE_CONCLUDED);
+        Log.d(LOG_TAG, "onProgressUpdate (78): Updating progress information.");
+        monitoringConcluded = (progressReport.getPercentageConcluded() == 1.0);
         this.progressMonitorAlertDialog.updateProgressInformations(progressReports[0]);
     }
 

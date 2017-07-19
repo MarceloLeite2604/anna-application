@@ -6,7 +6,7 @@ import android.content.Context;
  * Created by marcelo on 18/07/17.
  */
 
-public interface ProgressReporter {
+public interface ProgressReporterOld {
 
     ProgressReport reportProgress();
 }

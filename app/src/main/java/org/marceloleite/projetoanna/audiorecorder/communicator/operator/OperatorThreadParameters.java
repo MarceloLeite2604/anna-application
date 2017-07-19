@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operation.result.OperationResultHandler;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
 
 /**
  * The parameters required to execute the {@link org.marceloleite.projetoanna.audiorecorder.communicator.operator.OperatorThread} object.
@@ -23,16 +24,19 @@ public class OperatorThreadParameters {
      */
     private final AppCompatActivity appCompatActivity;
 
+    private final ProgressMonitorAlertDialog progressMonitorAlertDialog;
+
     /**
      * Constructor.
      *
      * @param bluetoothSocket   The socket which represents the bluetooth communication with the audio recorder.
      * @param appCompatActivity The appCompatActivity of the application which established the connection with the audio recorder.
      */
-    public OperatorThreadParameters(BluetoothSocket bluetoothSocket, OperationResultHandler operationResultHandler, AppCompatActivity appCompatActivity) {
+    public OperatorThreadParameters(BluetoothSocket bluetoothSocket, OperationResultHandler operationResultHandler, AppCompatActivity appCompatActivity, ProgressMonitorAlertDialog progressMonitorAlertDialog) {
         this.bluetoothSocket = bluetoothSocket;
         this.operationResultHandler = operationResultHandler;
         this.appCompatActivity = appCompatActivity;
+        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
     }
 
     /**
@@ -55,5 +59,9 @@ public class OperatorThreadParameters {
 
     public OperationResultHandler getOperationResultHandler() {
         return operationResultHandler;
+    }
+
+    public ProgressMonitorAlertDialog getProgressMonitorAlertDialog() {
+        return progressMonitorAlertDialog;
     }
 }

@@ -73,7 +73,7 @@ public class Communicator implements OperationResultInterface {
      */
     public void startExecution() {
         if (operatorThread == null) {
-            OperatorThreadParameters operatorThreadParameters = new OperatorThreadParameters(communicatorParameters.getBluetoothSocket(), operationResultHandler, communicatorParameters.getAppCompatActivity());
+            OperatorThreadParameters operatorThreadParameters = new OperatorThreadParameters(communicatorParameters.getBluetoothSocket(), operationResultHandler, communicatorParameters.getAppCompatActivity(), communicatorParameters.getProgressMonitorAlertDialog());
             this.operatorThread = new OperatorThread(operatorThreadParameters);
         }
 
