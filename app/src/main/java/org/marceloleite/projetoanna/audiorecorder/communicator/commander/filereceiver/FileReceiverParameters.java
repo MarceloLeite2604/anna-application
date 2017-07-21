@@ -14,11 +14,8 @@ public class FileReceiverParameters {
     private Context context;
     private SenderReceiver senderReceiver;
 
-    private ProgressMonitorAlertDialog progressMonitorAlertDialog;
-
-    public FileReceiverParameters(Context context, ProgressMonitorAlertDialog progressMonitorAlertDialog, SenderReceiver senderReceiver) {
+    public FileReceiverParameters(Context context, SenderReceiver senderReceiver) {
         this.context = context;
-        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
         this.senderReceiver = senderReceiver;
     }
 
@@ -28,9 +25,5 @@ public class FileReceiverParameters {
 
     public SenderReceiver getSenderReceiver() {
         return senderReceiver;
-    }
-
-    public ProgressMonitorAlertDialog getProgressMonitorAlertDialog() {
-        return progressMonitorAlertDialog;
     }
 }

@@ -62,10 +62,13 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
      */
     private ProgressMonitorAlertDialog progressMonitorAlertDialog;
 
+    private ReceiveFileResult receiveFileResult;
+
     /**
      * Constructor.
      */
-    public AsyncTaskFileReceiver() {
+    public AsyncTaskFileReceiver(ProgressMonitorAlertDialog progressMonitorAlertDialog) {
+        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
         this.fileSize = 0;
     }
 
@@ -79,7 +82,6 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
 
         this.context = fileReceiverParameters.getContext();
         this.senderReceiver = fileReceiverParameters.getSenderReceiver();
-        this.progressMonitorAlertDialog = fileReceiverParameters.getProgressMonitorAlertDialog();
 
         File receivedFile;
         ReceiveFileResult receiveFileResult;
@@ -268,6 +270,10 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
         }
     }
 
+    public ReceiveFileResult getReceiveFileResult() {
+        return receiveFileResult;
+    }
+
     @Override
     protected void onPreExecute() {
         ProgressReport progressReport = new ProgressReport(INITIAL_MESSAGE, 0.0);
@@ -277,7 +283,8 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
 
     @Override
     protected ReceiveFileResult doInBackground(FileReceiverParameters... fileReceiverParameterses) {
-        return receiveFile(fileReceiverParameterses[0]);
+        receiveFileResult = receiveFile(fileReceiverParameterses[0]);
+        return receiveFileResult;
     }
 
     @Override

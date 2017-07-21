@@ -1,6 +1,7 @@
 package org.marceloleite.projetoanna.audiorecorder.communicator.commander;
 
 import android.bluetooth.BluetoothSocket;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderReturnCodes;
@@ -172,9 +173,17 @@ public class Commander {
         int requestAudioFilePackageResult = senderReceiver.sendPackage(requestAudioFilePackage);
         if (requestAudioFilePackageResult == AudioRecorderReturnCodes.SUCCESS) {
             /*AsyncTaskFileReceiverOld asyncTaskFileReceiverOld = new AsyncTaskFileReceiverOld();*/
-            FileReceiverParameters fileReceiverParameters = new FileReceiverParameters(appCompatActivity, progressMonitorAlertDialog, senderReceiver);
-            AsyncTaskFileReceiver asyncTaskFileReceiver = new AsyncTaskFileReceiver();
+            FileReceiverParameters fileReceiverParameters = new FileReceiverParameters(appCompatActivity, senderReceiver);
+            AsyncTaskFileReceiver asyncTaskFileReceiver = new AsyncTaskFileReceiver(progressMonitorAlertDialog);
             asyncTaskFileReceiver.execute(fileReceiverParameters);
+
+            while (asyncTaskFileReceiver.getStatus() != AsyncTask.Status.FINISHED) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Exception while waiting for file monitoring a progress.", e);
+                }
+            }
             /*asyncTaskFileReceiverOld.execute(fileReceiverParameters);*/
             /*AsyncTaskMonitorProgressOld asyncTaskMonitorProgressOld = new AsyncTaskMonitorProgressOld(appCompatActivity);
             asyncTaskMonitorProgressOld.execute(asyncTaskFileReceiverOld);*/
@@ -187,6 +196,7 @@ public class Commander {
             }*/
 
             /*return asyncTaskFileReceiverOld.getRequestLatestAudioFileResult();*/
+            /* TODO: Return value received from AsynTaskFileReceiver. */
             return null;
 
         } else {

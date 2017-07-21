@@ -91,6 +91,8 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        progressMonitorAlertDialog = new ProgressMonitorAlertDialog(this, null);
+
         try {
             bluetoothConnector = new BluetoothConnector(this, progressMonitorAlertDialog, this, this);
         } catch (IOException ioException) {
@@ -109,8 +111,6 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         buttonRecord = (Button) findViewById(R.id.button_record);
 
         buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
-
-        progressMonitorAlertDialog = new ProgressMonitorAlertDialog(this, null);
 
         updateInterface();
         // testMix();
