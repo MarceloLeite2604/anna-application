@@ -91,10 +91,8 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        progressMonitorAlertDialog = new ProgressMonitorAlertDialog(this, null);
-
         try {
-            bluetoothConnector = new BluetoothConnector(this, progressMonitorAlertDialog, this, this);
+            bluetoothConnector = new BluetoothConnector(this, null, this, this);
         } catch (IOException ioException) {
             Toast.makeText(getApplicationContext(), "This device does not have a bluetooth adapter.", Toast.LENGTH_LONG).show();
             this.finish();
@@ -299,6 +297,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         switch (result) {
             case GenericReturnCodes.SUCCESS:
                 Log.d(LOG_TAG, "stopAudioRecordingResult (263): Audio record stopped.");
+                videoRecorder.pause();
                 audioRecorder.requestLatestAudioFile();
                 break;
             case GenericReturnCodes.GENERIC_ERROR:
@@ -346,7 +345,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
 
         if (audioFile != null && movieFile != null) {
 
-            MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this);
+            MixerAsyncTask mixerAsyncTask = new MixerAsyncTask(this, this);
             MixerAsyncTaskParameters mixerAsyncTaskParameters = new MixerAsyncTaskParameters(this, audioFile, movieFile, startAudioCommandDelay);
             mixerAsyncTask.execute(mixerAsyncTaskParameters);
         }
@@ -384,6 +383,7 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
      * Updates the activity interface.
      */
     private void updateInterface() {
+        Log.d(LOG_TAG, "updateInterface (387): ");
         updateButtonConnectInterface();
         updateButtonRecordInterface();
     }

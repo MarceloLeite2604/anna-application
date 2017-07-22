@@ -2,6 +2,7 @@ package org.marceloleite.projetoanna.audiorecorder.communicator.commander.filere
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderReturnCodes;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.DataPackage;
@@ -28,7 +29,9 @@ import java.io.IOException;
  */
 public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, ProgressReport, ReceiveFileResult> {
 
-    private static final String INITIAL_MESSAGE = "Receiving audio file";
+    private static final String PROGRESS_MONITOR_DIALOG_TITLE = "Receiving audio";
+
+    private static final String PROGRESS_MONITOR_DIALOG_MESSAGE = "Receiving audio from device.";
 
     /**
      * A tag to identify this class' messages on log.
@@ -64,11 +67,13 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
 
     private ReceiveFileResult receiveFileResult;
 
+    private AppCompatActivity appCompatActivity;
+
     /**
      * Constructor.
      */
-    public AsyncTaskFileReceiver(ProgressMonitorAlertDialog progressMonitorAlertDialog) {
-        this.progressMonitorAlertDialog = progressMonitorAlertDialog;
+    public AsyncTaskFileReceiver(AppCompatActivity appCompatActivity) {
+        this.appCompatActivity = appCompatActivity;
         this.fileSize = 0;
     }
 
@@ -164,7 +169,7 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
         Log.d(LOG_TAG, "receiveFileContent (151): Receiving file content.");
         int totalBytesReceived = 0;
         boolean doneReceiveFileContent = false;
-        double percentageConcluded;
+        int percentageConcluded;
         BufferedOutputStream bufferedOutputStream;
 
         File fileToReceiveContent = createFile();
@@ -178,8 +183,7 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
         while (!doneReceiveFileContent) {
             Log.i(LOG_TAG, "receiveFileContent (123): Total of bytes received: " + totalBytesReceived + "/" + this.fileSize + ".");
             ReceivePackageResult receivePackageResult = senderReceiver.receivePackage();
-
-            /* If the package reception was executed successfully. */
+/* If the package reception was executed successfully. */
             if (receivePackageResult.getReturnCode() == AudioRecorderReturnCodes.SUCCESS) {
 
                 DataPackage receivedDataPackage = receivePackageResult.getDataPackage();
@@ -205,8 +209,8 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
                         totalBytesReceived += fileChunkContent.getFileChunk().length;
                         Log.d(LOG_TAG, "receiveFileContent (201): Bytes received: " + totalBytesReceived + ". File size: " + this.fileSize);
 
-                        percentageConcluded = (double) totalBytesReceived / (double) (this.fileSize);
-                        publishProgress(new ProgressReport(INITIAL_MESSAGE, percentageConcluded));
+                        percentageConcluded = (int) (100 * ((double) totalBytesReceived / (double) (this.fileSize)));
+                        publishProgress(new ProgressReport(PROGRESS_MONITOR_DIALOG_TITLE, percentageConcluded));
 
                         if (totalBytesReceived >= this.fileSize) {
                             doneReceiveFileContent = true;
@@ -270,26 +274,42 @@ public class AsyncTaskFileReceiver extends AsyncTask<FileReceiverParameters, Pro
         }
     }
 
-    public ReceiveFileResult getReceiveFileResult() {
-        return receiveFileResult;
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        appCompatActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressMonitorAlertDialog = new ProgressMonitorAlertDialog(appCompatActivity, PROGRESS_MONITOR_DIALOG_TITLE, PROGRESS_MONITOR_DIALOG_MESSAGE);
+                progressMonitorAlertDialog.show();
+            }
+        });
     }
 
     @Override
-    protected void onPreExecute() {
-        ProgressReport progressReport = new ProgressReport(INITIAL_MESSAGE, 0.0);
-        this.progressMonitorAlertDialog.updateProgressInformations(progressReport);
-        this.progressMonitorAlertDialog.show();
+    protected void onPostExecute(ReceiveFileResult receiveFileResult) {
+        super.onPostExecute(receiveFileResult);
+        appCompatActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressMonitorAlertDialog.hide();
+            }
+        });
     }
 
     @Override
     protected ReceiveFileResult doInBackground(FileReceiverParameters... fileReceiverParameterses) {
+        Log.d(LOG_TAG, "doInBackground (287): ");
         receiveFileResult = receiveFile(fileReceiverParameterses[0]);
         return receiveFileResult;
     }
 
     @Override
     protected void onProgressUpdate(ProgressReport... progressReports) {
+        Log.d(LOG_TAG, "onProgressUpdate (294): ");
         ProgressReport progressReport = progressReports[0];
-        this.progressMonitorAlertDialog.updateProgressInformations(progressReport);
+        if (this.progressMonitorAlertDialog != null) {
+            this.progressMonitorAlertDialog.updateProgressInformations(progressReport);
+        }
     }
 }

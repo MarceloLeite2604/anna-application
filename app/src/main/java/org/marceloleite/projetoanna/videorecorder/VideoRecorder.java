@@ -492,16 +492,18 @@ public class VideoRecorder implements CameraCaptureSessionStateInterface, Camera
      * Stops the {@link HandlerThread} associated with the {@link Handler} which controls the video capture session.
      */
     private void stopCaptureSessionHandlerThread() {
-        captureSessionHandlerThread.quitSafely();
+        if (captureSessionHandlerThread != null) {
+            captureSessionHandlerThread.quitSafely();
 
-        try {
-            captureSessionHandlerThread.join();
-        } catch (InterruptedException interruptedException) {
-            throw new RuntimeException("Exception thrown while waiting for the capture session handler thread to stop.", interruptedException);
+            try {
+                captureSessionHandlerThread.join();
+            } catch (InterruptedException interruptedException) {
+                throw new RuntimeException("Exception thrown while waiting for the capture session handler thread to stop.", interruptedException);
+            }
+
+            captureSessionHandlerThread = null;
+            captureSessionHandler = null;
         }
-
-        captureSessionHandlerThread = null;
-        captureSessionHandler = null;
     }
 
     /**

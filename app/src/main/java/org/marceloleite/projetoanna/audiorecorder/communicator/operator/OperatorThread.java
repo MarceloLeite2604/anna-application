@@ -14,6 +14,8 @@ import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operatio
 import org.marceloleite.projetoanna.audiorecorder.communicator.operator.operation.result.OperationResultHandler;
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.file.FileType;
+import org.marceloleite.projetoanna.utils.file.FileUtils;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttempts;
 import org.marceloleite.projetoanna.utils.retryattempts.RetryAttemptsReturnCodes;
 
@@ -81,7 +83,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
 
     @Override
     public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        //Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         Looper.prepare();
 
         this.commander = new Commander(operatorThreadParameters.getAppCompatActivity(), operatorThreadParameters.getProgressMonitorAlertDialog(), operatorThreadParameters.getBluetoothSocket());

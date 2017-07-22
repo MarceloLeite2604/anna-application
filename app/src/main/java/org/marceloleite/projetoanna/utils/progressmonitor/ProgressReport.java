@@ -8,14 +8,14 @@ public class ProgressReport {
 
     private String message;
 
-    private double percentageConcluded;
+    private int percentageConcluded;
 
-    public ProgressReport(String message, double percentageConcluded) {
+    public ProgressReport(String message, int percentageConcluded) {
         this.percentageConcluded = percentageConcluded;
         this.message = message;
     }
 
-    public double getPercentageConcluded() {
+    public int getPercentageConcluded() {
         return percentageConcluded;
     }
 

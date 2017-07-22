@@ -120,8 +120,8 @@ public class Pairer implements StartDiscoveringInterface, DiscovererInterface, P
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(pairerParameters.getAppCompatActivity());
         alertDialogBuilder.setTitle("Pairing");
         alertDialogPairingDevice = alertDialogBuilder.create();
-        InformationView informationView = new InformationView(alertDialogPairingDevice.getContext());
-        informationView.setInformationText("Pairing with \"" + bluetoothDeviceToPair.getName() + "\".");
+        String infromationText = "Pairing with \"" + bluetoothDeviceToPair.getName() + "\".";
+        InformationView informationView = new InformationView(alertDialogPairingDevice.getContext(), infromationText);
         alertDialogPairingDevice.setView(informationView);
         alertDialogPairingDevice.show();
     }

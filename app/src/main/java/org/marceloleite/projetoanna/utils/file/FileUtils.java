@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 /**
  * Stores some components which are utils to manipulate files.
@@ -56,12 +57,14 @@ public abstract class FileUtils {
 
         String formattedDate = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
 
+        int randomInt = new Random().nextInt(65535);
 
-        File temporaryFile = new File(cacheDirectory.getPath() + File.separator + formattedDate + fileType.getFileExtension());
+
+        File temporaryFile = new File(cacheDirectory.getPath() + File.separator + formattedDate + "_" + randomInt + "." + fileType.getFileExtension());
 
         try {
-            boolean fileExists = temporaryFile.createNewFile();
-            if (fileExists) {
+            boolean fileDoesNotExist = temporaryFile.createNewFile();
+            if (!fileDoesNotExist) {
                 Log.w(LOG_TAG, "createTemporaryFile (64): Temporary file \"" + temporaryFile.getAbsolutePath() + "\" already exists.");
             }
         } catch (IOException ioException) {

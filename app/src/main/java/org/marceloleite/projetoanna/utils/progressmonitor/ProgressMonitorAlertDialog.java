@@ -3,13 +3,12 @@ package org.marceloleite.projetoanna.utils.progressmonitor;
 import android.app.AlertDialog;
 import android.content.Context;
 
-import org.marceloleite.projetoanna.ui.InformationView;
+import org.marceloleite.projetoanna.ui.ProgressMonitoringView;
 import org.marceloleite.projetoanna.utils.Log;
 
 /**
  * Created by marcelo on 18/07/17.
  */
-
 public class ProgressMonitorAlertDialog extends AlertDialog {
 
     /**
@@ -25,21 +24,18 @@ public class ProgressMonitorAlertDialog extends AlertDialog {
     }
 
 
-    private InformationView informationView;
+    private ProgressMonitoringView progressMonitoringView;
 
 
-    public ProgressMonitorAlertDialog(Context context, String title) {
+    public ProgressMonitorAlertDialog(Context context, String title, String initialMessage) {
         super(context);
         setTitle(title);
         setCancelable(false);
-        this.informationView = new InformationView(context);
-        this.informationView.showProgressBar(true);
-        setView(informationView);
+        this.progressMonitoringView = new ProgressMonitoringView(context, initialMessage);
+        setView(progressMonitoringView);
     }
 
     public void updateProgressInformations(ProgressReport progressReport) {
-        int percentage = (int) progressReport.getPercentageConcluded();
-        informationView.setInformationText(progressReport.getMessage());
-        informationView.setProgressBarValue(percentage);
+        progressMonitoringView.updateProgressInformations(progressReport);
     }
 }

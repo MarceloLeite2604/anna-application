@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderReturnCodes;
 import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.AsyncTaskFileReceiver;
 import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.FileReceiverParameters;
+import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.ReceiveFileResult;
 import org.marceloleite.projetoanna.audiorecorder.communicator.commander.filereceiver.RequestLatestAudioFileResult;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.DataPackage;
 import org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType;
@@ -16,6 +17,10 @@ import org.marceloleite.projetoanna.audiorecorder.communicator.senderreceiver.Se
 import org.marceloleite.projetoanna.utils.GenericReturnCodes;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.marceloleite.projetoanna.audiorecorder.communicator.datapackage.PackageType.COMMAND_RESULT;
 
@@ -172,22 +177,22 @@ public class Commander {
 
         int requestAudioFilePackageResult = senderReceiver.sendPackage(requestAudioFilePackage);
         if (requestAudioFilePackageResult == AudioRecorderReturnCodes.SUCCESS) {
-            /*AsyncTaskFileReceiverOld asyncTaskFileReceiverOld = new AsyncTaskFileReceiverOld();*/
             FileReceiverParameters fileReceiverParameters = new FileReceiverParameters(appCompatActivity, senderReceiver);
-            AsyncTaskFileReceiver asyncTaskFileReceiver = new AsyncTaskFileReceiver(progressMonitorAlertDialog);
+            AsyncTaskFileReceiver asyncTaskFileReceiver = new AsyncTaskFileReceiver(appCompatActivity);
             asyncTaskFileReceiver.execute(fileReceiverParameters);
 
-            while (asyncTaskFileReceiver.getStatus() != AsyncTask.Status.FINISHED) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException("Exception while waiting for file monitoring a progress.", e);
-                }
+            ReceiveFileResult receiveFileResult = null;
+            try {
+                receiveFileResult = asyncTaskFileReceiver.get(5, TimeUnit.MINUTES);
+            } catch (InterruptedException interruptedException) {
+                throw new RuntimeException("Interrupted while waiting for file reception.", interruptedException);
+            } catch (ExecutionException executionException) {
+                throw new RuntimeException("Exception raised when executing file receiving task.", executionException);
+            } catch (TimeoutException timeoutException) {
+                throw new RuntimeException("File receiving task timed out.", timeoutException);
             }
-            /*asyncTaskFileReceiverOld.execute(fileReceiverParameters);*/
-            /*AsyncTaskMonitorProgressOld asyncTaskMonitorProgressOld = new AsyncTaskMonitorProgressOld(appCompatActivity);
-            asyncTaskMonitorProgressOld.execute(asyncTaskFileReceiverOld);*/
-            /*while (asyncTaskFileReceiverOld.getStatus() != AsyncTask.Status.FINISHED) {
+
+            /*while (asyncTaskFileReceiver.getStatus() != AsyncTask.Status.FINISHED) {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -195,10 +200,16 @@ public class Commander {
                 }
             }*/
 
-            /*return asyncTaskFileReceiverOld.getRequestLatestAudioFileResult();*/
-            /* TODO: Return value received from AsynTaskFileReceiver. */
-            return null;
+            if (receiveFileResult != null) {
 
+                if (receiveFileResult.getReturnCode() == GenericReturnCodes.SUCCESS) {
+                    return new RequestLatestAudioFileResult(GenericReturnCodes.SUCCESS, receiveFileResult.getFileReceived());
+                } else {
+                    return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+                }
+            } else {
+                return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);
+            }
         } else {
             return new RequestLatestAudioFileResult(GenericReturnCodes.GENERIC_ERROR, null);
         }

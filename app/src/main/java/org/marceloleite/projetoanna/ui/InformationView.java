@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import org.marceloleite.projetoanna.R;
 import org.marceloleite.projetoanna.utils.Log;
+import org.w3c.dom.Text;
 
 /**
  * A generic {@link LinearLayout} to show information about the application.
@@ -41,13 +42,31 @@ public class InformationView extends LinearLayout {
      * Constructor.
      *
      * @param context The context of the application which the linear layout should be created.
+     * @param message Message to show on view.
      */
-    public InformationView(@NonNull Context context) {
+    public InformationView(@NonNull Context context, String message) {
+        this(context, message, true);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param context         The context of the application which the linear layout should be created.
+     * @param message         Message to show on view.
+     * @param showProgressBar Inform true if the progress bar must be shown on view or false to hidden it.
+     */
+    public InformationView(@NonNull Context context, String message, boolean showProgressBar) {
         super(context);
 
         View.inflate(context, R.layout.information, this);
-        textView = findViewById(R.id.information_text);
-        progressBar = findViewById(R.id.information_progressbar);
+        this.textView = findViewById(R.id.information_text);
+        this.textView.setText(message);
+        this.progressBar = findViewById(R.id.information_progressbar);
+        showProgressBar(showProgressBar);
+    }
+
+    public void setMessage(String informationText) {
+        textView.setText(informationText);
     }
 
     /**
@@ -55,30 +74,11 @@ public class InformationView extends LinearLayout {
      *
      * @param show True if the progress bar must be shown. False if it should be hidden.
      */
-    @SuppressWarnings("unused")
     public void showProgressBar(boolean show) {
         int value = View.GONE;
         if (show) {
             value = View.VISIBLE;
         }
         progressBar.setVisibility(value);
-    }
-
-    /**
-     * Defines the information to be shown to the user.
-     *
-     * @param text The information to be shown to the user.
-     */
-    public void setInformationText(String text) {
-        textView.setText(text);
-    }
-
-    /**
-     * Updates the progress bar value
-     *
-     * @param value New value of the progress bar.
-     */
-    public void setProgressBarValue(int value) {
-        progressBar.setProgress(value);
     }
 }
