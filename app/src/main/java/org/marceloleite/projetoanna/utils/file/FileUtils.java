@@ -119,9 +119,9 @@ public abstract class FileUtils {
         File file = new File(outputDirectory, fileName);
 
         try {
-            boolean fileAlreadyExists = file.createNewFile();
-            if (fileAlreadyExists) {
-                Log.i(LOG_TAG, "createFile (120): File \"" + file.getAbsolutePath() + "\" already exists.");
+            boolean fileDoesNotExist = file.createNewFile();
+            if (!fileDoesNotExist) {
+                Log.w(LOG_TAG, "createFile (120): File \"" + file.getAbsolutePath() + "\" already exists.");
             }
         } catch (IOException ioException) {
             throw new RuntimeException("Could not create file \"" + file.getAbsolutePath() + "\".", ioException);
@@ -205,9 +205,14 @@ public abstract class FileUtils {
 
             while (!copyConcluded) {
                 bytesRead = fileInputStream.read(buffer, 0, COPY_FILE_BUFFER_SIZE);
-                fileOutputStream.write(buffer, 0, bytesRead);
 
-                if (bytesRead <= 0) {
+                if (bytesRead > 0) {
+                    fileOutputStream.write(buffer, 0, bytesRead);
+
+                    if (bytesRead < COPY_FILE_BUFFER_SIZE) {
+                        copyConcluded = true;
+                    }
+                } else {
                     copyConcluded = true;
                 }
             }

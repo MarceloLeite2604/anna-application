@@ -12,6 +12,8 @@ import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaDecoderCallb
 import org.marceloleite.projetoanna.mixer.media.codec.callback.MediaEncoderCallback;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReport;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,9 +58,9 @@ public class MediaCodecWrapper {
      * @param audioTimeIgnored      Informs how much audio time must be ignored before consider start writing the raw audio on file.
      * @param audioDuration         The duration of the audio to be written on file.
      */
-    public MediaCodecWrapper(MediaFormat mediaFormat, MediaExtractorWrapper mediaExtractorWrapper, File outputFile, long audioTimeIgnored, long audioDuration) {
+    public MediaCodecWrapper(MediaFormat mediaFormat, MediaExtractorWrapper mediaExtractorWrapper, File outputFile, long audioTimeIgnored, long audioDuration, ProgressReporter progressReporter) {
         createMediaDecoder(mediaFormat);
-        createMediaDecoderCallback(mediaExtractorWrapper.getMediaExtractor(), outputFile, audioTimeIgnored, audioDuration);
+        createMediaDecoderCallback(mediaExtractorWrapper.getMediaExtractor(), outputFile, audioTimeIgnored, audioDuration, progressReporter);
         configureMediaCodec(mediaFormat, 0);
     }
 
@@ -71,9 +73,9 @@ public class MediaCodecWrapper {
      * @param inputFile         The raw audio file to be read and encoded.
      * @param mediaMuxerWrapper The wrapped which contains the {@link android.media.MediaMuxer} object where the encoded audio must be written on.
      */
-    public MediaCodecWrapper(MediaFormat mediaFormat, File inputFile, MediaMuxerWrapper mediaMuxerWrapper) {
+    public MediaCodecWrapper(MediaFormat mediaFormat, File inputFile, MediaMuxerWrapper mediaMuxerWrapper, ProgressReporter progressReporter) {
         createMediaEncoder(mediaFormat);
-        createMediaEncoderCallback(inputFile, mediaMuxerWrapper);
+        createMediaEncoderCallback(inputFile, mediaMuxerWrapper, progressReporter);
         configureMediaCodec(mediaFormat, MediaCodec.CONFIGURE_FLAG_ENCODE);
 
     }
@@ -147,8 +149,8 @@ public class MediaCodecWrapper {
      * @param audioTimeIgnore The amount of audio time which will be ignored before start its decoding.
      * @param audioDuration   The duration of the audio to be decoded.
      */
-    private void createMediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile, long audioTimeIgnore, long audioDuration) {
-        callback = new MediaDecoderCallback(mediaExtractor, outputFile, audioTimeIgnore, audioDuration);
+    private void createMediaDecoderCallback(MediaExtractor mediaExtractor, File outputFile, long audioTimeIgnore, long audioDuration, ProgressReporter progressReporter) {
+        callback = new MediaDecoderCallback(mediaExtractor, outputFile, audioTimeIgnore, audioDuration, progressReporter);
         mediaCodec.setCallback(callback);
     }
 
@@ -158,8 +160,8 @@ public class MediaCodecWrapper {
      * @param inputFile         The file which contains the raw audio to be encoded.
      * @param mediaMuxerWrapper The {@link MediaMuxerWrapper } object which contains the {@link android.media.MediaMuxer} object where the encoded audio will be written.
      */
-    private void createMediaEncoderCallback(File inputFile, MediaMuxerWrapper mediaMuxerWrapper) {
-        callback = new MediaEncoderCallback(inputFile, mediaMuxerWrapper);
+    private void createMediaEncoderCallback(File inputFile, MediaMuxerWrapper mediaMuxerWrapper, ProgressReporter progressReporter) {
+        callback = new MediaEncoderCallback(inputFile, mediaMuxerWrapper, progressReporter);
         mediaCodec.setCallback(callback);
     }
 

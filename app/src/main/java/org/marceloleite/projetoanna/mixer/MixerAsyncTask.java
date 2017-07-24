@@ -6,13 +6,15 @@ import android.support.v7.app.AppCompatActivity;
 
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.progressmonitor.ProgressMonitorAlertDialog;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReport;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReporter;
 
 import java.io.File;
 
 /**
  * Extends the {@link AsyncTask} class to execute the recorded audio and video mixing.
  */
-public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, Integer, File> {
+public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, ProgressReport, File> implements ProgressReporter {
 
     private static final String PROGRESS_MONITOR_DIALOG_TITLE = "Mixing";
 
@@ -60,7 +62,8 @@ public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, Integer,
             File audioFile = mixerAsyncTaskParameters.getAudioFile();
             long startAudioDelay = mixerAsyncTaskParameters.getAudioAndVideoDelayTime();
 
-            mixedFile = Mixer.mixAudioAndVideo(context, audioFile, movieFile, startAudioDelay);
+            Mixer mixer = new Mixer(this);
+            mixedFile = mixer.mixAudioAndVideo(context, audioFile, movieFile, startAudioDelay);
         }
 
         return mixedFile;
@@ -88,5 +91,15 @@ public class MixerAsyncTask extends AsyncTask<MixerAsyncTaskParameters, Integer,
                 progressMonitorAlertDialog.show();
             }
         });
+    }
+
+    @Override
+    public void reportProgress(ProgressReport progressReport) {
+        publishProgress(progressReport);
+    }
+
+    @Override
+    protected void onProgressUpdate(ProgressReport... progressReports) {
+        progressMonitorAlertDialog.updateProgressInformations(progressReports[0]);
     }
 }

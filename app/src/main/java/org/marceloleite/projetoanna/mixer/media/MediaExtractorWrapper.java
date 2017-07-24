@@ -5,6 +5,7 @@ import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.MediaUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class MediaExtractorWrapper {
 
     public MediaExtractorWrapper(File mediaFile, String mediaMimetype) {
         this.mediaFile = mediaFile;
-        this.mediaDuration = retrieveMediaDuration(mediaFile);
+        this.mediaDuration = MediaUtils.retrieveMediaDuration(mediaFile);
         this.mediaExtractor = createMediaExtractor(mediaFile);
         this.selectedMediaTrackInfos = selectMediaTrack(mediaMimetype);
     }
@@ -88,23 +89,6 @@ public class MediaExtractorWrapper {
      */
     public long getMediaDuration() {
         return mediaDuration;
-    }
-
-    /**
-     * Retrieves the duration of a media file.
-     *
-     * @param mediaFile The media file which its duration should be retrieves.
-     * @return The duration of the media file. TODO: Which time unit is it?
-     */
-    private long retrieveMediaDuration(File mediaFile) {
-        int duration = 0;
-        MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-        metaRetriever.setDataSource(mediaFile.getAbsolutePath());
-        String stringDuration = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        if (stringDuration != null) {
-            duration = Integer.parseInt(stringDuration);
-        }
-        return duration;
     }
 
     /**

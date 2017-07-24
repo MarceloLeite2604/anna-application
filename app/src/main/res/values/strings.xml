@@ -8,4 +8,7 @@
     <string name="alert_dialog_title_start_search_devices">No devices paired yet. Start discovering Bluetooth devices?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="video_ready_title">Your video is ready</string>
+    <string name="video_ready_button_play_text">Play</string>
+    <string name="video_ready_button_share_text">Share</string>
 </resources>

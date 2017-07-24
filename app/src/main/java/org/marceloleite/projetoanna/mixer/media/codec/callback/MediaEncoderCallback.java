@@ -9,6 +9,8 @@ import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.
 import org.marceloleite.projetoanna.mixer.media.codec.callback.bytebufferwriter.ByteBufferWriteMediaMuxerWrapper;
 import org.marceloleite.projetoanna.utils.Log;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReport;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReporter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +34,8 @@ public class MediaEncoderCallback extends MediaCodecCallback {
     static {
         Log.addClassToLog(LOG_TAG);
     }
+
+    private static final String DEFAULT_PROGRESS_REPORT_MESSAGE = "Enconding.";
 
     /**
      * The wrapper which contains the {@link android.media.MediaMuxer} object where the encoded audio track will be written.
@@ -58,21 +62,27 @@ public class MediaEncoderCallback extends MediaCodecCallback {
      */
     private long totalBytesRead;
 
+    private ProgressReporter progressReporter;
+
+    private long inputFileSize;
+
     /**
      * Constructor.
      *
      * @param inputFile         The file which contains the raw audio data.
      * @param mediaMuxerWrapper The wrapper which contains the {@link android.media.MediaMuxer} object where the encoded audio will be written.
      */
-    public MediaEncoderCallback(File inputFile, MediaMuxerWrapper mediaMuxerWrapper) {
+    public MediaEncoderCallback(File inputFile, MediaMuxerWrapper mediaMuxerWrapper, ProgressReporter progressReporter) {
         try {
             this.fileInputStream = new FileInputStream(inputFile);
         } catch (FileNotFoundException fileNotFoundException) {
             throw new RuntimeException("Exception thrown while creating the input stream to read the file which to be encoded.", fileNotFoundException);
         }
+        this.inputFileSize = inputFile.length();
         this.mediaMuxerWrapper = mediaMuxerWrapper;
         this.byteBufferWriteMediaMuxerWrapper = new ByteBufferWriteMediaMuxerWrapper(mediaMuxerWrapper);
         this.finishedEncoding = false;
+        this.progressReporter = progressReporter;
         this.totalBytesRead = 0;
     }
 
@@ -84,6 +94,12 @@ public class MediaEncoderCallback extends MediaCodecCallback {
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
         bufferInfo.size = readInputStream(fileInputStream, inputBuffer);
+
+        int percentageConcluded = (int)(((double)totalBytesRead/(double)inputFileSize)*100);
+
+        ProgressReport progressReport = new ProgressReport(DEFAULT_PROGRESS_REPORT_MESSAGE, percentageConcluded);
+        progressReporter.reportProgress(progressReport);
+
         bufferInfo = elaborateFlags(inputBuffer, bufferInfo);
 
         mediaCodec.queueInputBuffer(inputBufferId, AudioUtils.BUFFER_OFFSET, bufferInfo.size, bufferInfo.presentationTimeUs, bufferInfo.flags);

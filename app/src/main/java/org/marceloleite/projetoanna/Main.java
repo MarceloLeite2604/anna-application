@@ -12,12 +12,12 @@ import org.marceloleite.projetoanna.audiorecorder.AudioRecorder;
 import org.marceloleite.projetoanna.audiorecorder.AudioRecorderInterface;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnector;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorInterface;
-import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorParameters;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorResult;
 import org.marceloleite.projetoanna.audiorecorder.bluetoothconnector.BluetoothConnectorReturnCodes;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTask;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTaskInterface;
 import org.marceloleite.projetoanna.mixer.MixerAsyncTaskParameters;
+import org.marceloleite.projetoanna.ui.AlertDialogVideoReady;
 import org.marceloleite.projetoanna.ui.listeners.buttonconnect.ButtonConnectInterface;
 import org.marceloleite.projetoanna.ui.listeners.buttonconnect.ButtonConnectOnClickListener;
 import org.marceloleite.projetoanna.ui.listeners.buttonrecord.ButtonRecordInterface;
@@ -111,7 +111,6 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
         buttonRecord.setOnClickListener(new ButtonRecordOnClickListener(this));
 
         updateInterface();
-        // testMix();
     }
 
     @Override
@@ -374,9 +373,11 @@ public class Main extends AppCompatActivity implements ButtonConnectInterface, B
     }*/
 
     @Override
-    public void mixConcluded(File file) {
-        Toast.makeText(this, "Movie saved on " + file.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
+    public void mixConcluded(File movieFile) {
+        //Toast.makeText(this, "Movie saved on " + file.getAbsolutePath() + ".", Toast.LENGTH_LONG).show();
         updateInterface();
+        AlertDialogVideoReady alertDialogVideoReady = new AlertDialogVideoReady(this, movieFile);
+        alertDialogVideoReady.show();
     }
 
     /**

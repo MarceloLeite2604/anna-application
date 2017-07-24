@@ -11,9 +11,12 @@ import org.marceloleite.projetoanna.mixer.media.MediaExtractorWrapper;
 import org.marceloleite.projetoanna.mixer.media.MediaMuxerWrapper;
 import org.marceloleite.projetoanna.mixer.media.codec.MediaCodecWrapper;
 import org.marceloleite.projetoanna.utils.Log;
+import org.marceloleite.projetoanna.utils.MediaUtils;
 import org.marceloleite.projetoanna.utils.audio.AudioUtils;
 import org.marceloleite.projetoanna.utils.file.FileType;
 import org.marceloleite.projetoanna.utils.file.FileUtils;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReport;
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReporter;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -21,7 +24,9 @@ import java.nio.ByteBuffer;
 /**
  * Mixes the recorded audio and video files.
  */
-abstract class Mixer {
+class Mixer implements ProgressReporter {
+
+    private static final String DEFAULT_PROGRESS_REPORT_MESSAGE = "Mixing audio and video.";
 
     /**
      * A tag to identify this class' messages on log.
@@ -45,6 +50,13 @@ abstract class Mixer {
      */
     private static final int AAC_ENCODING_MAX_INPUT_SIZE = 16 * 1024;
 
+    private ProgressReporter progressReporterMixing;
+
+    private MixingStage currentMixingStage;
+
+    public Mixer(ProgressReporter progressReporterMixing) {
+        this.progressReporterMixing = progressReporterMixing;
+    }
 
     /**
      * Request the mixing of recorded audio and video files.
@@ -55,16 +67,20 @@ abstract class Mixer {
      * @param startAudioDelay The delay between the audio and video start point.
      * @return The file which contains the mixed audio and video.
      */
-    static File mixAudioAndVideo(Context context, File audioFile, File videoFile, long startAudioDelay) {
+    public File mixAudioAndVideo(Context context, File audioFile, File videoFile, long startAudioDelay) {
 
         /* Creates and configures the media extractor for video file. */
         MediaExtractorWrapper videoFileMediaExtractorWrapper = new MediaExtractorWrapper(videoFile, MediaFormat.MIMETYPE_VIDEO_AVC);
 
-        long audioFileDuration = videoFileMediaExtractorWrapper.getMediaDuration() * 1000;
-        Log.d(LOG_TAG, "mixAudioAndVideo (46): Audio file duration: " + audioFileDuration);
+        File rawAudioFile = convertMp3ToRaw(context, audioFile, startAudioDelay);
+        File mixedMp4File = createMixedMp4File(context, rawAudioFile, videoFileMediaExtractorWrapper);
 
-        File rawAudioFile = convertMp3ToRaw(context, audioFile, startAudioDelay, audioFileDuration);
-        return createMixedMp4File(context, rawAudioFile, videoFileMediaExtractorWrapper);
+        /* Deletes the temporary file. */
+        if (!rawAudioFile.delete()) {
+            Log.e(LOG_TAG, "mixAudioAndVideo (80): Could not delete temporary file " + rawAudioFile + "\".");
+        }
+
+        return mixedMp4File;
     }
 
     /**
@@ -73,17 +89,21 @@ abstract class Mixer {
      * @param context          The context of the application in execution.
      * @param mp3File          The mp3 file to be converted.
      * @param audioTimeIgnored The amount of audio time which should be ignored in the conversion.
-     * @param audioDuration    The duration of the raw audio time created.
      * @return The raw audio file created.
      */
-    private static File convertMp3ToRaw(Context context, File mp3File, long audioTimeIgnored, long audioDuration) {
+    private File convertMp3ToRaw(Context context, File mp3File, long audioTimeIgnored) {
         Log.d(LOG_TAG, "convertMp3ToRaw (54): Converting mp3 file to raw audio.");
+
+        currentMixingStage = MixingStage.CONVERT_MP3_TO_RAW;
 
         /* Creates and configures the mp3 file media extractor. */
         MediaExtractorWrapper mp3FileMediaExtractorWrapper = new MediaExtractorWrapper(mp3File, MediaFormat.MIMETYPE_AUDIO_MPEG);
 
         /* Creates the new raw audio file. */
-        File rawAudioFile = FileUtils.createFile(context, FileType.AUDIO_RAW_FILE);
+        File rawAudioFile = FileUtils.createTemporaryFile(context, FileType.AUDIO_RAW_FILE);
+
+        long audioDuration = mp3FileMediaExtractorWrapper.getMediaDuration() * 1000;
+        Log.d(LOG_TAG, "mixAudioAndVideo (46): Audio file duration: " + audioDuration);
 
         /* Creates and configures the mp3 media decoder. */
         MediaCodecWrapper mp3MediaDecoderWrapper = createMp3MediaDecoder(mp3FileMediaExtractorWrapper, rawAudioFile, audioTimeIgnored, audioDuration);
@@ -106,16 +126,16 @@ abstract class Mixer {
      *                              file.
      * @param audioTimeIgnored      The amount of audio time which should be ignored in the
      *                              conversion.
-     * @param audioDuration         The duration of the raw audio time created.
+     * @param audioDuration         The duration of the audio file.
      * @return A {@link MediaCodecWrapper} object wrapping the mp3 decoder for the media file
      * manipulated by the {@link MediaExtractor} wrapped on the {@link MediaCodecWrapper} informed.
      */
-    private static MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile, long audioTimeIgnored, long audioDuration) {
+    private MediaCodecWrapper createMp3MediaDecoder(MediaExtractorWrapper mediaExtractorWrapper, File rawAudioFile, long audioTimeIgnored, long audioDuration) {
         Log.d(LOG_TAG, "createMp3MediaDecoder (74): Creating mp3 media decoder.");
         MediaCodecWrapper mediaCodecWrapper;
 
         MediaFormat mp3MediaFormat = mediaExtractorWrapper.getSelectedMediaTrackInfos().getMediaFormat();
-        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper, rawAudioFile, audioTimeIgnored, audioDuration);
+        mediaCodecWrapper = new MediaCodecWrapper(mp3MediaFormat, mediaExtractorWrapper, rawAudioFile, audioTimeIgnored, audioDuration, this);
         return mediaCodecWrapper;
     }
 
@@ -130,7 +150,7 @@ abstract class Mixer {
      *                                       manipulates the video file to be mixed.
      * @return An mp4 file with the audio and video mixed.
      */
-    private static File createMixedMp4File(Context context, File rawAudioFile, MediaExtractorWrapper videoFileMediaExtractorWrapper) {
+    private File createMixedMp4File(Context context, File rawAudioFile, MediaExtractorWrapper videoFileMediaExtractorWrapper) {
 
         /* Creates the mixed video file. */
         File mixedVideoTemporaryFile = FileUtils.createTemporaryFile(context, FileType.MOVIE_FILE);
@@ -143,6 +163,8 @@ abstract class Mixer {
 
         /* Creates the AAC audio encoder */
         MediaCodecWrapper aacMediaEncoderWrapper = createAacMediaEncoder(rawAudioFile, mediaMuxerWrapper);
+
+        currentMixingStage = MixingStage.ENCODE_RAW_TO_AAC;
 
         Log.d(LOG_TAG, "createMixedMp4File (96): Encoding raw audio to AAC format.");
         aacMediaEncoderWrapper.startAndWaitCodec();
@@ -173,7 +195,7 @@ abstract class Mixer {
             Log.e(LOG_TAG, "createMixedMp4File (168): Could not delete temporary file \"" + mixedVideoTemporaryFile + "\".");
         }
 
-        return mixedVideoTemporaryFile;
+        return movieFile;
     }
 
     /**
@@ -185,9 +207,9 @@ abstract class Mixer {
      *                          be stored.
      * @return The AAc media encoder created.
      */
-    private static MediaCodecWrapper createAacMediaEncoder(File rawAudioInputFile, MediaMuxerWrapper mediaMuxerWrapper) {
+    private MediaCodecWrapper createAacMediaEncoder(File rawAudioInputFile, MediaMuxerWrapper mediaMuxerWrapper) {
         MediaFormat aacMediaFormat = createAacMediaFormat();
-        return new MediaCodecWrapper(aacMediaFormat, rawAudioInputFile, mediaMuxerWrapper);
+        return new MediaCodecWrapper(aacMediaFormat, rawAudioInputFile, mediaMuxerWrapper, this);
     }
 
     /**
@@ -195,7 +217,7 @@ abstract class Mixer {
      *
      * @return The AAC media format used to encode the raw audio.
      */
-    private static MediaFormat createAacMediaFormat() {
+    private MediaFormat createAacMediaFormat() {
         MediaFormat aacMediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AudioUtils.SAMPLE_RATE, 2);
         aacMediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
         aacMediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, AudioUtils.AAC_ENCODING_BIT_RATE);
@@ -212,12 +234,17 @@ abstract class Mixer {
      * @param mediaMuxerWrapper              The wrapper of the {@link MediaMuxer} where the video
      *                                       content will be copied to.
      */
-    private static void copyVideoToMixedFile(MediaExtractorWrapper videoFileMediaExtractorWrapper, MediaMuxerWrapper mediaMuxerWrapper) {
+    private void copyVideoToMixedFile(MediaExtractorWrapper videoFileMediaExtractorWrapper, MediaMuxerWrapper mediaMuxerWrapper) {
+
+        currentMixingStage = MixingStage.COPYING_VIDEO_TO_MOVIE;
 
         boolean videoExtractionConcluded = false;
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
         ByteBuffer byteBuffer = ByteBuffer.allocate(VIDEO_COPY_BUFFER_SIZE);
         bufferInfo.offset = AudioUtils.BUFFER_OFFSET;
+
+        long videoFileDuration = MediaUtils.retrieveMediaDuration(videoFileMediaExtractorWrapper.getMediaFile()) * 1000;
+        int percentageConcluded;
 
         MediaExtractor videoFileMediaExtractor = videoFileMediaExtractorWrapper.getMediaExtractor();
         MediaMuxer mediaMuxer = mediaMuxerWrapper.getMediaMuxer();
@@ -231,11 +258,27 @@ abstract class Mixer {
                 bufferInfo.size = 0;
             } else {
                 bufferInfo.presentationTimeUs = videoFileMediaExtractor.getSampleTime();
+                percentageConcluded = (int) (((double) bufferInfo.presentationTimeUs / (double) videoFileDuration) * 100);
+                ProgressReport progressReport = new ProgressReport(DEFAULT_PROGRESS_REPORT_MESSAGE, percentageConcluded);
+                reportProgress(progressReport);
                 //noinspection WrongConstant
                 bufferInfo.flags = videoFileMediaExtractor.getSampleFlags();
                 mediaMuxer.writeSampleData(mediaMuxerWrapper.getVideoTrackIndex(), byteBuffer, bufferInfo);
                 videoFileMediaExtractor.advance();
             }
         }
+    }
+
+    @Override
+    public void reportProgress(ProgressReport progressReport) {
+        int mixingProgressPercentage = MixingStage.getStartPercentageFor(currentMixingStage);
+        // Log.d(LOG_TAG, "getStartPercentageFor (51): Start percentage for " + currentMixingStage + " is " + mixingProgressPercentage);
+
+        int additionalPercentage = (int) (progressReport.getPercentageConcluded() * currentMixingStage.getRelativeWeight());
+        // Log.d(LOG_TAG, "getStartPercentageFor (51): Additional percentage informed for " + currentMixingStage + " is " + additionalPercentage);
+        mixingProgressPercentage += additionalPercentage;
+
+        ProgressReport mixingProgressReport = new ProgressReport(DEFAULT_PROGRESS_REPORT_MESSAGE, mixingProgressPercentage);
+        progressReporterMixing.reportProgress(mixingProgressReport);
     }
 }

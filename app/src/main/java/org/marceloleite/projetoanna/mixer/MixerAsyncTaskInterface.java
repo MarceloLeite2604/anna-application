@@ -1,5 +1,7 @@
 package org.marceloleite.projetoanna.mixer;
 
+import org.marceloleite.projetoanna.utils.progressmonitor.ProgressReport;
+
 import java.io.File;
 
 /**

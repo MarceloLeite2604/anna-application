@@ -70,6 +70,7 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
      */
     public OperatorThread(OperatorThreadParameters operatorThreadParameters) {
         this.operatorThreadParameters = operatorThreadParameters;
+        this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
     }
 
     /**
@@ -87,7 +88,6 @@ public class OperatorThread extends Thread implements OperationExecutorInterface
         Looper.prepare();
 
         this.commander = new Commander(operatorThreadParameters.getAppCompatActivity(), operatorThreadParameters.getProgressMonitorAlertDialog(), operatorThreadParameters.getBluetoothSocket());
-        this.noOperationRetryAttempts = new RetryAttempts(MAXIMUM_ATTEMPTS_BEFORE_CHECK_CONNECTION);
         this.operationExecutorHandler = new OperationExecutorHandler(this);
 
         sendCheckOperationMessage();
