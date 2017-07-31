@@ -1,23 +1,21 @@
 <resources>
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/red</item>
+        <!--<item name="colorPrimary">@color/red</item>
         <item name="colorPrimaryDark">@color/black</item>
         <item name="colorAccent">@color/red</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:colorBackground">@color/offWhite</item>
-        <item name="android:colorButtonNormal">@color/ButtonText</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:colorBackground">@color/white</item>
+        <item name="android:colorButtonNormal">@color/button</item>-->
     </style>
 
-    <style name="bluetooth_device_address">
+    <style name="bluetoothDeviceAddress" parent="AppTheme">
         <item name="android:text">00:00:00:00:00:00</item>
         <item name="android:paddingLeft">@dimen/bluetooth_device_address_layout_padding</item>
         <item name="android:textSize">@dimen/bluetooth_device_address_text_size</item>
     </style>
 
-    <style name="bluetooth_device_name">
+    <style name="bluetoothDeviceName" parent="AppTheme">
         <item name="android:text">Device name</item>
         <item name="android:textSize">@dimen/bluetooth_device_name_text_size</item>
     </style>

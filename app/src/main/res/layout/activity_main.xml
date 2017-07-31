@@ -10,7 +10,6 @@
 
     <TextureView
         android:id="@+id/texture_view_camera_preview"
-        android:alpha="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -22,15 +21,18 @@
         android:orientation="horizontal">
 
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/button_connect"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.5"
             android:layout_margin="5dp"
+            android:layout_weight="0.5"
+            android:elevation="0dp"
             android:text="@string/button_connect_first_text"
             tools:ignore="NestedWeights" />
 
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/button_record"
             android:layout_width="0dp"
             android:layout_height="match_parent"

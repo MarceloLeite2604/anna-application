@@ -12,17 +12,19 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:contentDescription="video thumbnail"
-        android:scaleType="centerInside"
         android:padding="10dp"
+        android:scaleType="centerInside"
         tools:ignore="HardcodedText" />
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
 
         <Button
             android:id="@+id/video_ready_button_play"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
@@ -31,6 +33,7 @@
 
         <Button
             android:id="@+id/video_ready_button_share"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"

@@ -2,18 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bluetooth_device_row"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/text_view_bluetooth_device_row_name"
-        style="@style/bluetooth_device_name"
+        style="@style/bluetoothDeviceName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/text_view_bluetooth_device_row_address"
-        style="@style/bluetooth_device_address"
+        style="@style/bluetoothDeviceAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
