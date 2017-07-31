@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/projeto-anna-application.iml" filepath="$PROJECT_DIR$/projeto-anna-application.iml" />
+      <module fileurl="file:///media/marcelo/Compartilhado/Documentos/Git/anna-application/anna-application.iml" filepath="/media/marcelo/Compartilhado/Documentos/Git/anna-application/anna-application.iml" />
+      <module fileurl="file:///media/marcelo/Compartilhado/Documentos/Git/anna-application/app/app.iml" filepath="/media/marcelo/Compartilhado/Documentos/Git/anna-application/app/app.iml" />
     </modules>
   </component>
 </project>

@@ -23,24 +23,18 @@
 
         <Button
             android:id="@+id/video_ready_button_play"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="0.5"
-            android:alpha="0.8"
-            android:background="#999"
             android:text="@string/video_ready_button_play_text" />
 
         <Button
             android:id="@+id/video_ready_button_share"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="0.5"
-            android:alpha="0.8"
-            android:background="#999"
             android:text="@string/video_ready_button_share_text" />
     </LinearLayout>
 

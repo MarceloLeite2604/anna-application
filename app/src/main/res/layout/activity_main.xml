@@ -10,6 +10,7 @@
 
     <TextureView
         android:id="@+id/texture_view_camera_preview"
+        android:alpha="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -22,9 +23,6 @@
 
         <Button
             android:id="@+id/button_connect"
-            style="?android:attr/buttonBarButtonStyle"
-            android:alpha="0.8"
-            android:background="#999"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
@@ -34,9 +32,6 @@
 
         <Button
             android:id="@+id/button_record"
-            style="?android:attr/buttonBarButtonStyle"
-            android:background="#999"
-            android:alpha="0.8"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
